@@ -1,0 +1,6 @@
+.swal2-icon {
+    font-size: 0.5rem !important; /* Уменьшает размер иконки */
+}
+h2.swal2-title {
+    font-size: 1.2rem;
+}

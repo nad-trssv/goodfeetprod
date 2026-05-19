@@ -1,0 +1,9 @@
+
+@import url('./website/main.css');
+@import url('./website/home.css');
+@import url('./tailwindcss.css');
+@import url('./website/media.css');
+@import url('../../public/vendors/swiper/swiper-bundle.min.css');
+@import url('../../public/vendors/simplebar/simplebar.min.css');
+@import url('../../public/assets/css/user.min.css');
+@import url('../../public/vendors/glightbox/glightbox.min.css');

@@ -1,0 +1,60 @@
+{
+  "public/assets/img/bg/41.jpg": {
+    "file": "41-Dctb2V5d.jpg",
+    "src": "public/assets/img/bg/41.jpg"
+  },
+  "public/assets/img/icons/fly-map-marker.png": {
+    "file": "fly-map-marker-CenxIgLa.png",
+    "src": "public/assets/img/icons/fly-map-marker.png"
+  },
+  "public/assets/img/icons/fly-map-marker_dark.png": {
+    "file": "fly-map-marker_dark-B29H3CkK.png",
+    "src": "public/assets/img/icons/fly-map-marker_dark.png"
+  },
+  "public/assets/img/icons/land-map-marker.png": {
+    "file": "land-map-marker-Z-UtfV8u.png",
+    "src": "public/assets/img/icons/land-map-marker.png"
+  },
+  "public/assets/img/icons/land-map-marker_dark.png": {
+    "file": "land-map-marker_dark-BI1O5zQT.png",
+    "src": "public/assets/img/icons/land-map-marker_dark.png"
+  },
+  "public/assets/img/icons/logo-bg.png": {
+    "file": "logo-bg-D6fkxHbx.png",
+    "src": "public/assets/img/icons/logo-bg.png"
+  },
+  "public/assets/img/icons/plane.png": {
+    "file": "plane-CBQIWILS.png",
+    "src": "public/assets/img/icons/plane.png"
+  },
+  "public/assets/img/icons/plane_dark.png": {
+    "file": "plane_dark-nKTQhBeZ.png",
+    "src": "public/assets/img/icons/plane_dark.png"
+  },
+  "public/assets/img/icons/star.svg": {
+    "file": "star-DF7Ow4iE.svg",
+    "src": "public/assets/img/icons/star.svg"
+  },
+  "resources/css/app.css": {
+    "file": "app-B19l4QZL.css",
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/css/homepage.css": {
+    "file": "homepage-BQgYjkXf.css",
+    "src": "resources/css/homepage.css",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "app-DTj6NtY1.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  },
+  "resources/js/homepage.js": {
+    "file": "homepage-B0sfyq4j.js",
+    "name": "homepage",
+    "src": "resources/js/homepage.js",
+    "isEntry": true
+  }
+}

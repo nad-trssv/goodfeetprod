@@ -1,0 +1,63 @@
+:root,
+[data-bs-theme=light] {
+    --phoenix-btn-border-width: 1px;
+    --phoenix-btn-font-size: 0.9rem;
+    --phoenix-btn-border-radius: 0.375rem;
+    --phoenix-btn-line-height: 1.2;
+    --calendar-btn-padding-y: 0.5rem;
+    --calendar-btn-padding-x: 1rem;
+
+    --phoenix-btn-font-weight: 700;
+    --calendar-event-bg: #e3e6ed;
+    --calendar-event-border: #dedfdf;
+    --calendar-day-border: #0f111a00;
+    --calendar-currentday-bg: #d8deeb;
+    --dashboard-bg: #fff;
+    --calendar-currentday-event-border: #cbd0dd;
+    --calendar-event-text-weight: 700;
+    --calendar-btn-color: #3874ff;
+    --calendar-btn-bg: #f5f7fa;
+    --calendar-btn-hover-bg: #393f4d;
+    --calendar-btn-hover-color: #fff;
+    --calendar-btn-border-color: #e3e6ed00;
+    --calendar-arrow-color: #222;
+    --calendar-currentDay-circle-bg: #424b8f;
+    --calendar-currentDay-circle-color: #fff;
+    --icon-bg: #1c2231;
+    --link-color: #2f4f99;
+    --main-text-color: #222;
+    --highlight-text-color: #767c8d;
+    --main-text-color-rgb: 40 40 40;
+    --main-text-secondary-color: #d6630a;
+    --calendar-dayoff: #e91034;
+    --calendar-bg: #fff;
+    --btn-border-color: #5b5c5f;
+}
+
+[data-bs-theme=dark] {
+    --phoenix-btn-font-weight: 300;
+    --calendar-event-bg: #171a26;
+    --calendar-event-border: #000000;
+    --calendar-day-border: #0f111a1c;
+    --calendar-currentday-bg: #2e3654;
+    --dashboard-bg: #0f111a;
+    --calendar-currentday-event-border: #373e53;
+    --calendar-event-text-weight: 100;
+    --calendar-btn-color: #9fa6bc;
+    --calendar-btn-bg: #0f111a;
+    --calendar-btn-hover-bg: #222834;
+    --calendar-btn-hover-color: #fff;
+    --calendar-btn-border-color: #31374a;
+    --calendar-arrow-color: #fff;
+    --calendar-currentDay-circle-bg: #85a9ff;
+    --calendar-currentDay-circle-color: #fff;
+    --icon-bg: #e5edff;
+    --link-color: #c8ffff;
+    --main-text-color: #fff;
+    --highlight-text-color: #767c8d;
+    --main-text-color-rgb: 255 255 255;
+    --main-text-secondary-color: #ffcc85;
+    --calendar-dayoff: #e43351;
+    --calendar-bg: #141824;
+    --btn-border-color: #aaaaac;
+} 
