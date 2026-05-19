@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: docker_s/Dockerfile
+    container_name: goodfeet_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ..:/var/www
+      - ./php.ini:/usr/local/etc/php/conf.d/custom.ini
+    depends_on:
+      - db
+    networks:
+      - goodfeet
+
+  nginx:
+    image: nginx:alpine
+    container_name: goodfeet_nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ..:/var/www
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - goodfeet
+
+  db:
+    image: mysql:8.0
+    container_name: goodfeet_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: goodfeet
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: goodfeet
+      MYSQL_PASSWORD: goodfeet
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./db:/docker-entrypoint-initdb.d
+    networks:
+      - goodfeet
+
+networks:
+  goodfeet:
+    driver: bridge
+
+volumes:
+  db_data:
