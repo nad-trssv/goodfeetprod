@@ -475,7 +475,9 @@
             }
             function calendarRender() { 
                 var currentDate = moment().format('YYYY-MM-DD');
-                renderSlots(service_id, user_id, currentDate);
+                if (!busyDays.includes(currentDate) && !closedDays.includes(currentDate)) {
+                    renderSlots(service_id, user_id, currentDate);
+                }
 
                 $('#bookingCalendar').fullCalendar({
                   header:{
@@ -494,12 +496,8 @@
                         $('td[data-date="' + dateStr + '"]').addClass('disabled-day');
                     }
 
-                    var dateOfWeekStr = date.format('dddd').toLowerCase();
-                    var englishDay = dayMap[dateOfWeekStr];
-
-                    if (workHours.includes(englishDay)) {
-                        $('td.fc-day-top[data-date="' + date.format('YYYY-MM-DD') + '"]').addClass('disabled-day');
-                    }
+                    // workHours теперь определяется через busyDays для конкретного мастера
+                    // поэтому этот блок убираем
 
                     if (closedDays.includes(dateStr)) {
                       $('td[data-date="' + dateStr + '"]').addClass('disabled-day'); 
@@ -575,15 +573,25 @@
             }
             
             function renderBusyDays(service_id, user_id){
+                $('#bookingCalendar').empty();
+                $('#availableSlots').empty();
+                $('#dateName').text('');
+                
+                try {
+                    $('#bookingCalendar').fullCalendar('destroy');
+                } catch(e) {}
+
+                $('#bookingCalendar').html('<div class="text-center py-5"><i class="fas fa-spinner fa-spin fs-4"></i></div>');
+                
                 $.ajax({
-                    url: "{{  route('api.booking.getBusyDays') }}",
+                    url: "{{ route('api.booking.getBusyDays') }}",
                     type: "POST",
                     dataType: 'json',
-                    data:{ service_id, user_id},
-                    success:function(response)
-                    { 
-                      busyDays = response;
-                      calendarRender();
+                    data: { service_id, user_id },
+                    success: function(response) {
+                        busyDays = response;
+                        $('#bookingCalendar').empty();
+                        calendarRender();
                     },
                 });
             }

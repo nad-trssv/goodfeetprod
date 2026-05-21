@@ -27,8 +27,11 @@ class ProfileService
             ($user->profile_photo_path === '') ? $user->profile_photo_storageFileName = '/avatar.webp' : $user->profile_photo_storageFileName = '/'.$user->profile_photo_path;
             $this->profile = $user;
             
+            $user->load('services');
+
             return [
                 'profile' => $this->profile,
+                'services' => $user->services,
             ];
 
         } catch (Exception $exception) {

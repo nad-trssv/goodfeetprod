@@ -83,17 +83,41 @@
                                 </div>
                     
                                 <div class="col-12 gy-6">
+                                  @can('is-superadmin')
+                                  {{-- Администратор видит всех мастеров --}}
                                   <div class="form-floating form-floating-advance-select">
                                     <label>Мастера</label>
-                                    <select class="form-select" id="masters" name="masters[]" data-choices="data-choices" multiple="multiple" data-options='{"removeItemButton":true,"placeholder":true}'  multiple required>
-                                      @if ($masters)
-                                          @foreach ($masters as $master)
-                                            <option value="{{ $master['id'] }}" @if(in_array($master['id'], $choosedMasters)) selected @endif>{{ $master['name'] }}</option>
-                                          @endforeach
-                                      @endif
+                                    <select class="form-select" id="masters" name="masters[]" data-choices="data-choices" multiple="multiple"
+                                            data-options='{"removeItemButton":true,"placeholder":true}' multiple required>
+                                      @foreach ($masters as $master)
+                                        <option value="{{ $master['id'] }}" @if(in_array($master['id'], $choosedMasters)) selected @endif>
+                                          {{ $master['name'] }}
+                                        </option>
+                                      @endforeach
                                     </select>
                                     <div class="invalid-feedback">Выберите минимум одного мастера</div>
                                   </div>
+                                  @else
+                                  {{-- Мастер видит только себя --}}
+                                  @php $myId = auth()->user()->id; @endphp
+                                  <div class="card bg-light p-3">
+                                    <h6 class="mb-2">Моё участие в услуге</h6>
+                                    <div class="form-check">
+                                      <input class="form-check-input" type="checkbox" name="masters[]"
+                                            value="{{ $myId }}" id="my_master"
+                                            {{ in_array($myId, $choosedMasters) ? 'checked' : '' }}>
+                                      <label class="form-check-label" for="my_master">
+                                        Я оказываю эту услугу
+                                      </label>
+                                    </div>
+                                    {{-- Сохраняем остальных мастеров скрытыми полями --}}
+                                    @foreach($choosedMasters as $masterId)
+                                      @if($masterId != $myId)
+                                        <input type="hidden" name="masters[]" value="{{ $masterId }}">
+                                      @endif
+                                    @endforeach
+                                  </div>
+                                  @endcan
                                 </div>
                                 <div class="col-12 gy-6">
                                   <div class="form-floating">

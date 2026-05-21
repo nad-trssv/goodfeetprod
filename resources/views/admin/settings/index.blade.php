@@ -1,1017 +1,744 @@
 @section('title', 'Settings')
-  @push('styles')
-  <link href="{{ asset('vendors/flatpickr/flatpickr.min.css') }}" rel="stylesheet" />
-  @endpush
-  <x-dashboard-layout>
-    <div class="content">
-      <nav class="mb-3" aria-label="breadcrumb">
-        <ol class="breadcrumb mb-0">
-          <li class="breadcrumb-item active">Настройки</li>
-        </ol>
-      </nav>
-      
-        <div class="row">
-          <div class="sticky-top" style="margin-top:-72px;padding-top:72px">
-            <div class="nav flex-column nav-pills" id="v-pills">
-              <a class="nav-link ps-0 ps-sm-3" href="#v-pills-home">Рабочее время</a>
-              <a class="nav-link ps-0 ps-sm-3" href="#v-pills-profile">Обед</a>
-              <a class="nav-link ps-0 ps-sm-3" href="#v-pills-messages">Нерабочие дни / часы</a>
-              <a class="nav-link ps-0 ps-sm-3" href="#v-pills-fix-booking">Фиксированная запись на услуги</a>
-              <a class="nav-link ps-0 ps-sm-3" href="#v-pills-bookingLimit">Лимит дней на бронирование</a>
-              <a class="nav-link ps-0 ps-sm-3" href="#v-pills-fix-settings">Настройки сайта</a>
+@push('styles')
+<link href="{{ asset('vendors/flatpickr/flatpickr.min.css') }}" rel="stylesheet" />
+<style>
+  .settings-tabs .nav-link {
+    color: var(--phoenix-body-color);
+    border-radius: 0;
+    border-bottom: 2px solid transparent;
+    padding: 0.75rem 1.25rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .settings-tabs .nav-link.active {
+    color: var(--phoenix-primary);
+    border-bottom: 2px solid var(--phoenix-primary);
+    background: transparent;
+  }
+  .settings-tabs {
+    border-bottom: 1px solid var(--phoenix-border-color);
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+  .tab-content > .tab-pane {
+    display: none;
+  }
+  .tab-content > .tab-pane.active {
+    display: block;
+  }
+</style>
+@endpush
+
+<x-dashboard-layout>
+  <div class="content">
+    <nav class="mb-3" aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item active">Настройки</li>
+      </ol>
+    </nav>
+
+    {{-- Табы --}}
+    <ul class="nav settings-tabs mb-4" id="settingsTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-workhours" type="button">
+          <span class="fas fa-clock me-1"></span>Рабочее время
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-reddays" type="button">
+          <span class="fas fa-calendar-times me-1"></span>Нерабочие дни
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-booking" type="button">
+          <span class="fas fa-lock me-1"></span>Бронирование
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-site" type="button">
+          <span class="fas fa-cog me-1"></span>Настройки сайта
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+
+      {{-- ТАБ 1: Рабочее время + Обед --}}
+      <div class="tab-pane active" id="tab-workhours">
+        <div class="row g-4">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header"><h5 class="mb-0">Рабочее время</h5></div>
+              <div class="card-body">
+                <form id="workHoursTable">
+                  @csrf
+                  @php
+                    $daysInRussian = [
+                      'monday' => 'Понедельник', 'tuesday' => 'Вторник',
+                      'wednesday' => 'Среда', 'thursday' => 'Четверг',
+                      'friday' => 'Пятница', 'saturday' => 'Суббота', 'sunday' => 'Воскресенье',
+                    ];
+                  @endphp
+                  <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                      <thead>
+                        <tr>
+                          <th>День</th>
+                          <th>Начало</th>
+                          <th>Конец</th>
+                          <th>Выходной</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @foreach ($workHours as $key => $item)
+                        <tr>
+                          <td><strong>{{ $daysInRussian[$key] }}</strong></td>
+                          <td>
+                            <input class="form-control form-control-sm datetimepicker flatpickr-input {{ $item['start'] == null ? 'disabled' : '' }}"
+                                   id="{{ $key }}_start" type="text" placeholder="HH:mm"
+                                   value="{{ $item['start'] }}"
+                                   data-options='{"enableTime":true,"noCalendar":true,"dateFormat":"H:i","disableMobile":true,"time_24hr":true}'
+                                   style="width:120px" readonly
+                                   {{ $item['start'] == null ? 'disabled' : '' }}>
+                          </td>
+                          <td>
+                            <input class="form-control form-control-sm datetimepicker flatpickr-input {{ $item['end'] == null ? 'disabled' : '' }}"
+                                   id="{{ $key }}_end" type="text" placeholder="HH:mm"
+                                   value="{{ $item['end'] }}"
+                                   data-options='{"enableTime":true,"noCalendar":true,"dateFormat":"H:i","disableMobile":true,"time_24hr":true}'
+                                   style="width:120px" readonly
+                                   {{ $item['end'] == null ? 'disabled' : '' }}>
+                          </td>
+                          <td>
+                            <div class="form-check">
+                              <input class="form-check-input day-null-checkbox" type="checkbox"
+                                     id="{{ $key }}" value="{{ $key }}"
+                                     {{ $item['start'] == null ? 'checked' : '' }}>
+                              <label class="form-check-label text-muted fs-10" for="{{ $key }}">Выходной</label>
+                            </div>
+                          </td>
+                        </tr>
+                        @endforeach
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="text-end mt-3">
+                    <button class="btn btn-primary" type="submit">Сохранить рабочее время</button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="row">
-          {{-- Рабочее время --}}
-          <section class="my-2">
-            <h3 id="v-pills-home" class="my-2">Рабочее время</h3>
-            @php
-              $daysInRussian = [
-                'monday' => 'Понедельник',
-                'tuesday' => 'Вторник',
-                'wednesday' => 'Среда',
-                'thursday' => 'Четверг',
-                'friday' => 'Пятница',
-                'saturday' => 'Суббота',
-                'sunday' => 'Воскресенье',
-              ];
-            @endphp
 
-            <form id="workHoursTable" class="row g-3 needs-validation mt-2">
-              @csrf
-              @foreach ($workHours as $key => $item)
-                <div class="row py-4 border-bottom">
-                  <div class="col-md-4 d-flex justify-content-start justify-content-lg-end align-items-end mb-2">
-                    <h4 class="mx-2 my-0">{{ $daysInRussian[$key] }}:</h4>
-                    <div class="d-flex justify-content-end align-items-center ml-4">
-                      <input class="form-input my-0" id="{{ $key }}" type="checkbox" value="{{ $key }}" @if ($item['start'] == NULL || $item['end'] == NULL) checked @endif />
-                      <label class="form-label px-1" for="{{ $key }}">NULL</label>
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label" for="{{ $key }}_start">Время начала</label>
-                    <input class="form-control datetimepicker flatpickr-input @if ($item['start'] == NULL || $item['end'] == NULL) disabled @endif" id="{{ $key }}_start" type="text" placeholder="hour : minute" value="{{ $item['start'] }}"
-                      data-options='{"enableTime":true,"noCalendar":true,"dateFormat":"H:i","disableMobile":true,"time_24hr":true }' readonly @if ($item['start'] == NULL || $item['end'] == NULL) disabled @endif>
-                    <div class="invalid-feedback" id="{{ $key }}_start-error"></div>
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label" for="{{ $key }}_end">Время окончания</label>
-                    <input class="form-control datetimepicker flatpickr-input @if ($item['start'] == NULL || $item['end'] == NULL) disabled @endif" id="{{ $key }}_end" type="text" placeholder="hour : minute" value="{{ $item['end'] }}"
-                      data-options='{"enableTime":true,"noCalendar":true,"dateFormat":"H:i","disableMobile":true,"time_24hr":true }' readonly @if ($item['start'] == NULL || $item['end'] == NULL) disabled @endif>
-                    <div class="invalid-feedback" id="{{ $key }}_end-error"></div>
-                  </div>
-                </div>
-              @endforeach
-
-              <div class="row mt-2">
-                <div class="col-md-12 d-flex justify-content-end">
-                  <button class="btn btn-primary w-100" type="submit">Сохранить</button>
-                </div>
-              </div>
-            </form>
-          </section>
-          <hr>
-          {{-- Обед --}}
-          <section class="my-2">
-            <h3 id="v-pills-profile" class="my-2">Обед</h3>
-            <form id="lunchHoursTable" class="row g-3 needs-validation">
-              @csrf
-              <div class="row">
-
-                <div class="col-md-4 d-flex justify-content-end align-items-end mb-2">
-                  <div class="d-flex justify-content-end align-items-center ml-4">
-                    <input class="form-input my-0" id="lunch" type="checkbox" value="lunch" @if ($lunchHours['start'] == NULL ||  $lunchHours['end'] == NULL) checked @endif />
-                    <label class="form-label px-1" for="lunch">NULL</label>
-                  </div>
-                </div>
-
-                <div class="col-md-4">
-                  <label class="form-label" for="lunch_start">Время начала</label>
-                  <input class="form-control datetimepicker flatpickr-input @if ($lunchHours['start'] == NULL || $lunchHours['end'] == NULL) disabled @endif" id="lunch_start" type="text" placeholder="hour : minute"  value="{{ $lunchHours['start'] }}"
-                    data-options='{"enableTime":true,"noCalendar":true,"dateFormat":"H:i","disableMobile":true,"time_24hr":true }' readonly @if ($lunchHours['start'] == NULL || $lunchHours['end'] == NULL) disabled @endif >
-                  <div class="invalid-feedback" id="lunch_start-error"></div>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label" for="lunch_end">Время окончания</label>
-                  <input class="form-control datetimepicker flatpickr-input @if ($lunchHours['start'] == NULL || $lunchHours['end']  == NULL) disabled @endif" id="lunch_end" type="text" placeholder="hour : minute" value="{{ $lunchHours['end'] }}"
-                    data-options='{"enableTime":true,"noCalendar":true,"dateFormat":"H:i","disableMobile":true,"time_24hr":true }' readonly @if ($lunchHours['start'] == NULL || $lunchHours['end'] == NULL) disabled @endif >
-                    <div class="invalid-feedback" id="lunch_end-error"></div>
-                </div>
-              </div>
-
-              <div class="row mt-2">
-                <div class="col-md-12 d-flex justify-content-end">
-                  <button class="btn btn-primary w-100" type="submit">Сохранить</button>
-                </div>
-              </div>
-            </form>
-          </section>
-          
-          <hr>
-          {{-- Нерабочие дни --}}
-          <section class="my-2">
-            <h3 id="v-pills-messages" class="my-2">Нерабочие дни / часы</h3>
-            {{-- Create red day --}}
-            <div>
-              <div class="row">
-                <div class="col-12">
-                  <a class="btn btn-phoenix-secondary mt-2 btn-vivid d-flex w-full" data-bs-toggle="collapse" href="#redDays_create" role="button" aria-expanded="false" aria-controls="redDays_create">Добавить новый</a>
-                </div>
-              </div>
-              <div class="collapse" id="redDays_create">
-                <form id="newRedDay" class="row g-3 my-2">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header"><h5 class="mb-0">Обеденный перерыв</h5></div>
+              <div class="card-body">
+                <form id="lunchHoursTable">
                   @csrf
-                  <div class="row my-2">
-                    <div class="col-md-12 my-2">
-                      <label class="form-label text-body" for="bootstrap-vertical-wizard-wizard-name">Название*</label>
-                      <input class="form-control" type="text" name="redDay_name" id="redDay_name" placeholder="Christmas">
-                      <div class="invalid-feedback" id="name-error"></div>
+                  <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                      <label class="form-label">Начало обеда</label>
+                      <input class="form-control datetimepicker flatpickr-input {{ $lunchHours['start'] == null ? 'disabled' : '' }}"
+                             id="lunch_start" type="text" placeholder="HH:mm"
+                             value="{{ $lunchHours['start'] }}"
+                             data-options='{"enableTime":true,"noCalendar":true,"dateFormat":"H:i","disableMobile":true,"time_24hr":true}'
+                             readonly {{ $lunchHours['start'] == null ? 'disabled' : '' }}>
                     </div>
-                  </div>
-                  <div class="row my-2">
-                    <div class="col-md-12">
-                      <label class="form-label" for="redDay_date">Выберите день</label>
-                      <input class="form-control datetimepicker flatpickr-input" id="redDay_date" type="text" placeholder="Y-m-d"  value=""
-                        data-options='{"dateFormat":"Y-m-d","disableMobile":true  }' readonly>
-                      <div class="invalid-feedback" id="date-error"></div>
+                    <div class="col-md-4">
+                      <label class="form-label">Конец обеда</label>
+                      <input class="form-control datetimepicker flatpickr-input {{ $lunchHours['end'] == null ? 'disabled' : '' }}"
+                             id="lunch_end" type="text" placeholder="HH:mm"
+                             value="{{ $lunchHours['end'] }}"
+                             data-options='{"enableTime":true,"noCalendar":true,"dateFormat":"H:i","disableMobile":true,"time_24hr":true}'
+                             readonly {{ $lunchHours['end'] == null ? 'disabled' : '' }}>
                     </div>
-                  </div>
-                  <div class="row my-2">
-                    <div class="col-md-12 my-2">
-                        <input class="form-input my-0" id="redFullDay" type="checkbox" value="redFullDay" />
-                        <label class="form-label px-1" for="redFullDay">Весь день</label>
-                    </div>
-                  </div>
-                  <div class="row my-2">
-                    <div class="col-md-6">
-                      <label class="form-label" for="redDay_start_time">Начало времени</label>
-                      <input class="form-control datetimepicker flatpickr-input" id="redDay_start_time" type="text" placeholder="hour : minute"  value=""
-                        data-options='{"enableTime":true,"noCalendar":true,"dateFormat":"H:i","disableMobile":true,"time_24hr":true }' readonly >
-                      <div class="invalid-feedback" id="start_time-error"></div>
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label" for="redDay_end_time">Конец времени</label>
-                      <input class="form-control datetimepicker flatpickr-input" id="redDay_end_time" type="text" placeholder="hour : minute"  value=""
-                        data-options='{"enableTime":true,"noCalendar":true,"dateFormat":"H:i","disableMobile":true,"time_24hr":true }' readonly >
-                      <div class="invalid-feedback" id="end_time-error"></div>
-                    </div>
-                  </div>
-                  <div class="row">
-                    <div class="col-12">
-                      <div class="form-check form-switch">
-                        <input class="form-check-input" id="redDay_repeat" type="checkbox" checked="" />
-                        <label class="form-check-label" for="redDay_repeat">Повторять каждый год</label>
+                    <div class="col-md-4 d-flex align-items-center">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="lunch"
+                               value="lunch" {{ $lunchHours['start'] == null ? 'checked' : '' }}>
+                        <label class="form-check-label" for="lunch">Нет обеда</label>
                       </div>
                     </div>
                   </div>
-                  <div class="row my-2">
-                    <div class="col-md-12">                  
-                      <label class="form-label" for="redDay_desc">Описание</label>
-                      <textarea class="form-control" id="redDay_desc" rows="3"></textarea>
-                      <div class="invalid-feedback" id="description-error"></div>
+                  <div class="text-end mt-3">
+                    <button class="btn btn-primary" type="submit">Сохранить обед</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {{-- ТАБ 2: Нерабочие дни --}}
+      <div class="tab-pane" id="tab-reddays">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Нерабочие дни / часы</h5>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#redDays_create">
+              <span class="fas fa-plus me-1"></span>Добавить
+            </button>
+          </div>
+          <div class="card-body">
+            {{-- Форма добавления --}}
+            <div class="collapse mb-4" id="redDays_create">
+              <div class="card card-body bg-light">
+                <form id="newRedDay" class="row g-3">
+                  @csrf
+                  <div class="col-md-6">
+                    <label class="form-label">Название*</label>
+                    <input class="form-control" type="text" id="redDay_name" placeholder="Рождество">
+                    <div class="invalid-feedback" id="name-error"></div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Дата*</label>
+                    <input class="form-control datetimepicker flatpickr-input" id="redDay_date" type="text"
+                           placeholder="Y-m-d" data-options='{"dateFormat":"Y-m-d","disableMobile":true}' readonly>
+                    <div class="invalid-feedback" id="date-error"></div>
+                  </div>
+                  <div class="col-md-3 d-flex align-items-center">
+                    <div class="form-check">
+                      <input class="form-check-input" id="redFullDay" type="checkbox">
+                      <label class="form-check-label" for="redFullDay">Весь день</label>
                     </div>
                   </div>
-                
-                  <div class="row mt-2">
-                    <div class="col-md-12 d-flex justify-content-end">
+                  <div class="col-md-3">
+                    <label class="form-label">Начало</label>
+                    <input class="form-control datetimepicker flatpickr-input" id="redDay_start_time" type="text"
+                           placeholder="HH:mm" data-options='{"enableTime":true,"noCalendar":true,"dateFormat":"H:i","disableMobile":true,"time_24hr":true}' readonly>
+                    <div class="invalid-feedback" id="start_time-error"></div>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">Конец</label>
+                    <input class="form-control datetimepicker flatpickr-input" id="redDay_end_time" type="text"
+                           placeholder="HH:mm" data-options='{"enableTime":true,"noCalendar":true,"dateFormat":"H:i","disableMobile":true,"time_24hr":true}' readonly>
+                    <div class="invalid-feedback" id="end_time-error"></div>
+                  </div>
+                  <div class="col-md-3 d-flex align-items-center">
+                    <div class="form-check mt-3">
+                      <input class="form-check-input" id="redDay_repeat" type="checkbox" checked>
+                      <label class="form-check-label" for="redDay_repeat">Повторять ежегодно</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Привязать к мастеру</label>
+                    <select class="form-select" id="redDay_user_id">
+                      <option value="">Общий (для всех)</option>
+                      @foreach(\App\Models\User::whereIn('role_id', [1, 2])->orderBy('name')->get() as $master)
+                        <option value="{{ $master->id }}">{{ $master->name }}</option>
+                      @endforeach
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Описание</label>
+                    <input class="form-control" type="text" id="redDay_desc" placeholder="Необязательно">
+                  </div>
+                  <div class="col-12 text-end">
+                    <button class="btn btn-primary" type="submit">Сохранить</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            {{-- Список --}}
+            <div class="search-box mb-3">
+              <form class="position-relative">
+                <input class="form-control search-input search form-control-sm" type="search" placeholder="Поиск..." />
+                <span class="fas fa-search search-box-icon"></span>
+              </form>
+            </div>
+            <div id="tableExample" data-list='{"valueNames":["name","date","repeat"],"page":15}'>
+              <div class="table-responsive">
+                <table id="redDaysTable" class="table table-sm fs-9 mb-0">
+                  <thead>
+                    <tr>
+                      <th class="sort ps-3" data-sort="name">Название</th>
+                      <th class="sort" data-sort="date">Дата и время</th>
+                      <th>Мастер</th>
+                      <th class="sort" data-sort="repeat">Повтор</th>
+                      <th class="text-end pe-0">Действие</th>
+                    </tr>
+                  </thead>
+                  <tbody class="list">
+                    <tr><td colspan="5" class="text-center text-muted">Загрузка...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="row align-items-center justify-content-between py-2 fs-9">
+                <div class="col-auto d-flex">
+                  <p class="mb-0 d-none d-sm-block me-3 fw-semibold" data-list-info></p>
+                  <a class="fw-semibold" href="#!" data-list-view="*">Показать все</a>
+                  <a class="fw-semibold d-none" href="#!" data-list-view="less">Свернуть</a>
+                </div>
+                <div class="col-auto d-flex">
+                  <button class="page-link" data-list-pagination="prev"><span class="fas fa-chevron-left"></span></button>
+                  <ul class="mb-0 pagination"></ul>
+                  <button class="page-link pe-0" data-list-pagination="next"><span class="fas fa-chevron-right"></span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {{-- ТАБ 3: Бронирование --}}
+      <div class="tab-pane" id="tab-booking">
+        <div class="row g-4">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header"><h5 class="mb-0">Фиксированная запись на услуги</h5></div>
+              <div class="card-body">
+                <p class="text-muted fs-9 mb-3">Если включено — клиенты смогут записываться только на указанные слоты. Это глобальная настройка для мастеров без персонального расписания.</p>
+                <form id="fixHoursTable">
+                  @csrf
+                  <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" id="isFixed" type="checkbox">
+                    <label class="form-check-label" for="isFixed">Включить фиксированное время</label>
+                  </div>
+                  <div id="rows-container" class="disabled"></div>
+                  <div class="text-end mt-3">
+                    <button class="btn btn-primary" type="submit">Сохранить</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header"><h5 class="mb-0">Лимит дней на бронирование</h5></div>
+              <div class="card-body">
+                <form id="bookingLimitDays">
+                  @csrf
+                  <div class="row g-3 align-items-end">
+                    <div class="col-md-6">
+                      <label class="form-label">Количество дней вперёд для бронирования</label>
+                      <input class="form-control {{ $bookingLimit['active'] == false ? 'bookingLimit_disabled' : '' }}"
+                             type="number" id="bookingLimit_days"
+                             value="{{ $bookingLimit['days'] }}"
+                             {{ $bookingLimit['active'] == false ? 'disabled' : '' }}>
+                      <div class="invalid-feedback" id="bookingLimit-error"></div>
+                    </div>
+                    <div class="col-md-2">
                       <button class="btn btn-primary w-100" type="submit">Сохранить</button>
                     </div>
                   </div>
                 </form>
               </div>
             </div>
-            {{-- List red days --}}
-            <div>
-                <div class="row">
-                  <div class="col-12">
-                    <a class="btn btn-phoenix-secondary mt-2 btn-vivid d-flex w-full" data-bs-toggle="collapse" href="#redDays_list" role="button" aria-expanded="false" aria-controls="redDays_list">Список</a>
-                  </div>
-                </div>
-              <div class="collapse" id="redDays_list">
-                <div id="tableExample" data-list="{&quot;valueNames&quot;:[&quot;name&quot;,&quot;date&quot;,&quot;age&quot;],&quot;page&quot;:10}">
-                  <div class="search-box mb-3 mt-3">
-                    <form class="position-relative">
-                      <input class="form-control search-input search form-control-sm" type="search" placeholder="Search" aria-label="Search" />
-                      <span class="fas fa-search search-box-icon"></span>
-                    </form>
-                  </div>
-                  <div class="row">
-                    <div class="col-12">
-                      <div class="table-responsive">
-                        <table id="redDaysTable" class="table table-sm fs-9 mb-0">
-                          <thead>
-                            <tr>
-                              <th class="sort border-top border-translucent ps-3" data-sort="name">Название</th>
-                              <th class="sort border-top border-translucent" data-sort="date">Число и время</th>
-                              <th class="sort border-top border-translucent" data-sort="date">Повторение</th>
-                              <th class="sort text-end align-middle pe-0 border-top border-translucent" scope="col">Действие</th>
-                            </tr>
-                          </thead>
-                          <tbody class="list">
-                            <tr>
-                              <th></th>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              
-              </div>
-            </div>
-          </section>
-          
-          <hr>
-          {{-- Фиксированные рабочие дни --}}
-          <section class="my-2">
-            <h3 id="v-pills-fix-booking" class="my-2">Фиксированная запись на услуги</h3>
-            <form id="fixHoursTable" class="row g-3 my-2">
-              @csrf
-              <div class="g-2">
-                <p class="col-8">Выберите, как пользователи смогут бронировать время. Если чекбокс включен, клиенты смогут записываться только на указанные ниже временные слоты. Если чекбокс отключен, клиенты смогут выбрать любое удобное для них время.</p>
-                <div class="form-check form-switch">
-                  <input class="form-check-input" id="isFixed" type="checkbox" />
-                  <label class="form-check-label" for="isFixed">Ограничить выбор времени доступными слотами</label>
-                </div>
-              </div>
-              <div id="rows-container">
-              </div>
-              <div class="row mt-2">
-                <div class="col-md-12 d-flex justify-content-end">
-                  <button class="btn btn-primary w-100" type="submit">Сохранить</button>
-                </div>
-              </div>
-            </form>
-          </section>
+          </div>
+        </div>
+      </div>
 
-          <hr>
-          {{-- Лимит дней на бронирование услуг --}}
-          <section class="my-2">
-            <h3 id="v-pills-bookingLimit" class="my-2">Лимит дней на бронирование</h3>
-            <form id="bookingLimitDays" class="row g-3 needs-validation mt-4">
+      {{-- ТАБ 4: Настройки сайта --}}
+      <div class="tab-pane" id="tab-site">
+        <div class="card">
+          <div class="card-header"><h5 class="mb-0">Настройки сайта</h5></div>
+          <div class="card-body">
+            <form id="updateSettingsTable">
               @csrf
-              <div class="row gy-4 mt-0">
-                <div class="col-md-6 mt-0">
-                  <label class="form-label" for="bookingLimit_days">Количество дней, на которые клиент сможет бронировать</label>
-                  <input class="form-control @if ($bookingLimit['active'] == false) bookingLimit_disabled @endif" type="number" name="bookingLimit" id="bookingLimit_days" placeholder="Days" value="{{ $bookingLimit['days'] }}"  @if ($bookingLimit['active'] == false) disabled @endif>
-                  <div class="invalid-feedback" id="bookingLimit-error"></div>
-                </div>
-                {{--<div class="col-md-4 d-flex align-items-center">
-                  <input class="form-input my-0" id="bookingLimit" type="checkbox" value="afgd" @if ($bookingLimit['active'] == true) checked @endif />
-                  <label class="form-label px-1" for="bookingLimit">Активировать</label>
-                </div>--}}
-                <div class="col-md-2 d-flex justify-content-left align-items-center">
-                  <button class="btn btn-primary w-100" type="submit">Сохранить</button>
-                </div>
-              </div>
-            </form>
-          </section>
-
-          <hr>
-          {{-- Настройки сайта --}}
-          <section class="my-2">
-            <h3 id="v-pills-fix-settings" class="my-2">Настройки сайта</h3>
-            <form id="updateSettingsTable" class="row g-3 needs-validation was-validated my-2" novalidate="">
-              @csrf
-              <div class="mb-3 row">
-                <h4 class="col-md-12">Моя компания</h4>
+              <h6 class="mb-3">Компания</h6>
+              <div class="row g-3 mb-4">
                 <div class="col-md-6">
-                  <label class="form-label" for="company_name">Название</label>
-                  <input class="form-control" id="company_name" type="text" value="" required="">
+                  <label class="form-label">Название</label>
+                  <input class="form-control" id="company_name" type="text">
                   <div class="invalid-feedback" id="company_name-error"></div>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label" for="company_email">Инфо Емайл</label>
-                  <input class="form-control" id="company_email" type="email" value="" required="">
+                  <label class="form-label">Email</label>
+                  <input class="form-control" id="company_email" type="email">
                   <div class="invalid-feedback" id="company_email-error"></div>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label" for="company_phone">Телефон</label>
-                  <input class="form-control" id="company_phone" type="text" value="" pattern="^\+.*">
+                  <label class="form-label">Телефон</label>
+                  <input class="form-control" id="company_phone" type="text" pattern="^\+.*">
                   <div class="invalid-feedback" id="company_phone-error"></div>
-                  <div class="invalid-feedback">Номер должен начинаться с +.</div>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label" for="company_address">Адрес</label>
+                  <label class="form-label">Адрес</label>
                   <input class="form-control" id="company_address" type="text">
                   <div class="invalid-feedback" id="company_address-error"></div>
                 </div>
               </div>
-              <div class="mb-3 row">
-                <h4 class="col-md-12">Карта</h4>
-                <p class="my-1">Пожалуйста всавьте iframe код</p>
+
+              <h6 class="mb-3">Карта <small class="text-muted fw-normal">(вставьте iframe код)</small></h6>
+              <div class="row g-3 mb-4">
                 <div class="col-md-6">
-                  <label class="form-label" for="google">Google</label>
+                  <label class="form-label">Google Maps</label>
                   <input class="form-control" id="google" type="text">
-                  <div class="invalid-feedback" id="google-error"></div>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label" for="waze">Waze</label>
+                  <label class="form-label">Waze</label>
                   <input class="form-control" id="waze" type="text">
-                  <div class="invalid-feedback" id="waze-error"></div>
                 </div>
               </div>
 
-              <div class="mb-3 row">
-                <h4 class="col-md-12">Социальные сети</h4>
+              <h6 class="mb-3">Социальные сети</h6>
+              <div class="row g-3 mb-4">
                 <div class="col-md-6">
-                  <label class="form-label" for="social_media_facebook">Facebook</label>
+                  <label class="form-label">Facebook</label>
                   <input class="form-control" id="social_media_facebook" type="text">
-                  <div class="invalid-feedback" id="social_media_facebook-error"></div>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label" for="social_media_youtube">Youtube</label>
+                  <label class="form-label">YouTube</label>
                   <input class="form-control" id="social_media_youtube" type="text">
-                  <div class="invalid-feedback" id="social_media_youtube-error"></div>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label" for="social_media_instagram">Instagram</label>
+                  <label class="form-label">Instagram</label>
                   <input class="form-control" id="social_media_instagram" type="text">
-                  <div class="invalid-feedback" id="social_media_instagram-error"></div>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label" for="social_media_twitter">Twitter / X</label>
+                  <label class="form-label">Twitter / X</label>
                   <input class="form-control" id="social_media_twitter" type="text">
-                  <div class="invalid-feedback" id="social_media_twitter-error"></div>
                 </div>
               </div>
-              <div class="row mt-2">
-                <div class="col-md-12 d-flex justify-content-end">
-                  <button class="btn btn-primary w-100" type="submit">Сохранить</button>
-                </div>
+
+              <div class="text-end">
+                <button class="btn btn-primary" type="submit">Сохранить настройки</button>
               </div>
             </form>
-          </section>
+          </div>
         </div>
+      </div>
 
-      <x-dashboard-footer />
     </div>
-    @push('scripts')
-    <script src="{{ asset('vendors/flatpickr/flatpickr.min.js') }}"></script>
-    <script src="vendors/sortablejs/Sortable.min.js"></script>
-    <script>
-      $(document).ready(function() {
+    <x-dashboard-footer />
+  </div>
 
-        //get api red days
-        $.ajax({  
-            url: 'api/settings/getRedDays',
-            type: "GET",
-            headers: {
-              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-            },
-            success: function(response) {
-              var redDays = response['fullRedDays'];
-              var redDaysArray = redDays.map(function(item) {
-                return item.date;
-              });
-              $('#redDay_date').flatpickr({
-                dateFormat: "Y-m-d",
-                disableMobile: true,
-                disable: redDaysArray,
-                onDayCreate: function(dObj, dStr, fp, dayElem) {
-                  if (redDaysArray.includes(fp.formatDate(dayElem.dateObj, "Y-m-d"))) {
-                    dayElem.classList.add("calendar_daysOff");
-                  }
-                }
-              });
-              
+  @push('scripts')
+  <script src="{{ asset('vendors/flatpickr/flatpickr.min.js') }}"></script>
+  <script src="vendors/sortablejs/Sortable.min.js"></script>
+  <script>
+    $(document).ready(function() {
+
+      // Инициализация flatpickr
+      flatpickr(".datetimepicker", {
+        enableTime: true, noCalendar: true, dateFormat: "H:i",
+        disableMobile: true, time_24hr: true,
+        onClose: function(selectedDates, dateStr, instance) {
+          if (!dateStr) instance.setDate(instance.input.defaultValue, false);
+        }
+      });
+
+      // Загрузка нерабочих дней
+      $.ajax({
+        url: 'api/settings/getRedDays', type: "GET",
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+        success: function(response) {
+          var redDaysArray = response['fullRedDays'].map(item => item.date);
+          flatpickr('#redDay_date', {
+            dateFormat: "Y-m-d", disableMobile: true,
+            onDayCreate: function(dObj, dStr, fp, dayElem) {
+              if (redDaysArray.includes(fp.formatDate(dayElem.dateObj, "Y-m-d")))
+                dayElem.classList.add("calendar_daysOff");
+            }
+          });
+          renderRedDaysTable(response['redDays']);
+        }
+      });
+
+      // Загрузка настроек сайта
+      $.ajax({
+        url: 'api/settings/mainSettings', type: "GET",
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+        success: function(response) {
+          response['mainSettings'].forEach(function(item) {
+            let el = document.getElementById(item.key);
+            if (el) el.value = item.payload;
+          });
+        }
+      });
+
+      // Чекбокс выходного дня
+      $('.day-null-checkbox').change(function() {
+        const val = $(this).val();
+        if ($(this).prop('checked')) {
+          $('#'+val+'_start').val(null).prop('disabled', true).addClass('disabled');
+          if ($('#'+val+'_start')[0]._flatpickr) $('#'+val+'_start')[0]._flatpickr.destroy();
+          $('#'+val+'_end').val(null).prop('disabled', true).addClass('disabled');
+          if ($('#'+val+'_end')[0]._flatpickr) $('#'+val+'_end')[0]._flatpickr.destroy();
+        } else {
+          ['_start','_end'].forEach(suffix => {
+            const el = $('#'+val+suffix);
+            el.val('').prop('disabled', false).removeClass('disabled');
+            flatpickr(el[0], { enableTime: true, noCalendar: true, dateFormat: "H:i", disableMobile: true, time_24hr: true });
+          });
+        }
+      });
+
+      // Чекбокс обеда
+      $('#lunch').change(function() {
+        if ($(this).prop('checked')) {
+          $('#lunch_start, #lunch_end').val(null).prop('disabled', true).addClass('disabled');
+        } else {
+          $('#lunch_start, #lunch_end').prop('disabled', false).removeClass('disabled');
+          flatpickr('#lunch_start', { enableTime: true, noCalendar: true, dateFormat: "H:i", disableMobile: true, time_24hr: true });
+          flatpickr('#lunch_end', { enableTime: true, noCalendar: true, dateFormat: "H:i", disableMobile: true, time_24hr: true });
+        }
+      });
+
+      // Весь день
+      $('#redFullDay').change(function() {
+        if ($(this).prop('checked')) {
+          $('#redDay_start_time, #redDay_end_time').val(null).prop('disabled', true).addClass('disabled');
+        } else {
+          $('#redDay_start_time, #redDay_end_time').prop('disabled', false).removeClass('disabled');
+          flatpickr('#redDay_start_time', { enableTime: true, noCalendar: true, dateFormat: "H:i", disableMobile: true, time_24hr: true });
+          flatpickr('#redDay_end_time', { enableTime: true, noCalendar: true, dateFormat: "H:i", disableMobile: true, time_24hr: true });
+        }
+      });
+
+      // Сохранить рабочее время
+      $('#workHoursTable').submit(function(e) {
+        e.preventDefault();
+        let formData = {};
+        ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].forEach(d => {
+          formData[d+'_start'] = $('#'+d+'_start').val();
+          formData[d+'_end'] = $('#'+d+'_end').val();
+        });
+        $.ajax({
+          url: '/settings/updateWorkHours', type: "POST",
+          headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+          data: formData,
+          success: () => showSuccess(),
+          error: (xhr) => showError(xhr)
+        });
+      });
+
+      // Сохранить обед
+      $('#lunchHoursTable').submit(function(e) {
+        e.preventDefault();
+        $.ajax({
+          url: '/settings/updateLunchHours', type: "POST",
+          headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+          data: { lunch_start: $("#lunch_start").val(), lunch_end: $("#lunch_end").val() },
+          success: () => showSuccess(),
+          error: (xhr) => showError(xhr)
+        });
+      });
+
+      // Добавить нерабочий день
+      $('#newRedDay').submit(function(e) {
+        e.preventDefault();
+        let repeat = $('#redDay_repeat').prop('checked') ? 1 : 0;
+        $.ajax({
+          url: '/settings/storeRedDay', type: "POST",
+          headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+          data: {
+            name: $("#redDay_name").val(), description: $("#redDay_desc").val(),
+            date: $("#redDay_date").val(), start_time: $("#redDay_start_time").val(),
+            end_time: $("#redDay_end_time").val(), repeat: repeat,
+            user_id: $("#redDay_user_id").val() || null,
+          },
+          success: function(response) {
+            if (response.status === "success") {
+              $("#redDay_name, #redDay_desc, #redDay_start_time, #redDay_end_time").val('');
               renderRedDaysTable(response['redDays']);
-            }
-        });
-
-        //get api main settings
-        $.ajax({  
-            url: 'api/settings/mainSettings',
-            type: "GET",
-            headers: {
-              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-            },
-            success: function(response) {
-              var mainSettings = response['mainSettings'];
-              var mainSettingsArray = mainSettings.map(function(item) {
-                var inputElement = document.getElementById(item.key);
-                if (inputElement) {
-                  inputElement.value = item.payload;
-                }
-              });
-              
-            }
-        });
-
-        $('#workHoursTable').submit(function(event){
-          event.preventDefault();
-          let formData = {
-            monday_start: $("#monday_start").val(),
-            monday_end: $("#monday_end").val(),
-            tuesday_start: $("#tuesday_start").val(),
-            tuesday_end: $("#tuesday_end").val(),
-            wednesday_start: $("#wednesday_start").val(),
-            wednesday_end: $("#wednesday_end").val(),
-            thursday_start: $("#thursday_start").val(),
-            thursday_end: $("#thursday_end").val(),
-            friday_start: $("#friday_start").val(),
-            friday_end: $("#friday_end").val(),
-            saturday_start: $("#saturday_start").val(),
-            saturday_end: $("#saturday_end").val(),
-            sunday_start: $("#sunday_start").val(),
-            sunday_end: $("#sunday_end").val(),
-          };
-        
-          $.ajax({  
-          url: '/settings/updateWorkHours',
-          type: "POST",
-          headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-          },
-          data: formData,
-          success: function(response) {
-            $('.is-invalid').removeClass('is-invalid');
-            if (response.status === "success") {
-                  Swal.fire({
-                    title: 'Отлично!',
-                    text: 'Данные успешно сохранены!',
-                    icon: 'success',
-                    confirmButtonText: 'OK'
-                  });
-            } else {
-                alert("Error: " + response.message);
+              $('#redDays_create').collapse('hide');
+              showSuccess();
             }
           },
-          error: function(xhr, status, error) {
-              Swal.fire({
-                title: 'Упс!',
-                text: 'Что-то пошло не так. Пожалуйста, попробуйте еще раз.',
-                icon: 'error',
-                confirmButtonText: 'OK'
-              });
-              if (xhr.status === 422) {
-                  $('.is-invalid').removeClass('is-invalid');
-                  let errors = xhr.responseJSON.errors;
-
-                  $.each(errors, function(field, messages) {
-                      let input = $('#' + field);
-                      input.addClass('is-invalid');
-
-                      let message = $('#' + field+'-error');
-                      message.text(messages[0]).show();
-                  });
-              }
-          }
-          });
+          error: (xhr) => showError(xhr)
         });
+      });
 
-        $('#lunchHoursTable').submit(function(event){
-          event.preventDefault();
-          let formData = {
-          lunch_start: $("#lunch_start").val(),
-          lunch_end: $("#lunch_end").val(),
-          };
-        
-          $.ajax({  
-          url: '/settings/updateLunchHours',
-          type: "POST",
-          headers: {
-          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-          },
-          data: formData,
-          success: function(response) {
-            $('.is-invalid').removeClass('is-invalid');
-            if (response.status === "success") {
-                  Swal.fire({
-                    title: 'Отлично!',
-                    text: 'Данные успешно сохранены!',
-                    icon: 'success',
-                    confirmButtonText: 'OK'
-                  });
-            } else {
-                alert("Error: " + response.message);
-            }
-          },
-          error: function(xhr, status, error) {
-                Swal.fire({
-                    title: 'Упс!',
-                    text: 'Что-то пошло не так. Пожалуйста, попробуйте еще раз.',
-                  icon: 'error',
-                  confirmButtonText: 'OK'
-                });
-              if (xhr.status === 422) {
-                  $('.is-invalid').removeClass('is-invalid');
-                  let errors = xhr.responseJSON.errors;
-
-                  $.each(errors, function(field, messages) {
-                      let input = $('#lunch_end-error');
-                      input.addClass('is-invalid');
-
-                      let message = $('#lunch_end-error');
-                      message.text(messages[0]).show();
-                  });
-              }
-          }
-          });
-        });
-
-        $('#newRedDay').submit(function(event){
-          event.preventDefault();
-          let repeat = 0;
-          if ($('#redDay_repeat').prop('checked')) {
-            repeat = 1;
-          }
-
-          let formData = {
-            name: $("#redDay_name").val(),
-            description: $("#redDay_desc").val(),
-            date: $("#redDay_date").val(),
-            start_time: $("#redDay_start_time").val(),
-            end_time: $("#redDay_end_time").val(),
-            repeat: repeat,
-          };
-        
-          $.ajax({  
-            url: '/settings/storeRedDay',
-            type: "POST",
-            headers: {
-              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-            },
-            data: formData,
-            success: function(response) {
-              if (response.status === "success") {
-                $('.is-invalid').removeClass('is-invalid');
-                  $("#redDay_name").val(''),
-                  $("#redDay_desc").val(''),
-                  $("#redDay_date").val(''),
-                  $("#redDay_start_time").val(''),
-                  $("#redDay_end_time").val(''),
-                  Swal.fire({
-                    title: 'Отлично!',
-                    text: 'Данные успешно сохранены!',
-                    icon: 'success',
-                    confirmButtonText: 'OK'
-                  });
-
-                let redDays = response['fullRedDays'];
-                let redDaysArray = redDays.map(function(item) {
-                  return item.date;
-                });
-                
-                if(response.isFullDay === true){
-                  $('#redDay_date').flatpickr({
-                    dateFormat: "Y-m-d",
-                    disableMobile: true,
-                    disable: redDaysArray,
-                    onDayCreate: function(dObj, dStr, fp, dayElem) {
-                      if (redDaysArray.includes(fp.formatDate(dayElem.dateObj, "Y-m-d"))) {
-                        dayElem.classList.add("calendar_daysOff");
-                      }
-                    }
-                  });
-                }
-                renderRedDaysTable(response['redDays']);
-
-              } else {
-                alert("Error: " + response.message);
-              }
-            },
-            error: function(xhr, status, error) {
-                Swal.fire({
-                  title: 'Упс!',
-                  text: 'Что-то пошло не так. Пожалуйста, попробуйте еще раз.',
-                  icon: 'error',
-                  confirmButtonText: 'OK'
-                });
-              if (xhr.status === 422) {
-                  $('.is-invalid').removeClass('is-invalid');
-                  let errors = xhr.responseJSON.errors;
-
-                  $.each(errors, function(field, messages) {
-                      let input = $('#redDay_' + field);
-                      input.addClass('is-invalid');
-
-                      let message = $('#' + field+'-error');
-                      message.text(messages[0]).show();
-                  });
-              }
-            }
-          });
-        });
-
-        $('input[type="checkbox"]:not(#redFullDay, #redDay_repeat, #isFixed, #bookingLimit)').change(function() {
-          if ($(this).prop('checked')) {
-            $('#'+$(this).val()+'_start').val(null).prop('readonly', true).prop('disabled', true).addClass('disabled').removeAttr('required').flatpickr().destroy();
-            $('#'+$(this).val()+'_end').val(null).prop('readonly', true).prop('disabled', true).addClass('disabled').removeAttr('required').flatpickr().destroy();
-          } else {
-            $('#'+$(this).val()+'_start').val('').attr('required', 'required').prop('readonly', false).prop('disabled', false).removeClass('disabled').flatpickr({
-              enableTime: true,
-              noCalendar: true,
-              dateFormat: "H:i",
-              disableMobile: true,
-              time_24hr: true
-            });
-            $('#'+$(this).val()+'_end').val('').attr('required', 'required').prop('readonly', false).prop('disabled', false).removeClass('disabled').flatpickr({
-              enableTime: true,
-              noCalendar: true,
-              dateFormat: "H:i",
-              disableMobile: true,
-              time_24hr: true
+      // Удалить нерабочий день
+      $(document).on("click", ".delete-red-day", function() {
+        let id = $(this).data("id");
+        let row = $(this).closest("tr");
+        Swal.fire({
+          title: "Вы уверены?", icon: "warning", showCancelButton: true,
+          confirmButtonColor: "#d33", cancelButtonColor: "#3085d6",
+          confirmButtonText: "Удалить", cancelButtonText: "Отмена"
+        }).then(result => {
+          if (result.isConfirmed) {
+            $.ajax({
+              url: `api/settings/deleteRedDay/${id}`, type: "DELETE",
+              headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+              success: () => { row.remove(); showSuccess(); },
+              error: () => Swal.fire("Ошибка!", "Не удалось удалить.", "error")
             });
           }
         });
-        $('input[type="checkbox"]#isFixed').change(function() {
-          if ($(this).prop('checked')) {
-            $('#rows-container').removeClass('disabled');
+      });
+
+      // Фиксированное время
+      $('#isFixed').change(function() {
+        $('#rows-container').toggleClass('disabled', !$(this).prop('checked'));
+      });
+
+      const rowsContainer = document.getElementById("rows-container");
+
+      function initializeFlatpickr() {
+        document.querySelectorAll(".datetimepicker:not(.flatpickr-input)").forEach(input => {
+          if (!input._flatpickr) {
+            flatpickr(input, { enableTime: true, noCalendar: true, dateFormat: "H:i", disableMobile: true, time_24hr: true });
+          }
+        });
+      }
+
+      function renderButtons() {
+        const rows = rowsContainer.querySelectorAll(".row");
+        rows.forEach((row, index) => {
+          const button = row.querySelector(".add-row-btn");
+          if (!button) return;
+          if (index === rows.length - 1) {
+            button.textContent = "Добавить слот";
+            button.classList.replace("badge-phoenix-danger", "badge-phoenix-secondary");
+            button.onclick = addRow;
           } else {
-            $('#rows-container').addClass('disabled');
+            button.textContent = "Удалить";
+            button.classList.replace("badge-phoenix-secondary", "badge-phoenix-danger");
+            button.onclick = deleteRow;
           }
         });
-        
-        $('input[type="checkbox"]#bookingLimit').change(function() {
-          if ($(this).prop('checked')) {
-            $('#bookingLimit_days').removeClass('bookingLimit_disabled').prop('disabled', false).attr('required', 'required');
-          } else {
-            $('#bookingLimit_days').addClass('bookingLimit_disabled').prop('disabled', true).removeAttr('required');
-          }
-        }); 
-        $('#bookingLimitDays').submit(function(event){
-          event.preventDefault();
-          let active = 0;
-          if ($('#bookingLimit').prop('checked')) {
-            active = 1;
-          }
+      }
 
-          let formData = {
-            days: $("#bookingLimit_days").val(),
-            active: active,
-          };
-        
-          $.ajax({  
-            url: '/api/settings/updateLimitDays',
-            type: "PUT",
-            headers: {
-              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-            },
-            data: formData,
-            success: function(response) {
-              if (response.status === "success") {
-                $('.is-invalid').removeClass('is-invalid');
-                  Swal.fire({
-                    title: 'Отлично!',
-                    text: 'Данные успешно сохранены!',
-                    icon: 'success',
-                    confirmButtonText: 'OK'
-                  });
-              } else {
-                alert("Error: " + response.message);
-              }
-            },
-            error: function(xhr, status, error) {
-                Swal.fire({
-                  title: 'Упс!',
-                  text: 'Что-то пошло не так. Пожалуйста, попробуйте еще раз.',
-                  icon: 'error',
-                  confirmButtonText: 'OK'
-                });
-              if (xhr.status === 422) {
-                  $('.is-invalid').removeClass('is-invalid');
-                  let errors = xhr.responseJSON.errors;
+      function addRow() {
+        const rows = rowsContainer.querySelectorAll(".row");
+        const newIndex = rows.length + 1;
+        const newRow = rows[rows.length - 1].cloneNode(true);
+        newRow.querySelector("[id$='_start']").id = `${newIndex}_start`;
+        newRow.querySelector("[id$='_start']").value = "";
+        rowsContainer.appendChild(newRow);
+        initializeFlatpickr();
+        renderButtons();
+      }
 
-                  $.each(errors, function(field, messages) {
-                      let input = $('#bookingLimit-error');
-                      input.addClass('is-invalid');
+      function deleteRow(event) {
+        if (rowsContainer.children.length > 1) {
+          event.target.closest(".row").remove();
+          renderButtons();
+        }
+      }
 
-                      let message = $('#bookingLimit-error');
-                      message.text(messages[0]).show();
-                  });
-              }
-            }
+      // Загрузка фиксированного бронирования
+      $.ajax({
+        url: 'api/settings/getFixedBooking', type: "GET",
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+        success: function(response) {
+          let fixedHours = Array.isArray(response.fixedBooking) ? response.fixedBooking : [];
+          try { if (typeof response.fixedBooking === "string") fixedHours = JSON.parse(response.fixedBooking); } catch(e) {}
+
+          const isFixed = response.fixedBookingStatus === 1;
+          $("#isFixed").prop("checked", isFixed);
+          $('#rows-container').toggleClass('disabled', !isFixed);
+
+          rowsContainer.innerHTML = "";
+          fixedHours.forEach((time, index) => {
+            rowsContainer.innerHTML += `
+              <div class="row my-1">
+                <div class="col-md-4">
+                  <input class="form-control form-control-sm datetimepicker fixedBookingTime" id="${index+1}_start" type="text" placeholder="HH:mm" value="${time}" readonly>
+                </div>
+                <div class="col-md-2 d-flex align-items-center">
+                  <button type="button" class="badge badge-phoenix badge-phoenix-danger add-row-btn mt-1">Удалить</button>
+                </div>
+              </div>`;
           });
+          initializeFlatpickr();
+          renderButtons();
+        }
+      });
+
+      $('#fixHoursTable').submit(function(e) {
+        e.preventDefault();
+        let fixedHours = [];
+        $(".fixedBookingTime").each(function() {
+          let v = $(this).val().trim();
+          if (v) fixedHours.push(v);
         });
-
-        $('#redFullDay').change(function() {
-            if ($(this).prop('checked')) {
-                $('#redDay_start_time').val(null).prop('readonly', true).prop('disabled', true).addClass('disabled').removeAttr('required').flatpickr().destroy();
-                $('#redDay_end_time').val(null).prop('readonly', true).prop('disabled', true).addClass('disabled').removeAttr('required').flatpickr().destroy();
-            } else {
-                $('#redDay_start_time').val('').attr('required', 'required').prop('readonly', false).prop('disabled', false).removeClass('disabled').flatpickr({
-                    enableTime: true,
-                    noCalendar: true,
-                    dateFormat: "H:i",
-                    disableMobile: true,
-                    time_24hr: true,
-                });
-                $('#redDay_end_time').val('').attr('required', 'required').prop('readonly', false).prop('disabled', false).removeClass('disabled').flatpickr({
-                    enableTime: true,
-                    noCalendar: true,
-                    dateFormat: "H:i",
-                    disableMobile: true,
-                    time_24hr: true
-                });
-            }
+        $.ajax({
+          url: '/settings/updateFixedBooking', type: "POST",
+          headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+          contentType: "application/json",
+          data: JSON.stringify({ fixedBooking: fixedHours, fixedBookingStatus: $('#isFixed').prop('checked') ? 1 : 0 }),
+          success: () => showSuccess(),
+          error: (xhr) => showError(xhr)
         });
-        $('#fixHoursTable').submit(function(event){
-          event.preventDefault();
-          
-          let fixedHours = [];
-          let isFixed = 0;
-          
-          if ($('#isFixed').prop('checked')) {
-            isFixed = 1;
-          }
+      });
 
-          $(".fixedBookingTime").each(function () {
-              let timeValue = $(this).val().trim();
-              if (timeValue !== "") {
-                  fixedHours.push(timeValue);
-              }
-          });
-        
-          $.ajax({  
-            url: '/settings/updateFixedBooking',
-            type: "POST",
-            headers: {
-              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-            },
-            contentType: "application/json",
-            data: JSON.stringify({ fixedBooking: fixedHours, fixedBookingStatus: isFixed }),
-            success: function(response) {
-              $('.is-invalid').removeClass('is-invalid');
-              if (response.status === "success") {
-                    Swal.fire({
-                      title: 'Отлично!',
-                      text: 'Данные успешно сохранены!',
-                      icon: 'success',
-                      confirmButtonText: 'OK'
-                    });
-              } else {
-                  alert("Error: " + response.message);
-              }
-            },
-            error: function(xhr, status, error) {
-                  Swal.fire({
-                    title: 'Упс!',
-                    text: 'Что-то пошло не так. Пожалуйста, попробуйте еще раз.',
-                    icon: 'error',
-                    confirmButtonText: 'OK'
-                  });
-                if (xhr.status === 422) {
-                    $('.is-invalid').removeClass('is-invalid');
-                    let errors = xhr.responseJSON.errors;
-
-                    $.each(errors, function(field, messages) {
-                        let input = $('#lunch_end-error');
-                        input.addClass('is-invalid');
-
-                        let message = $('#lunch_end-error');
-                        message.text(messages[0]).show();
-                    });
-                }
-            }
-          });
+      // Лимит дней
+      $('#bookingLimitDays').submit(function(e) {
+        e.preventDefault();
+        $.ajax({
+          url: '/api/settings/updateLimitDays', type: "PUT",
+          headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+          data: { days: $("#bookingLimit_days").val(), active: 0 },
+          success: () => showSuccess(),
+          error: (xhr) => showError(xhr)
         });
-        $('#updateSettingsTable').submit(function(e){
-          e.preventDefault();
-          let formData = {
-            company_name: $("#company_name").val(),
-            company_email: $("#company_email").val(),
-            company_phone: $("#company_phone").val() || null,
-            company_address: $("#company_address").val() || null,
-            google: $("#google").val() || null,
-            waze: $("#waze").val() || null,
+      });
+
+      // Настройки сайта
+      $('#updateSettingsTable').submit(function(e) {
+        e.preventDefault();
+        $.ajax({
+          url: '/settings/updateMainSettings', type: "POST",
+          headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+          data: {
+            company_name: $("#company_name").val(), company_email: $("#company_email").val(),
+            company_phone: $("#company_phone").val() || null, company_address: $("#company_address").val() || null,
+            google: $("#google").val() || null, waze: $("#waze").val() || null,
             social_media_facebook: $("#social_media_facebook").val() || null,
             social_media_youtube: $("#social_media_youtube").val() || null,
             social_media_instagram: $("#social_media_instagram").val() || null,
             social_media_twitter: $("#social_media_twitter").val() || null,
-          };
-        
-          $.ajax({  
-            url: '/settings/updateMainSettings',
-            type: "POST",
-            headers: {
-              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-            },
-            data: formData,
-            success: function(response) {
-              $('.is-invalid').removeClass('is-invalid');
-              if (response.status === "success") {
-                    Swal.fire({
-                      title: 'Отлично!',
-                      text: 'Данные успешно сохранены!',
-                      icon: 'success',
-                      confirmButtonText: 'OK'
-                    });
-              } else {
-                  alert("Error: " + response.message);
-              }
-            },
-            error: function(xhr, status, error) {
-                Swal.fire({
-                  title: 'Упс!',
-                  text: 'Что-то пошло не так. Пожалуйста, попробуйте еще раз.',
-                  icon: 'error',
-                  confirmButtonText: 'OK'
-                });
-                if (xhr.status === 422) {
-                    $('.is-invalid').removeClass('is-invalid');
-                    let errors = xhr.responseJSON.errors;
-
-                    $.each(errors, function(field, messages) {
-                        let input = $('#' + field);
-                        input.addClass('is-invalid');
-
-                        let message = $('#' + field+'-error');
-                        message.text(messages[0]).show();
-                    });
-                }
-            }
-          });
+          },
+          success: () => showSuccess(),
+          error: (xhr) => showError(xhr)
         });
-
-        function renderRedDaysTable(res){
-          let tbody = $("#redDaysTable tbody");
-          tbody.empty();
-          if (res.length === 0) {
-            tbody.append(`<tr class="no-data"><td colspan="4" class="text-center">No records found</td></tr>`);
-          } else {
-            res.forEach(function(day) {
-            let startTime = (day.start_time != null && day.end_time != null) ? `(${day.start_time}-${day.end_time})` : '';
-            let row = `
-                    <tr>
-                        <td class="align-middle ps-3 name">${day.name}</td>
-                        <td class="align-middle date">${day.date} ${startTime}</td>
-                        <td class="align-middle date">${day.repeat === 'yes' ? '✅' : '❌'}</td>
-                        <td class="align-middle white-space-nowrap text-end pe-0">
-                          <span class="badge badge-phoenix fs-10 badge-phoenix-danger delete-red-day cursor-pointer" data-id="${day.id}">
-                            <span class="badge-label">Remove</span><span class="ms-1" data-feather="x" style="height:12.8px;width:12.8px;"></span>
-                            <i class="fas fa-trash-alt"></i>
-                          </span>
-                        </td>
-                    </tr>
-              `;
-              tbody.append(row);
-            });
-          }
-          updateListJS();
-        }
-        $(document).on("click", ".delete-red-day", function() {
-            let button = $(this);
-            let redDayId = button.data("id");
-
-            Swal.fire({
-                title: "Вы уверены?",
-                text: "Это действие нельзя будет отменить!",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#d33",
-                cancelButtonColor: "#3085d6",
-                confirmButtonText: "Да, удалить!",
-                cancelButtonText: "Отмена"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: `api/settings/deleteRedDay/${redDayId}`,
-                        type: "DELETE",
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-                        },
-                        success: function(response) {
-                            if (response.status === "success") {
-                                Swal.fire("Удалено!", "День успешно удален.", "success");
-                                button.closest("tr").remove();
-                            } else {
-                                Swal.fire("Ошибка!", response.message, "error");
-                            }
-                        },
-                        error: function(xhr) {
-                            Swal.fire("Ошибка!", "Не удалось удалить запись.", "error");
-                        }
-                    });
-                }
-            });
-        });
-
-        const rowsContainer = document.getElementById("rows-container");
-        function initializeFlatpickr() {
-          document.querySelectorAll(".datetimepicker").forEach((input) => {
-            if (!input._flatpickr) { 
-                flatpickr(input, {
-                    enableTime: true,
-                    noCalendar: true,
-                    dateFormat: "H:i",
-                    disableMobile: true,
-                    time_24hr: true,
-                });
-            }
-          });
-        }
-        function renderButtons() {
-          const rows = rowsContainer.querySelectorAll(".row");
-          rows.forEach((row, index) => {
-              const button = row.querySelector(".add-row-btn");
-              if (index === rows.length - 1) {
-                  button.textContent = "Добавить строку";
-                  button.classList.replace("badge-phoenix-danger", "badge-phoenix-secondary");
-                  button.removeEventListener("click", deleteRow);
-                  button.addEventListener("click", addRow);
-              } else {
-                  button.textContent = "Удалить строку";
-                  button.classList.replace("badge-phoenix-secondary", "badge-phoenix-danger");
-                  button.removeEventListener("click", addRow);
-                  button.addEventListener("click", deleteRow);
-              }
-          });
-        }
-        function addRow() {
-            const rows = rowsContainer.querySelectorAll(".row");
-            const lastRow = rows[rows.length - 1];
-            const newIndex = rows.length + 1;
-            const newRow = lastRow.cloneNode(true);
-        
-            newRow.querySelector("[id$='_start']").id = `${newIndex}_start`;
-            newRow.querySelector("[id$='_start-error']").id = `${newIndex}_start-error`;
-        
-            newRow.querySelector("[id$='_start']").value = "";
-        
-            rowsContainer.appendChild(newRow);
-            initializeFlatpickr(); 
-            renderButtons();
-        }
-        function deleteRow(event) {
-            if (rowsContainer.children.length > 1) {
-                event.target.closest(".row").remove();
-                renderButtons();
-            }
-        }
-        function getFixedBooking() {
-          //get api fixedBooking
-          $.ajax({  
-              url: 'api/settings/getFixedBooking',
-              type: "GET",
-              headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-              },
-              success: function(response) {
-                let fixedHours = [];
-
-                if (typeof response.fixedBooking === "string") {
-                    try {
-                        fixedHours = JSON.parse(response.fixedBooking);
-                        
-                        if(fixedHours[0]){
-                          $("#isFixed").prop("checked", true);
-                        } else {
-                          $("#isFixed").prop("checked", false);
-                        }
-                    } catch (error) {
-                        console.error("Ошибка парсинга JSON:", error);
-                    }
-                } else if (Array.isArray(response.fixedBooking)) {
-                    fixedHours = response.fixedBooking;
-                    if(response.fixedBookingStatus === 1){
-                      $("#isFixed").prop("checked", true);
-                      $('#rows-container').removeClass('disabled');
-                    } else {
-                      $("#isFixed").prop("checked", false);
-                      $('#rows-container').addClass('disabled');
-                    }
-                }
-              
-                rowsContainer.innerHTML = "";
-
-                fixedHours.forEach((time, index) => {
-                    rowsContainer.innerHTML += `
-                        <div class="row my-1">
-                            <div class="col-md-4">
-                                <label class="form-label" for="${index + 1}_start">Время начала</label>
-                                <input class="form-control datetimepicker fixedBookingTime flatpickr-input" id="${index + 1}_start" type="text" 
-                                       placeholder="hour : minute" value="${time}" 
-                                       data-options='{"enableTime":true,"noCalendar":true,"dateFormat":"H:i","disableMobile":true,"time_24hr":true }' readonly>
-                                <div class="invalid-feedback" id="${index + 1}_start-error"></div>
-                            </div>
-                            <div class="col-md-2 d-flex align-items-center justify-content-end">
-                                <button type="button" class="badge badge-phoenix badge-phoenix-danger fixed_hrs__btn add-row-btn mt-2">
-                                    Удалить строку <i class="fas fa-minus"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                });
-
-                initializeFlatpickr(); 
-                renderButtons();
-              }
-          });
-        }
-        getFixedBooking();
       });
-      
+
+      function renderRedDaysTable(res) {
+        let tbody = $("#redDaysTable tbody");
+        tbody.empty();
+        if (!res.length) {
+          tbody.append('<tr><td colspan="5" class="text-center text-muted">Нет записей</td></tr>');
+          return;
+        }
+        res.forEach(day => {
+          let timeStr = (day.start_time && day.end_time) ? `<span class="text-muted fs-10">(${day.start_time}–${day.end_time})</span>` : '';
+          let masterBadge = day.user_id
+            ? `<span class="badge badge-phoenix badge-phoenix-primary fs-10">${day.master_name}</span>`
+            : `<span class="badge badge-phoenix badge-phoenix-secondary fs-10">Общий</span>`;
+          tbody.append(`
+            <tr>
+              <td class="ps-3 name">${day.name}</td>
+              <td class="date">${day.date} ${timeStr}</td>
+              <td>${masterBadge}</td>
+              <td class="repeat">${day.repeat === 'yes' ? '✅' : '❌'}</td>
+              <td class="text-end pe-0">
+                <button class="btn btn-sm btn-outline-danger delete-red-day" data-id="${day.id}">
+                  <span class="fas fa-trash"></span>
+                </button>
+              </td>
+            </tr>
+          `);
+        });
+        updateListJS();
+      }
+
+      function showSuccess() {
+        Swal.fire({ title: 'Отлично!', text: 'Данные успешно сохранены!', icon: 'success', confirmButtonText: 'OK' });
+      }
+      function showError(xhr) {
+        Swal.fire({ title: 'Упс!', text: 'Что-то пошло не так.', icon: 'error', confirmButtonText: 'OK' });
+        if (xhr.status === 422) {
+          $.each(xhr.responseJSON.errors, function(field, messages) {
+            $('#'+field).addClass('is-invalid');
+            $('#'+field+'-error').text(messages[0]).show();
+          });
+        }
+      }
+
       let listObj;
       function updateListJS() {
-        
-          listObj = new List('tableExample', {
-              valueNames: ['name', 'date', 'repeat'],
-              page: 10,
-          });
+        if (listObj) listObj.reIndex();
+        else listObj = new List('tableExample', { valueNames: ['name', 'date', 'repeat'], page: 15 });
       }
-    </script>
-    @endpush
-  </x-dashboard-layout>
+    });
+  </script>
+  @endpush
+</x-dashboard-layout>

@@ -125,4 +125,8 @@ class User extends Authenticatable
         }
 
     }
+    public function schedule()
+    {
+        return $this->hasOne(UserSchedule::class);
+    }
 }

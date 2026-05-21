@@ -47,6 +47,8 @@ Route::middleware([
     Route::get('calendarList', [AppointmentController::class, 'calendarList'])->name('calendarList');
     Route::get('calendar/details/{appointment}', [AppointmentController::class, 'show'])->name('calendar.show');
     Route::get('calendarListAllMasters', [AppointmentControllerAllMasters::class, 'calendarListAllMasters'])->middleware('super-admin')->name('calendarListAllMasters');
+    Route::get('master/{id}/calendar', [AppointmentController::class, 'masterCalendar'])->middleware('super-admin')->name('master.calendar');
+    Route::get('master/{id}/calendar/list', [AppointmentController::class, 'masterCalendarList'])->middleware('super-admin')->name('master.calendar.list');
 
     Route::resource('service', AdminServiceController::class);
     Route::get('service/{service}/languages', [AdminServiceController::class, 'editLanguages'])->name('languages.edit');
@@ -67,6 +69,9 @@ Route::middleware([
     Route::get('member', [MemberController::class, 'index'])->name('member.index');
     Route::get('member/create', [MemberController::class, 'create'])->name('member.create');
     Route::post('member/store/{step}', [MemberController::class, 'store'])->name('member.store');
+    Route::get('member/{id}/edit', [MemberController::class, 'edit'])->name('member.edit');
+    Route::put('member/{id}', [MemberController::class, 'update'])->name('member.update');
+    Route::delete('member/{id}', [MemberController::class, 'destroy'])->name('member.destroy');
 
     Route::resource('settings', SettingsController::class)->middleware('super-admin');
     Route::post('settings/updateWorkHours', [SettingsController::class, 'updateWorkHours'])->middleware('super-admin');
@@ -76,7 +81,14 @@ Route::middleware([
     Route::post('settings/updateMainSettings', [SettingsController::class, 'updateMainSettings'])->middleware('super-admin');
 
     Route::resource('profile', ProfileController::class);
-
+    Route::get('master/schedule', [App\Http\Controllers\Admin\MasterScheduleController::class, 'index'])->name('master.schedule.index');
+    Route::post('master/services/{service}/toggle', [App\Http\Controllers\Admin\MasterServiceController::class, 'toggle'])->name('master.service.toggle');
+    Route::get('master/services', [App\Http\Controllers\Admin\MasterServiceController::class, 'index'])->name('master.services.index');
+    Route::post('master/schedule/updateWorkHours', [App\Http\Controllers\Admin\MasterScheduleController::class, 'updateWorkHours'])->name('master.schedule.updateWorkHours');
+    Route::post('master/schedule/updateLunchHours', [App\Http\Controllers\Admin\MasterScheduleController::class, 'updateLunchHours'])->name('master.schedule.updateLunchHours');
+    Route::post('master/schedule/storeRedDay', [App\Http\Controllers\Admin\MasterScheduleController::class, 'storeRedDay'])->name('master.schedule.storeRedDay');
+    Route::post('master/schedule/updateFixedBooking', [App\Http\Controllers\Admin\MasterScheduleController::class, 'updateFixedBooking'])->name('master.schedule.updateFixedBooking');
+    Route::delete('master/schedule/redDay/{id}', [App\Http\Controllers\Admin\MasterScheduleController::class, 'destroyRedDay'])->name('master.schedule.destroyRedDay');
 });
 
 

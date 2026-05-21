@@ -44,7 +44,34 @@ class AppointmentController extends Controller
             'title' => 'Мои записи',
         ]);
     }
+    
+    public function masterCalendar(string $id)
+    {
+        $master = \App\Models\User::findOrFail($id);
+        $data = $this->appointmentService->list('byMaster', $id);
 
+        return view('admin.calendar.index', [
+            'appointments' => $data['appointments'],
+            'closedDays' => $data['closedDays'],
+            'services' => $data['services'],
+            'deletedServices' => $data['deletedServices'],
+            'users' => $data['users'],
+            'redDays' => $data['redDays'],
+            'master' => $master,
+        ]);
+    }
+
+    public function masterCalendarList(string $id)
+    {
+        $master = \App\Models\User::findOrFail($id);
+        $data = $this->appointmentService->list('byMaster', $id);
+
+        return view('admin.calendar.list', [
+            'appointments' => $data['appointments'],
+            'title' => 'Записи мастера: ' . $master->name,
+            'master' => $master,
+        ]);
+    }
     /**
      * Show the form for creating a new resource.
      */

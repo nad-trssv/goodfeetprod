@@ -25,6 +25,7 @@ class ProfileController extends Controller
         
         return view('admin.profile.index', [
             'profile' => $data['profile'],
+            'services' => $data['services'],
         ]);
     }
 

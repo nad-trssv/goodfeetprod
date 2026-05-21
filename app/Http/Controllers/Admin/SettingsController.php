@@ -69,17 +69,19 @@ class SettingsController extends Controller
     public function storeRedDay(StoreRequest $request)
     {
         $data = $this->settingService->storeRedDay($request);
-        $redDayData = RedDay::orderByDesc('id')->get();
+
+        $redDayData = RedDay::with('user')->orderByDesc('id')->get();
         $redDays = RedDayResource::collection($redDayData);
-        $data_fullday = RedDay::orderByDesc('id')->where('full_day', 1)->get();
+
+        $data_fullday = RedDay::with('user')->where('full_day', 1)->orderByDesc('id')->get();
         $fullRedDays = RedDayResource::collection($data_fullday);
-        
+
         return response()->json([
-            'status'    => 'success',
-            'isFullDay'      => $data['full_day'],
-            'data'      => $data,
-            'redDays'     => $redDays,
-            'fullRedDays'     => $fullRedDays,
+            'status' => 'success',
+            'isFullDay' => $data['full_day'],
+            'data' => $data,
+            'redDays' => $redDays,
+            'fullRedDays' => $fullRedDays,
         ]);
     }
 

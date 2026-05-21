@@ -115,6 +115,29 @@
                             </div>
                         </div>
                     </div>
+                    @if($services->count() > 0)
+                        <div class="mb-6">
+                            <h4 class="mb-3">Мои услуги</h4>
+                            <div class="row g-2">
+                                @foreach($services as $service)
+                                <div class="col-auto">
+                                    <div class="card border px-3 py-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="fas fa-check-circle text-success"></span>
+                                            <span class="fw-semibold fs-9">{{ $service->name }}</span>
+                                            <span class="badge bg-primary fs-10">{{ $service->price }} €</span>
+                                            <span class="text-muted fs-10">{{ $service->duration_minutes }} мин</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                            <p class="text-muted fs-10 mt-2">
+                                <span class="fas fa-info-circle me-1"></span>
+                                Для изменения услуг обратитесь к администратору
+                            </p>
+                        </div>
+                    @endif
                     <div class="text-end mb-6">
                         <div>
                         <button class="btn btn-phoenix-primary">Сохранить</button>

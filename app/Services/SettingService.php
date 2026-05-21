@@ -78,12 +78,14 @@ class SettingService
             return $this->setting;
         }  
     }
+    
     public function storeRedDay($request)
     {
         $full_day = false;
-        if($request['start_time'] == null || $request['end_time'] == null){
+        if ($request['start_time'] == null || $request['end_time'] == null) {
             $full_day = true;
         }
+
         $this->setting = RedDay::create([
             'name' => $request['name'],
             'description' => $request['description'],
@@ -92,7 +94,9 @@ class SettingService
             'end_time' => $request['end_time'],
             'full_day' => $full_day,
             'repeat' => $request['repeat'],
+            'user_id' => $request['user_id'] ?? null,
         ]);
+
         return $this->setting;
     }
 

@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers\Api;
-
 use App\Http\Controllers\Controller;
 use App\Http\Resources\RedDayResource;
 use App\Models\RedDay;
@@ -10,9 +8,10 @@ class RedDayController extends Controller
 {
     public function getRedDays()
     {
-        $data = RedDay::orderByDesc('id')->get();
+        $data = RedDay::with('user')->orderByDesc('id')->get();
         $redDays = RedDayResource::collection($data);
-        $data_fullday = RedDay::orderByDesc('id')->where('full_day', 1)->get();
+
+        $data_fullday = RedDay::with('user')->where('full_day', 1)->orderByDesc('id')->get();
         $fullRedDays = RedDayResource::collection($data_fullday);
 
         return response()->json([
@@ -28,6 +27,6 @@ class RedDayController extends Controller
             return response()->json(['status' => 'success', 'message' => 'Record deleted successfully']);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
-        }        
+        }
     }
 }

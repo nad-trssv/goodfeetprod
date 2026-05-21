@@ -255,17 +255,8 @@ class BookingController extends Controller
     }
     
     function getWorkHours(){
-        $siteSettings = SiteSettings::where('group', 'hours')
-        ->where('key', 'work_hours')
-        ->first();
-
-        if ($siteSettings) {
-            $siteSettingsDecoded = json_decode($siteSettings->payload, true);
-
-            $daysWithNullTimes = array_filter($siteSettingsDecoded, function ($day) {
-                return $day['start'] === null && $day['end'] === null;
-            });
-            return array_keys($daysWithNullTimes);
-        }
+        // Возвращаем пустой массив — выходные дни определяются
+        // индивидуально для каждого мастера через getBusyDays
+        return [];
     }
 }
