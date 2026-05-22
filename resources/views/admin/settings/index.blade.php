@@ -37,20 +37,9 @@
       </ol>
     </nav>
 
-    {{-- Табы --}}
     <ul class="nav settings-tabs mb-4" id="settingsTabs" role="tablist">
       <li class="nav-item" role="presentation">
-        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-workhours" type="button">
-          <span class="fas fa-clock me-1"></span>Рабочее время
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-reddays" type="button">
-          <span class="fas fa-calendar-times me-1"></span>Нерабочие дни
-        </button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-booking" type="button">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-booking" type="button">
           <span class="fas fa-lock me-1"></span>Бронирование
         </button>
       </li>
@@ -63,227 +52,8 @@
 
     <div class="tab-content">
 
-      {{-- ТАБ 1: Рабочее время + Обед --}}
-      <div class="tab-pane active" id="tab-workhours">
-        <div class="row g-4">
-          <div class="col-12">
-            <div class="card">
-              <div class="card-header"><h5 class="mb-0">Рабочее время</h5></div>
-              <div class="card-body">
-                <form id="workHoursTable">
-                  @csrf
-                  @php
-                    $daysInRussian = [
-                      'monday' => 'Понедельник', 'tuesday' => 'Вторник',
-                      'wednesday' => 'Среда', 'thursday' => 'Четверг',
-                      'friday' => 'Пятница', 'saturday' => 'Суббота', 'sunday' => 'Воскресенье',
-                    ];
-                  @endphp
-                  <div class="table-responsive">
-                    <table class="table table-sm align-middle">
-                      <thead>
-                        <tr>
-                          <th>День</th>
-                          <th>Начало</th>
-                          <th>Конец</th>
-                          <th>Выходной</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @foreach ($workHours as $key => $item)
-                        <tr>
-                          <td><strong>{{ $daysInRussian[$key] }}</strong></td>
-                          <td>
-                            <input class="form-control form-control-sm datetimepicker flatpickr-input {{ $item['start'] == null ? 'disabled' : '' }}"
-                                   id="{{ $key }}_start" type="text" placeholder="HH:mm"
-                                   value="{{ $item['start'] }}"
-                                   data-options='{"enableTime":true,"noCalendar":true,"dateFormat":"H:i","disableMobile":true,"time_24hr":true}'
-                                   style="width:120px" readonly
-                                   {{ $item['start'] == null ? 'disabled' : '' }}>
-                          </td>
-                          <td>
-                            <input class="form-control form-control-sm datetimepicker flatpickr-input {{ $item['end'] == null ? 'disabled' : '' }}"
-                                   id="{{ $key }}_end" type="text" placeholder="HH:mm"
-                                   value="{{ $item['end'] }}"
-                                   data-options='{"enableTime":true,"noCalendar":true,"dateFormat":"H:i","disableMobile":true,"time_24hr":true}'
-                                   style="width:120px" readonly
-                                   {{ $item['end'] == null ? 'disabled' : '' }}>
-                          </td>
-                          <td>
-                            <div class="form-check">
-                              <input class="form-check-input day-null-checkbox" type="checkbox"
-                                     id="{{ $key }}" value="{{ $key }}"
-                                     {{ $item['start'] == null ? 'checked' : '' }}>
-                              <label class="form-check-label text-muted fs-10" for="{{ $key }}">Выходной</label>
-                            </div>
-                          </td>
-                        </tr>
-                        @endforeach
-                      </tbody>
-                    </table>
-                  </div>
-                  <div class="text-end mt-3">
-                    <button class="btn btn-primary" type="submit">Сохранить рабочее время</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-12">
-            <div class="card">
-              <div class="card-header"><h5 class="mb-0">Обеденный перерыв</h5></div>
-              <div class="card-body">
-                <form id="lunchHoursTable">
-                  @csrf
-                  <div class="row g-3 align-items-end">
-                    <div class="col-md-4">
-                      <label class="form-label">Начало обеда</label>
-                      <input class="form-control datetimepicker flatpickr-input {{ $lunchHours['start'] == null ? 'disabled' : '' }}"
-                             id="lunch_start" type="text" placeholder="HH:mm"
-                             value="{{ $lunchHours['start'] }}"
-                             data-options='{"enableTime":true,"noCalendar":true,"dateFormat":"H:i","disableMobile":true,"time_24hr":true}'
-                             readonly {{ $lunchHours['start'] == null ? 'disabled' : '' }}>
-                    </div>
-                    <div class="col-md-4">
-                      <label class="form-label">Конец обеда</label>
-                      <input class="form-control datetimepicker flatpickr-input {{ $lunchHours['end'] == null ? 'disabled' : '' }}"
-                             id="lunch_end" type="text" placeholder="HH:mm"
-                             value="{{ $lunchHours['end'] }}"
-                             data-options='{"enableTime":true,"noCalendar":true,"dateFormat":"H:i","disableMobile":true,"time_24hr":true}'
-                             readonly {{ $lunchHours['end'] == null ? 'disabled' : '' }}>
-                    </div>
-                    <div class="col-md-4 d-flex align-items-center">
-                      <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="lunch"
-                               value="lunch" {{ $lunchHours['start'] == null ? 'checked' : '' }}>
-                        <label class="form-check-label" for="lunch">Нет обеда</label>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="text-end mt-3">
-                    <button class="btn btn-primary" type="submit">Сохранить обед</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {{-- ТАБ 2: Нерабочие дни --}}
-      <div class="tab-pane" id="tab-reddays">
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Нерабочие дни / часы</h5>
-            <button class="btn btn-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#redDays_create">
-              <span class="fas fa-plus me-1"></span>Добавить
-            </button>
-          </div>
-          <div class="card-body">
-            {{-- Форма добавления --}}
-            <div class="collapse mb-4" id="redDays_create">
-              <div class="card card-body bg-light">
-                <form id="newRedDay" class="row g-3">
-                  @csrf
-                  <div class="col-md-6">
-                    <label class="form-label">Название*</label>
-                    <input class="form-control" type="text" id="redDay_name" placeholder="Рождество">
-                    <div class="invalid-feedback" id="name-error"></div>
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label">Дата*</label>
-                    <input class="form-control datetimepicker flatpickr-input" id="redDay_date" type="text"
-                           placeholder="Y-m-d" data-options='{"dateFormat":"Y-m-d","disableMobile":true}' readonly>
-                    <div class="invalid-feedback" id="date-error"></div>
-                  </div>
-                  <div class="col-md-3 d-flex align-items-center">
-                    <div class="form-check">
-                      <input class="form-check-input" id="redFullDay" type="checkbox">
-                      <label class="form-check-label" for="redFullDay">Весь день</label>
-                    </div>
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">Начало</label>
-                    <input class="form-control datetimepicker flatpickr-input" id="redDay_start_time" type="text"
-                           placeholder="HH:mm" data-options='{"enableTime":true,"noCalendar":true,"dateFormat":"H:i","disableMobile":true,"time_24hr":true}' readonly>
-                    <div class="invalid-feedback" id="start_time-error"></div>
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">Конец</label>
-                    <input class="form-control datetimepicker flatpickr-input" id="redDay_end_time" type="text"
-                           placeholder="HH:mm" data-options='{"enableTime":true,"noCalendar":true,"dateFormat":"H:i","disableMobile":true,"time_24hr":true}' readonly>
-                    <div class="invalid-feedback" id="end_time-error"></div>
-                  </div>
-                  <div class="col-md-3 d-flex align-items-center">
-                    <div class="form-check mt-3">
-                      <input class="form-check-input" id="redDay_repeat" type="checkbox" checked>
-                      <label class="form-check-label" for="redDay_repeat">Повторять ежегодно</label>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label">Привязать к мастеру</label>
-                    <select class="form-select" id="redDay_user_id">
-                      <option value="">Общий (для всех)</option>
-                      @foreach(\App\Models\User::whereIn('role_id', [1, 2])->orderBy('name')->get() as $master)
-                        <option value="{{ $master->id }}">{{ $master->name }}</option>
-                      @endforeach
-                    </select>
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label">Описание</label>
-                    <input class="form-control" type="text" id="redDay_desc" placeholder="Необязательно">
-                  </div>
-                  <div class="col-12 text-end">
-                    <button class="btn btn-primary" type="submit">Сохранить</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-
-            {{-- Список --}}
-            <div class="search-box mb-3">
-              <form class="position-relative">
-                <input class="form-control search-input search form-control-sm" type="search" placeholder="Поиск..." />
-                <span class="fas fa-search search-box-icon"></span>
-              </form>
-            </div>
-            <div id="tableExample" data-list='{"valueNames":["name","date","repeat"],"page":15}'>
-              <div class="table-responsive">
-                <table id="redDaysTable" class="table table-sm fs-9 mb-0">
-                  <thead>
-                    <tr>
-                      <th class="sort ps-3" data-sort="name">Название</th>
-                      <th class="sort" data-sort="date">Дата и время</th>
-                      <th>Мастер</th>
-                      <th class="sort" data-sort="repeat">Повтор</th>
-                      <th class="text-end pe-0">Действие</th>
-                    </tr>
-                  </thead>
-                  <tbody class="list">
-                    <tr><td colspan="5" class="text-center text-muted">Загрузка...</td></tr>
-                  </tbody>
-                </table>
-              </div>
-              <div class="row align-items-center justify-content-between py-2 fs-9">
-                <div class="col-auto d-flex">
-                  <p class="mb-0 d-none d-sm-block me-3 fw-semibold" data-list-info></p>
-                  <a class="fw-semibold" href="#!" data-list-view="*">Показать все</a>
-                  <a class="fw-semibold d-none" href="#!" data-list-view="less">Свернуть</a>
-                </div>
-                <div class="col-auto d-flex">
-                  <button class="page-link" data-list-pagination="prev"><span class="fas fa-chevron-left"></span></button>
-                  <ul class="mb-0 pagination"></ul>
-                  <button class="page-link pe-0" data-list-pagination="next"><span class="fas fa-chevron-right"></span></button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {{-- ТАБ 3: Бронирование --}}
-      <div class="tab-pane" id="tab-booking">
+      <div class="tab-pane active" id="tab-booking">
         <div class="row g-4">
           <div class="col-12">
             <div class="card">
@@ -402,6 +172,58 @@
         </div>
       </div>
 
+    </div>
+    {{-- Модалка редактирования нерабочего дня --}}
+    <div class="modal fade" id="editRedDayModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Редактировать нерабочий день</h5>
+            <button class="btn btn-close p-1" type="button" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="edit_rd_id">
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label">Название*</label>
+                <input type="text" class="form-control" id="edit_rd_name">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Дата*</label>
+                <input type="date" class="form-control" id="edit_rd_date">
+              </div>
+              <div class="col-12">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="edit_rd_fullday">
+                  <label class="form-check-label" for="edit_rd_fullday">Весь день</label>
+                </div>
+              </div>
+              <div id="edit_rd_time_block" class="col-6">
+                <label class="form-label">Начало</label>
+                <input type="time" class="form-control" id="edit_rd_start">
+              </div>
+              <div id="edit_rd_time_block2" class="col-6">
+                <label class="form-label">Конец</label>
+                <input type="time" class="form-control" id="edit_rd_end">
+              </div>
+              <div class="col-12">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="edit_rd_repeat">
+                  <label class="form-check-label" for="edit_rd_repeat">Повторять ежегодно</label>
+                </div>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Описание</label>
+                <input type="text" class="form-control" id="edit_rd_description">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Отмена</button>
+            <button class="btn btn-primary" type="button" id="saveEditRedDay">Сохранить</button>
+          </div>
+        </div>
+      </div>
     </div>
     <x-dashboard-footer />
   </div>
@@ -692,32 +514,43 @@
       });
 
       function renderRedDaysTable(res) {
-        let tbody = $("#redDaysTable tbody");
-        tbody.empty();
-        if (!res.length) {
-          tbody.append('<tr><td colspan="5" class="text-center text-muted">Нет записей</td></tr>');
-          return;
-        }
-        res.forEach(day => {
-          let timeStr = (day.start_time && day.end_time) ? `<span class="text-muted fs-10">(${day.start_time}–${day.end_time})</span>` : '';
-          let masterBadge = day.user_id
-            ? `<span class="badge badge-phoenix badge-phoenix-primary fs-10">${day.master_name}</span>`
-            : `<span class="badge badge-phoenix badge-phoenix-secondary fs-10">Общий</span>`;
-          tbody.append(`
-            <tr>
-              <td class="ps-3 name">${day.name}</td>
-              <td class="date">${day.date} ${timeStr}</td>
-              <td>${masterBadge}</td>
-              <td class="repeat">${day.repeat === 'yes' ? '✅' : '❌'}</td>
-              <td class="text-end pe-0">
-                <button class="btn btn-sm btn-outline-danger delete-red-day" data-id="${day.id}">
-                  <span class="fas fa-trash"></span>
-                </button>
-              </td>
-            </tr>
-          `);
-        });
-        updateListJS();
+          let tbody = $("#redDaysTable tbody");
+          tbody.empty();
+          if (!res.length) {
+              tbody.append('<tr><td colspan="5" class="text-center text-muted">Нет записей</td></tr>');
+              return;
+          }
+          res.forEach(day => {
+              let timeStr = (day.start_time && day.end_time) ? `<span class="text-muted fs-10">(${day.start_time}–${day.end_time})</span>` : '';
+              let masterBadge = day.user_id
+                  ? `<span class="badge badge-phoenix badge-phoenix-primary fs-10">${day.master_name}</span>`
+                  : `<span class="badge badge-phoenix badge-phoenix-secondary fs-10">Общий</span>`;
+              tbody.append(`
+                  <tr id="rd_row_${day.id}">
+                      <td class="ps-3 name">${day.name}</td>
+                      <td class="date">${day.date} ${timeStr}</td>
+                      <td>${masterBadge}</td>
+                      <td class="repeat">${day.repeat === 'yes' ? '✅' : '❌'}</td>
+                      <td class="text-end pe-0">
+                          <button class="btn btn-sm btn-outline-primary edit-red-day me-1"
+                              data-id="${day.id}"
+                              data-name="${day.name}"
+                              data-date="${day.date}"
+                              data-start="${day.start_time || ''}"
+                              data-end="${day.end_time || ''}"
+                              data-repeat="${day.repeat === 'yes' ? 1 : 0}"
+                              data-description="${day.description || ''}"
+                              data-fullday="${(!day.start_time && !day.end_time) ? 1 : 0}">
+                              <span class="fas fa-edit"></span>
+                          </button>
+                          <button class="btn btn-sm btn-outline-danger delete-red-day" data-id="${day.id}">
+                              <span class="fas fa-trash"></span>
+                          </button>
+                      </td>
+                  </tr>
+              `);
+          });
+          updateListJS();
       }
 
       function showSuccess() {
@@ -738,6 +571,80 @@
         if (listObj) listObj.reIndex();
         else listObj = new List('tableExample', { valueNames: ['name', 'date', 'repeat'], page: 15 });
       }
+      // Открыть модалку редактирования
+      $(document).on('click', '.edit-red-day', function () {
+          const id = $(this).data('id');
+          const fullDay = $(this).data('fullday') == 1;
+
+          $('#edit_rd_id').val(id);
+          $('#edit_rd_name').val($(this).data('name'));
+          $('#edit_rd_date').val($(this).data('date'));
+          $('#edit_rd_start').val($(this).data('start'));
+          $('#edit_rd_end').val($(this).data('end'));
+          $('#edit_rd_repeat').prop('checked', $(this).data('repeat') == 1);
+          $('#edit_rd_description').val($(this).data('description'));
+          $('#edit_rd_fullday').prop('checked', fullDay);
+          $('#edit_rd_time_block, #edit_rd_time_block2').toggle(!fullDay);
+
+          $('#editRedDayModal').modal('show');
+      });
+
+      // Чекбокс весь день в модалке
+      $('#edit_rd_fullday').on('change', function () {
+          const isFullDay = $(this).is(':checked');
+          $('#edit_rd_time_block, #edit_rd_time_block2').toggle(!isFullDay);
+          if (isFullDay) {
+              $('#edit_rd_start, #edit_rd_end').val('');
+          }
+      });
+
+      // Сохранить редактирование
+      $('#saveEditRedDay').on('click', function () {
+          const id = $('#edit_rd_id').val();
+          const isFullDay = $('#edit_rd_fullday').is(':checked');
+
+          $.ajax({
+              url: `/api/settings/updateRedDay/${id}`,
+              type: 'PUT',
+              headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+              data: {
+                  name: $('#edit_rd_name').val(),
+                  date: $('#edit_rd_date').val(),
+                  start_time: isFullDay ? '' : $('#edit_rd_start').val(),
+                  end_time: isFullDay ? '' : $('#edit_rd_end').val(),
+                  repeat: $('#edit_rd_repeat').is(':checked') ? 1 : 0,
+                  description: $('#edit_rd_description').val(),
+              },
+              success: function (response) {
+                  $('#editRedDayModal').modal('hide');
+                  // Обновляем строку в таблице
+                  const day = response.redDay;
+                  const row = $(`#rd_row_${day.id}`);
+                  const timeStr = (day.start_time && day.end_time) ? `<span class="text-muted fs-10">(${day.start_time}–${day.end_time})</span>` : '';
+                  const masterBadge = day.user_id
+                      ? `<span class="badge badge-phoenix badge-phoenix-primary fs-10">${day.master_name}</span>`
+                      : `<span class="badge badge-phoenix badge-phoenix-secondary fs-10">Общий</span>`;
+
+                  row.find('.name').text(day.name);
+                  row.find('.date').html(`${day.date} ${timeStr}`);
+                  row.find('.repeat').text(day.repeat === 'yes' ? '✅' : '❌');
+
+                  // Обновляем data атрибуты кнопки
+                  row.find('.edit-red-day')
+                      .data('name', day.name)
+                      .data('date', day.date)
+                      .data('start', day.start_time || '')
+                      .data('end', day.end_time || '')
+                      .data('repeat', day.repeat === 'yes' ? 1 : 0)
+                      .data('fullday', (!day.start_time && !day.end_time) ? 1 : 0);
+
+                  showSuccess();
+              },
+              error: function () {
+                  showError({ status: 500 });
+              }
+          });
+      });
     });
   </script>
   @endpush

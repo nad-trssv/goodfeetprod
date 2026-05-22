@@ -16,7 +16,8 @@ Route::middleware([
     Route::get('settings/mainSettings', [MainSettingController::class, 'mainSettings']);
     Route::put('settings/updateLimitDays', [MainSettingController::class, 'updateLimitDays'])->name('updateLimitDays');
     Route::delete('settings/deleteRedDay/{id}', [RedDayController::class, 'destroy']);
-
+    Route::put('settings/updateRedDay/{id}', [RedDayController::class, 'update'])->name('api.settings.updateRedDay');
+    
     Route::post('booking/getFullyBooked', [BookingController::class, 'getFullyBooked'])->name('api.booking.getFullyBooked');
     Route::post('booking/getBusyDays', [BookingController::class, 'getBusyDays'])->name('api.booking.getBusyDays');
     Route::post('booking/store', [BookingController::class, 'storeBooking'])->name('api.booking.store');

@@ -169,6 +169,16 @@ class MemberController extends Controller
         $member->delete();
         return response()->json(['message' => 'Мастер удалён'], 200);
     }
+    public function allSchedules()
+    {
+        $masters = \App\Models\User::with(['schedule', 'services', 'role'])
+            ->whereIn('role_id', [1, 2])
+            ->orderBy('name')
+            ->get();
 
+        return view('admin.member.schedules', [
+            'masters' => $masters,
+        ]);
+    }
     public function show(string $id) {}
 }

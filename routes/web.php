@@ -89,6 +89,9 @@ Route::middleware([
     Route::post('master/schedule/storeRedDay', [App\Http\Controllers\Admin\MasterScheduleController::class, 'storeRedDay'])->name('master.schedule.storeRedDay');
     Route::post('master/schedule/updateFixedBooking', [App\Http\Controllers\Admin\MasterScheduleController::class, 'updateFixedBooking'])->name('master.schedule.updateFixedBooking');
     Route::delete('master/schedule/redDay/{id}', [App\Http\Controllers\Admin\MasterScheduleController::class, 'destroyRedDay'])->name('master.schedule.destroyRedDay');
+    Route::put('master/schedule/redDay/{id}', [App\Http\Controllers\Admin\MasterScheduleController::class, 'updateRedDay'])->name('master.schedule.updateRedDay');
+    Route::get('admin/red-days', [App\Http\Controllers\Admin\MasterScheduleController::class, 'allRedDays'])->middleware('super-admin')->name('admin.red-days.index');
+    Route::get('admin/masters/schedule', [MemberController::class, 'allSchedules'])->middleware('super-admin')->name('admin.masters.schedule');
 });
 
 

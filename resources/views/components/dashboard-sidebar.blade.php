@@ -84,6 +84,12 @@
                       <div class="d-flex align-items-center"><span class="nav-link-text">Добавить</span></div>
                     </a>
                   </li>
+                  <li class="nav-item"><a class="nav-link" href="{{ route('admin.masters.schedule') }}">
+                      <div class="d-flex align-items-center">
+                        <span class="nav-link-text">Расписание</span>
+                      </div>
+                    </a>
+                  </li>
                 </ul>
               </div>
             </div>
@@ -119,6 +125,17 @@
                   <div class="d-flex align-items-center">
                     <span class="nav-link-icon"><span class="fas fa-calendar-alt"></span></span>
                     <span class="nav-link-text-wrapper"><span class="nav-link-text">Моё расписание</span></span>
+                  </div>
+                </a>
+              </div>
+            @endcan
+            @can('is-superadmin')
+              <div class="nav-item-wrapper">
+                <a class="nav-link {{ request()->routeIs('admin.red-days.index') ? 'active' : '' }} label-1"
+                  href="{{ route('admin.red-days.index') }}" role="button">
+                  <div class="d-flex align-items-center">
+                    <span class="nav-link-icon"><span class="fas fa-calendar-times"></span></span>
+                    <span class="nav-link-text-wrapper"><span class="nav-link-text">Все нерабочие дни</span></span>
                   </div>
                 </a>
               </div>

@@ -16,26 +16,26 @@ class MasterScheduleController extends Controller
         $user = Auth::user();
         $schedule = UserSchedule::where('user_id', $user->id)->first();
 
-        // Глобальный лимит дней
         $bookingLimit = SiteSettings::where('group', 'hours')
             ->where('key', 'booking_date_limit')
             ->first();
         $bookingLimit = $bookingLimit ? json_decode($bookingLimit->payload, true) : ['days' => 30, 'active' => false];
 
-        // Глобальное фиксированное время
         $fixedBooking = SiteSettings::where('group', 'hours')
             ->where('key', 'fixed_booking_hours')
             ->first();
         $fixedBooking = $fixedBooking ? json_decode($fixedBooking->payload, true) : ['value' => false, 'payload' => []];
 
-        // Индивидуальные нерабочие дни мастера
-        $redDays = RedDay::where('user_id', $user->id)->orderByDesc('date')->get();
+        $redDays = RedDay::where('user_id', $user->id)
+            ->orderByDesc('date')
+            ->get();
 
         return view('admin.master.schedule', [
             'schedule' => $schedule,
             'bookingLimit' => $bookingLimit,
             'fixedBooking' => $fixedBooking,
             'redDays' => $redDays,
+            'user' => $user,
         ]);
     }
 
@@ -134,5 +134,56 @@ class MasterScheduleController extends Controller
         $redDay->delete();
 
         return response()->json(['status' => 'success']);
+    }
+
+    public function updateRedDay(Request $request, string $id)
+    {
+        $user = Auth::user();
+        $redDay = RedDay::where('id', $id)->where('user_id', $user->id)->firstOrFail();
+
+        $request->validate([
+            'name' => 'required|string',
+            'date' => 'required|date_format:Y-m-d',
+            'start_time' => 'nullable|date_format:H:i',
+            'end_time' => 'nullable|date_format:H:i|after:start_time',
+            'repeat' => 'required|boolean',
+        ]);
+
+        $fullDay = !$request->start_time || !$request->end_time;
+
+        $redDay->update([
+            'name' => $request->name,
+            'date' => $request->date,
+            'start_time' => $fullDay ? null : $request->start_time,
+            'end_time' => $fullDay ? null : $request->end_time,
+            'full_day' => $fullDay,
+            'repeat' => $request->repeat,
+        ]);
+
+        return response()->json(['status' => 'success', 'redDay' => $redDay->fresh()]);
+    }
+
+    public function allRedDays()
+    {
+        $redDays = RedDay::with('user')
+            ->orderByDesc('date')
+            ->get()
+            ->map(function ($day) {
+                return [
+                    'id' => $day->id,
+                    'name' => $day->name,
+                    'date' => \Carbon\Carbon::parse($day->date)->format('Y-m-d'),
+                    'start_time' => $day->start_time,
+                    'end_time' => $day->end_time,
+                    'full_day' => $day->full_day,
+                    'repeat' => $day->repeat,
+                    'master_name' => $day->user ? $day->user->name : 'Общий',
+                    'user_id' => $day->user_id,
+                ];
+            });
+
+        return view('admin.red-days.index', [
+            'redDays' => $redDays,
+        ]);
     }
 }

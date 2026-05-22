@@ -136,95 +136,183 @@
       </div>
     </section>
 
-    {{-- Нерабочие дни --}}
-    <section id="section-reddays" class="card mb-4">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0"><span class="fas fa-calendar-times me-2"></span>Мои нерабочие дни</h5>
-        <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#addRedDayForm">
-          <span class="fas fa-plus me-1"></span>Добавить
+{{-- Нерабочие дни --}}
+<section id="section-reddays" class="card mb-4">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0"><span class="fas fa-calendar-times me-2"></span>Мои нерабочие дни</h5>
+    <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#addRedDayForm">
+      <span class="fas fa-plus me-1"></span>Добавить
+    </button>
+  </div>
+  <div class="card-body">
+    <div class="collapse mb-4" id="addRedDayForm">
+      <div class="card card-body bg-light">
+        <form id="newRedDayForm">
+          @csrf
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Название*</label>
+              <input type="text" class="form-control" id="rd_name" placeholder="Например: У врача">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Дата*</label>
+              <input type="date" class="form-control" id="rd_date">
+            </div>
+            <div class="col-md-3 d-flex align-items-center">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="rd_full_day">
+                <label class="form-check-label" for="rd_full_day">Весь день</label>
+              </div>
+            </div>
+            <div class="col-md-3" id="rd_time_block">
+              <label class="form-label">Начало</label>
+              <input type="time" class="form-control" id="rd_start_time">
+            </div>
+            <div class="col-md-3" id="rd_time_block2">
+              <label class="form-label">Конец</label>
+              <input type="time" class="form-control" id="rd_end_time">
+            </div>
+            <div class="col-md-3 d-flex align-items-center">
+              <div class="form-check mt-3">
+                <input class="form-check-input" type="checkbox" id="rd_repeat">
+                <label class="form-check-label" for="rd_repeat">Повторять ежегодно</label>
+              </div>
+            </div>
+          </div>
+          <div class="text-end mt-3">
+            <button type="submit" class="btn btn-primary btn-sm">Сохранить</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    {{-- Поиск и фильтр --}}
+    <div class="row g-2 mb-3">
+      <div class="col-md-5">
+        <input type="text" class="form-control form-control-sm" id="rdSearch" placeholder="Поиск по названию...">
+      </div>
+      <div class="col-md-4">
+        <select class="form-select form-select-sm" id="rdFilterType">
+          <option value="">Все типы</option>
+          <option value="full">Весь день</option>
+          <option value="partial">Частичные</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <button class="btn btn-sm btn-outline-secondary w-100" id="rdResetFilter">
+          <span class="fas fa-times me-1"></span>Сбросить
         </button>
       </div>
-      <div class="card-body">
-        <div class="collapse mb-4" id="addRedDayForm">
-          <div class="card card-body bg-light">
-            <form id="newRedDayForm">
-              @csrf
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <label class="form-label">Название*</label>
-                  <input type="text" class="form-control" id="rd_name" placeholder="Например: У врача">
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Дата*</label>
-                  <input type="date" class="form-control" id="rd_date">
-                </div>
-                <div class="col-md-3 d-flex align-items-center">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="rd_full_day">
-                    <label class="form-check-label" for="rd_full_day">Весь день</label>
-                  </div>
-                </div>
-                <div class="col-md-3" id="rd_time_block">
-                  <label class="form-label">Начало</label>
-                  <input type="time" class="form-control" id="rd_start_time">
-                </div>
-                <div class="col-md-3" id="rd_time_block2">
-                  <label class="form-label">Конец</label>
-                  <input type="time" class="form-control" id="rd_end_time">
-                </div>
-                <div class="col-md-3 d-flex align-items-center">
-                  <div class="form-check mt-3">
-                    <input class="form-check-input" type="checkbox" id="rd_repeat">
-                    <label class="form-check-label" for="rd_repeat">Повторять ежегодно</label>
-                  </div>
+    </div>
+
+    {{-- Таблица --}}
+    <div class="table-responsive">
+      <table class="table table-sm fs-9" id="redDaysTable">
+        <thead>
+          <tr>
+            <th>Название</th>
+            <th>Дата</th>
+            <th>Время</th>
+            <th>Повтор</th>
+            <th class="text-end"></th>
+          </tr>
+        </thead>
+        <tbody id="redDaysBody">
+          @forelse ($redDays as $redDay)
+          <tr id="rd_row_{{ $redDay->id }}" class="rd-row"
+              data-name="{{ strtolower($redDay->name) }}"
+              data-type="{{ $redDay->full_day ? 'full' : 'partial' }}">
+            <td class="rd-name">{{ $redDay->name }}</td>
+            <td class="rd-date">{{ \Carbon\Carbon::parse($redDay->date)->format('d.m.Y') }}</td>
+            <td class="rd-time">
+              @if($redDay->full_day)
+                <span class="badge bg-secondary fs-10">Весь день</span>
+              @else
+                {{ $redDay->start_time }} – {{ $redDay->end_time }}
+              @endif
+            </td>
+            <td>{{ $redDay->repeat ? '✅' : '❌' }}</td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-outline-primary edit-rd me-1"
+                data-id="{{ $redDay->id }}"
+                data-name="{{ $redDay->name }}"
+                data-date="{{ \Carbon\Carbon::parse($redDay->date)->format('Y-m-d') }}"
+                data-start="{{ $redDay->start_time }}"
+                data-end="{{ $redDay->end_time }}"
+                data-repeat="{{ $redDay->repeat }}"
+                data-fullday="{{ $redDay->full_day }}">
+                <span class="fas fa-edit"></span>
+              </button>
+              <button class="btn btn-sm btn-danger delete-rd" data-id="{{ $redDay->id }}">
+                <span class="fas fa-trash"></span>
+              </button>
+            </td>
+          </tr>
+          @empty
+          <tr id="rd_empty"><td colspan="5" class="text-center text-muted">Нет нерабочих дней</td></tr>
+          @endforelse
+        </tbody>
+      </table>
+    </div>
+
+    {{-- Пагинация --}}
+    <div class="row align-items-center justify-content-between py-2 fs-9">
+      <div class="col-auto">
+        <p class="mb-0 text-muted" id="rdPaginationInfo"></p>
+      </div>
+      <div class="col-auto d-flex gap-1" id="rdPaginationButtons"></div>
+    </div>
+  </div>
+</section>
+
+    {{-- Модалка редактирования --}}
+    <div class="modal fade" id="editRdModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Редактировать день</h5>
+            <button class="btn btn-close p-1" type="button" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="edit_rd_id">
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label">Название*</label>
+                <input type="text" class="form-control" id="edit_rd_name">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Дата*</label>
+                <input type="date" class="form-control" id="edit_rd_date">
+              </div>
+              <div class="col-12">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="edit_rd_fullday">
+                  <label class="form-check-label" for="edit_rd_fullday">Весь день</label>
                 </div>
               </div>
-              <div class="text-end mt-3">
-                <button type="submit" class="btn btn-primary btn-sm">Сохранить</button>
+              <div class="col-6" id="edit_rd_time1">
+                <label class="form-label">Начало</label>
+                <input type="time" class="form-control" id="edit_rd_start">
               </div>
-            </form>
+              <div class="col-6" id="edit_rd_time2">
+                <label class="form-label">Конец</label>
+                <input type="time" class="form-control" id="edit_rd_end">
+              </div>
+              <div class="col-12">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="edit_rd_repeat">
+                  <label class="form-check-label" for="edit_rd_repeat">Повторять ежегодно</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Отмена</button>
+            <button class="btn btn-primary" type="button" id="saveEditRd">Сохранить</button>
           </div>
         </div>
-
-        {{-- Список нерабочих дней --}}
-        <div class="table-responsive">
-          <table class="table table-sm fs-9" id="redDaysTable">
-            <thead>
-              <tr>
-                <th>Название</th>
-                <th>Дата</th>
-                <th>Время</th>
-                <th>Повтор</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="redDaysBody">
-              @forelse ($redDays as $redDay)
-              <tr id="rd_row_{{ $redDay->id }}">
-                <td>{{ $redDay->name }}</td>
-                <td>{{ \Carbon\Carbon::parse($redDay->date)->format('d.m.Y') }}</td>
-                <td>
-                  @if($redDay->full_day)
-                    <span class="badge bg-secondary">Весь день</span>
-                  @else
-                    {{ $redDay->start_time }} - {{ $redDay->end_time }}
-                  @endif
-                </td>
-                <td>{{ $redDay->repeat ? '✅' : '❌' }}</td>
-                <td>
-                  <button class="btn btn-sm btn-danger delete-rd" data-id="{{ $redDay->id }}">
-                    <span class="fas fa-trash"></span>
-                  </button>
-                </td>
-              </tr>
-              @empty
-              <tr id="rd_empty"><td colspan="5" class="text-center text-muted">Нет нерабочих дней</td></tr>
-              @endforelse
-            </tbody>
-          </table>
-        </div>
       </div>
-    </section>
+    </div>
 
     {{-- Фиксированное время --}}
     <section id="section-fixed" class="card mb-4">
@@ -392,7 +480,9 @@
 
             $('#rd_empty').remove();
             $('#redDaysBody').append(`
-              <tr id="rd_row_${rd.id}">
+            <tr id="rd_row_${rd.id}" class="rd-row"
+                data-name="${rd.name.toLowerCase()}"
+                data-type="${rd.full_day ? 'full' : 'partial'}">
                 <td>${rd.name}</td>
                 <td>${dateStr}</td>
                 <td>${timeStr}</td>
@@ -408,6 +498,9 @@
             $('#rd_name, #rd_date, #rd_start_time, #rd_end_time').val('');
             $('#rd_full_day, #rd_repeat').prop('checked', false);
             $('#addRedDayForm').collapse('hide');
+            // Обновляем массив всех строк после добавления новой
+            rdAllRows = $('#redDaysBody tr.rd-row').toArray();
+            applyRdFilters();
             showSuccess();
           },
           error: function (xhr) {
@@ -427,6 +520,8 @@
           headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
           success: function () {
             $('#rd_row_' + id).remove();
+            rdAllRows = rdAllRows.filter(r => $(r).attr('id') !== 'rd_row_' + id);
+            applyRdFilters();
             if ($('#redDaysBody tr').length === 0) {
               $('#redDaysBody').append('<tr id="rd_empty"><td colspan="5" class="text-center text-muted">Нет нерабочих дней</td></tr>');
             }
@@ -497,6 +592,143 @@
                 error: function () { showError('Ошибка сохранения'); }
             });
         });
+        // Пагинация нерабочих дней
+        const rdPerPage = 10;
+        let rdCurrentPage = 1;
+        let rdAllRows = [];
+        let rdFilteredRows = [];
+
+        function initRdRows() {
+            rdAllRows = $('#redDaysBody tr.rd-row').toArray();
+            rdFilteredRows = rdAllRows;
+            renderRdPage();
+        }
+
+        function applyRdFilters() {
+            const search = $('#rdSearch').val().toLowerCase();
+            const type = $('#rdFilterType').val();
+
+            rdFilteredRows = rdAllRows.filter(row => {
+                const name = $(row).data('name');
+                const rowType = $(row).data('type');
+                const matchSearch = !search || name.includes(search);
+                const matchType = !type || rowType === type;
+                return matchSearch && matchType;
+            });
+
+            rdCurrentPage = 1;
+            renderRdPage();
+        }
+
+        function renderRdPage() {
+            const total = rdFilteredRows.length;
+            const totalPages = Math.ceil(total / rdPerPage) || 1;
+            const start = (rdCurrentPage - 1) * rdPerPage;
+            const end = start + rdPerPage;
+
+            rdAllRows.forEach(row => $(row).hide());
+            rdFilteredRows.slice(start, end).forEach(row => $(row).show());
+
+            const showing = Math.min(end, total);
+            $('#rdPaginationInfo').text(total > 0 ? `Показано ${start + 1}–${showing} из ${total} записей` : 'Нет записей');
+
+            let buttons = '';
+            if (totalPages > 1) {
+                buttons += `<button class="btn btn-sm btn-outline-secondary rd-page-btn" data-page="${rdCurrentPage - 1}" ${rdCurrentPage === 1 ? 'disabled' : ''}><span class="fas fa-chevron-left"></span></button>`;
+                for (let i = 1; i <= totalPages; i++) {
+                    if (i === 1 || i === totalPages || (i >= rdCurrentPage - 1 && i <= rdCurrentPage + 1)) {
+                        buttons += `<button class="btn btn-sm ${i === rdCurrentPage ? 'btn-primary' : 'btn-outline-secondary'} rd-page-btn" data-page="${i}">${i}</button>`;
+                    } else if (i === rdCurrentPage - 2 || i === rdCurrentPage + 2) {
+                        buttons += `<span class="btn btn-sm disabled">...</span>`;
+                    }
+                }
+                buttons += `<button class="btn btn-sm btn-outline-secondary rd-page-btn" data-page="${rdCurrentPage + 1}" ${rdCurrentPage === totalPages ? 'disabled' : ''}><span class="fas fa-chevron-right"></span></button>`;
+            }
+            $('#rdPaginationButtons').html(buttons);
+        }
+
+        $(document).on('click', '.rd-page-btn', function () {
+            if (!$(this).prop('disabled')) {
+                rdCurrentPage = parseInt($(this).data('page'));
+                renderRdPage();
+            }
+        });
+
+        $('#rdSearch').on('input', applyRdFilters);
+        $('#rdFilterType').on('change', applyRdFilters);
+        $('#rdResetFilter').on('click', function () {
+            $('#rdSearch').val('');
+            $('#rdFilterType').val('');
+            applyRdFilters();
+        });
+
+        // Открыть модалку редактирования
+        $(document).on('click', '.edit-rd', function () {
+            const fullDay = $(this).data('fullday') == 1;
+            $('#edit_rd_id').val($(this).data('id'));
+            $('#edit_rd_name').val($(this).data('name'));
+            $('#edit_rd_date').val($(this).data('date'));
+            $('#edit_rd_start').val($(this).data('start'));
+            $('#edit_rd_end').val($(this).data('end'));
+            $('#edit_rd_repeat').prop('checked', $(this).data('repeat') == 1);
+            $('#edit_rd_fullday').prop('checked', fullDay);
+            $('#edit_rd_time1, #edit_rd_time2').toggle(!fullDay);
+            $('#editRdModal').modal('show');
+        });
+
+        $('#edit_rd_fullday').on('change', function () {
+            $('#edit_rd_time1, #edit_rd_time2').toggle(!$(this).is(':checked'));
+        });
+
+        // Сохранить редактирование
+        $('#saveEditRd').on('click', function () {
+            const id = $('#edit_rd_id').val();
+            const isFullDay = $('#edit_rd_fullday').is(':checked');
+
+            $.ajax({
+                url: '/master/schedule/redDay/' + id,
+                type: 'PUT',
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                data: {
+                    name: $('#edit_rd_name').val(),
+                    date: $('#edit_rd_date').val(),
+                    start_time: isFullDay ? '' : $('#edit_rd_start').val(),
+                    end_time: isFullDay ? '' : $('#edit_rd_end').val(),
+                    repeat: $('#edit_rd_repeat').is(':checked') ? 1 : 0,
+                },
+                success: function (response) {
+                    const rd = response.redDay;
+                    const row = $(`#rd_row_${rd.id}`);
+                    const date = new Date(rd.date);
+                    const dateStr = date.toLocaleDateString('ru-RU');
+                    const timeStr = rd.full_day
+                        ? '<span class="badge bg-secondary fs-10">Весь день</span>'
+                        : `${rd.start_time} – ${rd.end_time}`;
+
+                    row.find('.rd-name').text(rd.name);
+                    row.find('.rd-date').text(dateStr);
+                    row.find('.rd-time').html(timeStr);
+                    row.data('name', rd.name.toLowerCase());
+                    row.data('type', rd.full_day ? 'full' : 'partial');
+
+                    row.find('.edit-rd')
+                        .data('name', rd.name)
+                        .data('date', rd.date)
+                        .data('start', rd.start_time || '')
+                        .data('end', rd.end_time || '')
+                        .data('repeat', rd.repeat)
+                        .data('fullday', rd.full_day);
+
+                    $('#editRdModal').modal('hide');
+                    showSuccess('Нерабочий день обновлён!');
+                    applyRdFilters();
+                },
+                error: function () { showError('Ошибка сохранения'); }
+            });
+        });
+
+        // Инициализация пагинации
+        initRdRows();
     });
   </script>
   @endpush
