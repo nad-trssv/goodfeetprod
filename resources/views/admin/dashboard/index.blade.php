@@ -3,47 +3,90 @@
   @endpush
   <x-dashboard-layout>
     <div class="content">
-      <div class="d-flex mb-5 pt-8" id="scrollspyStats"><span class="fa-stack me-2 ms-n1"><svg class="svg-inline--fa fa-circle fa-stack-2x text-primary" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512z"></path></svg><!-- <i class="fas fa-circle fa-stack-2x text-primary"></i> Font Awesome fontawesome.com --><svg class="svg-inline--fa fa-percent fa-inverse fa-stack-1x text-primary-subtle" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="percent" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg=""><path fill="currentColor" d="M374.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-320 320c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l320-320zM128 128A64 64 0 1 0 0 128a64 64 0 1 0 128 0zM384 384a64 64 0 1 0 -128 0 64 64 0 1 0 128 0z"></path></svg><!-- <i class="fa-inverse fa-stack-1x text-primary-subtle fas fa-percentage"></i> Font Awesome fontawesome.com --></span>
+      {{-- Мои показатели --}}
+      <div class="d-flex mb-4 pt-8" id="scrollspyStats">
+        <span class="fa-stack me-2 ms-n1">
+          <i class="fas fa-circle fa-stack-2x text-primary"></i>
+          <i class="fa-inverse fa-stack-1x fas fa-user text-primary-subtle"></i>
+        </span>
         <div class="col">
-          <h3 class="mb-0 text-primary position-relative fw-bold"><span class="bg-body pe-2">В этом месяце</span><span class="border border-primary position-absolute top-50 translate-middle-y w-100 start-0 z-n1"></span></h3>
-          <p class="mb-0">Здесь вы можете увидеть статистику за текущий месяц</p>
+          <h3 class="mb-0 text-primary position-relative fw-bold">
+            <span class="bg-body pe-2">Мои показатели в этом месяце</span>
+            <span class="border border-primary position-absolute top-50 translate-middle-y w-100 start-0 z-n1"></span>
+          </h3>
+          <p class="mb-0">Статистика по вашим записям</p>
         </div>
       </div>
       <div class="px-3 mb-5">
         <div class="row justify-content-start">
-          <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-start-xxl border-end-xxl-0 border-bottom-xxl-0 border-end border-bottom pb-4 pb-xxl-0 ">
+          <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
             <i class="fa-solid fa-users text-primary fs-5 lh-1"></i>
             <h1 class="fs-5 pt-3">{{ $stats['clients'] }}</h1>
             <p class="fs-9 mb-0">Клиентов</p>
           </div>
-          <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-start-xxl border-end-xxl-0 border-bottom-xxl-0 border-end border-bottom pb-4 pb-xxl-0 ">
+          <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
             <i class="fa-solid fa-calendar-xmark text-warning fs-5 lh-1"></i>
             <h1 class="fs-5 pt-3">{{ $stats['redDays'] }}</h1>
-            <p class="fs-9 mb-0">Нерабочих дня</p>
+            <p class="fs-9 mb-0">Нерабочих дней</p>
           </div>
-          <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-start-xxl border-end-xxl-0 border-bottom-xxl-0 border-end border-bottom pb-4 pb-xxl-0 ">
+          <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
             <span class="uil uil-wallet text-success fs-5 lh-1"></span>
             <h1 class="fs-5 pt-3">{{ $stats['salary'] }} &euro;</h1>
-            <p class="fs-9 mb-0">Расчетная прибыль</p>
+            <p class="fs-9 mb-0">Прибыль</p>
           </div>
-          <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-start-xxl border-end-xxl-0 border-bottom-xxl-0 border-end border-bottom pb-4 pb-xxl-0 ">
-            <span class="stat_icons">
-              <i class="uil fs-5 lh-1 uil-chart-growth text-primary"></i>
-              <i class="fas fa-users text-warning icon_top"></i>
-            </span>
-            <h1 class="fs-5 pt-3 @if ($stats['clientsDifference'] > 0) text-success @endif">{{ $stats['clientsDifference'] }}</h1>
-            <p class="fs-9 mb-0">Статистика клиентов в сравнении с прошлым месяцем</p>
+          <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
+            <i class="uil fs-5 lh-1 uil-chart-growth text-primary"></i>
+            <h1 class="fs-5 pt-3 {{ $stats['clientsDifference'] > 0 ? 'text-success' : '' }}">{{ $stats['clientsDifference'] }}</h1>
+            <p class="fs-9 mb-0">Клиенты vs прошлый месяц</p>
           </div>
-          <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-start-xxl border-end-xxl-0 border-bottom-xxl-0 border-end border-bottom pb-4 pb-xxl-0 ">
-            <span class="stat_icons">
-              <i class="uil fs-5 lh-1 uil-chart-line text-primary"></i>
-              <i class="fas fa-coins text-warning icon_top"></i>
-            </span>
-            <h1 class="fs-5 pt-3 @if ($stats['salaryDifference'] > 0) text-success @endif">{{ $stats['salaryDifference'] }} &euro;</h1>
-            <p class="fs-9 mb-0">Статистика зарплаты в сравнении с прошлым месяцем</p>
+          <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
+            <i class="uil fs-5 lh-1 uil-chart-line text-primary"></i>
+            <h1 class="fs-5 pt-3 {{ $stats['salaryDifference'] > 0 ? 'text-success' : '' }}">{{ $stats['salaryDifference'] }} &euro;</h1>
+            <p class="fs-9 mb-0">Прибыль vs прошлый месяц</p>
           </div>
         </div>
       </div>
+
+      {{-- Общие показатели — только для администратора --}}
+      @can('is-superadmin')
+        <div class="d-flex mb-4">
+          <span class="fa-stack me-2 ms-n1">
+            <i class="fas fa-circle fa-stack-2x text-success"></i>
+            <i class="fa-inverse fa-stack-1x fas fa-users text-success-subtle"></i>
+          </span>
+          <div class="col">
+            <h3 class="mb-0 text-success position-relative fw-bold">
+              <span class="bg-body pe-2">Общие показатели в этом месяце</span>
+              <span class="border border-success position-absolute top-50 translate-middle-y w-100 start-0 z-n1"></span>
+            </h3>
+            <p class="mb-0">Статистика по всем мастерам</p>
+          </div>
+        </div>
+        <div class="px-3 mb-5">
+          <div class="row justify-content-start">
+            <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
+              <i class="fa-solid fa-users text-success fs-5 lh-1"></i>
+              <h1 class="fs-5 pt-3">{{ $stats['all_clients'] }}</h1>
+              <p class="fs-9 mb-0">Всего клиентов</p>
+            </div>
+            <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
+              <span class="uil uil-wallet text-success fs-5 lh-1"></span>
+              <h1 class="fs-5 pt-3">{{ $stats['all_salary'] }} &euro;</h1>
+              <p class="fs-9 mb-0">Общая прибыль</p>
+            </div>
+            <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
+              <i class="uil fs-5 lh-1 uil-chart-growth text-success"></i>
+              <h1 class="fs-5 pt-3 {{ $stats['all_clientsDifference'] > 0 ? 'text-success' : '' }}">{{ $stats['all_clientsDifference'] }}</h1>
+              <p class="fs-9 mb-0">Клиенты vs прошлый месяц</p>
+            </div>
+            <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
+              <i class="uil fs-5 lh-1 uil-chart-line text-success"></i>
+              <h1 class="fs-5 pt-3 {{ $stats['all_salaryDifference'] > 0 ? 'text-success' : '' }}">{{ $stats['all_salaryDifference'] }} &euro;</h1>
+              <p class="fs-9 mb-0">Прибыль vs прошлый месяц</p>
+            </div>
+          </div>
+        </div>
+      @endcan
       <div class="mx-lg-n4 mt-3">
         <div class="row g-3">
           <div class="col-12 col-xl-6 col-xxl-8">
@@ -123,32 +166,25 @@
             <div class="card h-100">
               <div class="card-body">
                 <div class="card-title mb-1 d-flex pb-4 border-bottom border-dashed align-items-end">
-                  <h3 class="flex-1 mb-0">События</h3>
+                  <h3 class="flex-1 mb-0">Мои события</h3>
                   <a class="fw-bold fs-9" href="{{ route('calendarList') }}">Все записи</a>
                 </div>
                 @if ($events->isNotEmpty())
                   @foreach ($events as $event)
                     <div class="py-3 border-bottom border-dashed">
-                      <div class="d-flex flex-between-center">
-                        <p class="text-warning fs-10 mb-0 fw-bold mb-1 text-uppercase">
-                          @if ($event['start_time'] !== null && $event['end_time'] !== null)
-                            {{ \Carbon\Carbon::parse($event['date'] . ' ' . $event['start_time'])->translatedFormat('D, M d H:i') }}
-                            - {{ \Carbon\Carbon::parse($event['date'] . ' ' . $event['end_time'])->translatedFormat('H:i') }}
-                          @else
-                            {{ \Carbon\Carbon::parse($event['date'])->translatedFormat('D, M d') }}
-                          @endif
-                        </p>
-                      </div>
-
+                      <p class="text-warning fs-10 mb-0 fw-bold mb-1 text-uppercase">
+                        @if ($event['start_time'] !== null && $event['end_time'] !== null)
+                          {{ \Carbon\Carbon::parse($event['date'] . ' ' . $event['start_time'])->translatedFormat('D, M d H:i') }}
+                          - {{ \Carbon\Carbon::parse($event['date'] . ' ' . $event['end_time'])->translatedFormat('H:i') }}
+                        @else
+                          {{ \Carbon\Carbon::parse($event['date'])->translatedFormat('D, M d') }}
+                        @endif
+                      </p>
                       @if ($event['type'] === 'redday')
-                        <p class="fw-bold mb-1">
-                          <i class="far fa-calendar-times text-danger me-1"></i>
-                          {{ $event['name'] }}
-                        </p>
+                        <p class="fw-bold mb-1"><i class="far fa-calendar-times text-danger me-1"></i>{{ $event['name'] }}</p>
                       @elseif ($event['type'] === 'birthday')
                         <p class="fw-bold mb-1">
-                          <i class="fas fa-birthday-cake text-warning me-1"></i>
-                          {{ $event['name'] }}
+                          <i class="fas fa-birthday-cake text-warning me-1"></i>{{ $event['name'] }}
                           @if($event->celebrant)
                             — @can('is-superadmin')
                               <a class="text-primary" href="{{ route('member.edit', $event->celebrant->id) }}">{{ $event->celebrant->name }}</a>
@@ -158,17 +194,8 @@
                           @endif
                         </p>
                       @elseif ($event['type'] === 'event')
-                        <p class="fw-bold mb-1">
-                          <i class="far fa-bell text-success me-1"></i>
-                          {{ $event['name'] }}
-                        </p>
-                        @if ($event['organized_by'] && $event->organizer)
-                          <p class="text-body-secondary fs-9 mb-1">
-                            Организатор: <span class="fw-bold">{{ $event->organizer->name }}</span>
-                          </p>
-                        @endif
+                        <p class="fw-bold mb-1"><i class="far fa-bell text-success me-1"></i>{{ $event['name'] }}</p>
                       @endif
-
                       @if($event['description'])
                         <p class="fs-10 text-body-tertiary mb-0">{{ $event['description'] }}</p>
                       @endif
@@ -180,15 +207,53 @@
               </div>
             </div>
           </div>
-          <div class="col-12 col-xl-8 col-xxl-8">
-            <div class="card h-100">
-              <div class="card-body">
-                <div class="row g-0">
-                  <div class="quickcode-chart-by-day" style="min-height:300px"></div>
+
+          @can('is-superadmin')
+            <div class="col-12 col-xl-4 col-xxl-4">
+              <div class="card h-100">
+                <div class="card-body">
+                  <div class="card-title mb-1 d-flex pb-4 border-bottom border-dashed align-items-end">
+                    <h3 class="flex-1 mb-0">Все события</h3>
+                    <a class="fw-bold fs-9" href="{{ route('calendarListAllMasters') }}">Все записи</a>
+                  </div>
+                  @if ($allEvents->isNotEmpty())
+                    @foreach ($allEvents as $event)
+                      <div class="py-3 border-bottom border-dashed">
+                        <p class="text-warning fs-10 mb-0 fw-bold mb-1 text-uppercase">
+                          @if ($event['start_time'] !== null && $event['end_time'] !== null)
+                            {{ \Carbon\Carbon::parse($event['date'] . ' ' . $event['start_time'])->translatedFormat('D, M d H:i') }}
+                            - {{ \Carbon\Carbon::parse($event['date'] . ' ' . $event['end_time'])->translatedFormat('H:i') }}
+                          @else
+                            {{ \Carbon\Carbon::parse($event['date'])->translatedFormat('D, M d') }}
+                          @endif
+                        </p>
+                        @if ($event['type'] === 'redday')
+                          <p class="fw-bold mb-1"><i class="far fa-calendar-times text-danger me-1"></i>{{ $event['name'] }}</p>
+                        @elseif ($event['type'] === 'birthday')
+                          <p class="fw-bold mb-1">
+                            <i class="fas fa-birthday-cake text-warning me-1"></i>{{ $event['name'] }}
+                            @if($event->celebrant)
+                              — <a class="text-primary" href="{{ route('member.edit', $event->celebrant->id) }}">{{ $event->celebrant->name }}</a>
+                            @endif
+                          </p>
+                        @elseif ($event['type'] === 'event')
+                          <p class="fw-bold mb-1"><i class="far fa-bell text-success me-1"></i>{{ $event['name'] }}</p>
+                          @if ($event['organized_by'] && $event->organizer)
+                            <p class="text-body-secondary fs-9 mb-1">Организатор: <span class="fw-bold">{{ $event->organizer->name }}</span></p>
+                          @endif
+                        @endif
+                        @if($event['description'])
+                          <p class="fs-10 text-body-tertiary mb-0">{{ $event['description'] }}</p>
+                        @endif
+                      </div>
+                    @endforeach
+                  @else
+                    <p class="text-body-tertiary my-4">На сегодня нет мероприятий!</p>
+                  @endif
                 </div>
               </div>
             </div>
-          </div>
+          @endcan
         </div>
       </div>
       <div class="row col-12 my-6">
@@ -199,22 +264,32 @@
           <div class="quickcode-chart-by-month-clients" style="min-height:300px"></div>
         </div>
       </div>
-      <div class="row col-12 my-6">
+      <div class="row col-12 my-2">
         <div class="col-12">
           <div class="quickcode-gauge-by-day" style="min-height:300px"></div>
         </div>
       </div>
+
+      @can('is-superadmin')
+        <div class="row col-12 my-6">
+          <div class="col-6">
+            <div class="quickcode-chart-all-by-month-sales" style="min-height:300px"></div>
+          </div>
+          <div class="col-6">
+            <div class="quickcode-chart-all-by-month-clients" style="min-height:300px"></div>
+          </div>
+        </div>
+      @endcan
       <x-dashboard-footer />
     </div>
     @push('scripts')
-      <script>
+    <script>
         //Activity today
         const items = document.querySelectorAll('.event-item');
         const now = new Date();
         items.forEach((item) => {
             const start = new Date(item.dataset.start);
             const end = new Date(item.dataset.end);
-        
             if (now >= start && now <= end) {
                 item.classList.add('active');
             } else {
@@ -222,294 +297,180 @@
             }
         });
 
-    // CHarts
-    const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--phoenix-primary-rgb').trim();
-    // Chart By Day
-    var chartContainerByDay = document.querySelector('.quickcode-chart-by-day');
-    var chartDataByDay = @json($chartDataByDay);
-    var myChartByDay = echarts.init(chartContainerByDay);
-    var optionByDay = {
-        title: {
-            text: 'Общие продажи и количество записей по дням',
-            left: 'center',
-            textStyle: {
-                color: `rgba(${primaryColor}, 1)`,
-            },
-        },
-        tooltip: {
-            trigger: 'axis',
-            axisPointer: {
-                type: 'shadow'
-            },
-        },
-        legend: {
-          data: ['Общие продажи', 'Количество записей'],
-          top: '10%'
-        },
-        xAxis: {
-            type: 'category',
-            data: chartDataByDay.labels 
-        },
-        yAxis: [
-            {
-                type: 'value',
-                name: 'Общие продажи',
-                position: 'left',
-                axisLabel: {
-                    formatter: '{value} €' 
-                }
-            },
-            {
-                type: 'value',
-                name: 'Количество записей',
-                position: 'right'
-            }
-        ],
-        series: [
-            {
-                name: 'Общие продажи',
-                type: 'line',
-                smooth: true,
-                data: chartDataByDay.data, 
-                lineStyle: {
-                    color: 'rgba(255, 158, 68, 1)'
-                },
-                areaStyle: {
-                    color: new echarts.graphic.LinearGradient(
-                        0, 0, 0, 1,
-                        [
-                          { offset: 0, color: 'rgba(255, 148, 0, 0.8)' },
-                            { offset: 1, color: 'rgba(255, 70, 131, 0.2)' }
-                        ]
-                    )
-                },
-                itemStyle: {
-                    color: '#ef8b00'
-                }
-            },
-            {
-                name: 'Количество записей',
-                type: 'bar', 
-                yAxisIndex: 1, 
-                data: chartDataByDay.counts,
-                itemStyle: {
-                    color: new echarts.graphic.LinearGradient(
-                        0, 0, 0, 1,
-                        [
-                            { offset: 0, color: 'rgba(137, 110, 181, 0.8)' },
-                            { offset: 1, color: 'rgba(190, 178, 211, 0.2)' }
-                        ]
-                    )
-                }
-            }
-        ]
-    };
-    // Chart By Month
-    var chartDataByMonth = @json($chartDataByMonth);
+        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--phoenix-primary-rgb').trim();
+        var chartDataByMonth = @json($chartDataByMonth);
 
-    //Sales
-    var chartContainerByMonthSales = document.querySelector('.quickcode-chart-by-month-sales');
-    var myChartByMonthSales = echarts.init(chartContainerByMonthSales);
-    var optionByMonthSales = {
-        title: {
-            text: 'Общие продажи за месяц',
-            left: 'center',
-            textStyle: {
-                color: `rgba(${primaryColor}, 1)`,
+        // Мои продажи по месяцам
+        var chartContainerByMonthSales = document.querySelector('.quickcode-chart-by-month-sales');
+        var myChartByMonthSales = echarts.init(chartContainerByMonthSales);
+        myChartByMonthSales.setOption({
+            title: {
+                text: 'Мои продажи по месяцам',
+                left: 'center',
+                textStyle: { color: `rgba(${primaryColor}, 1)` }
             },
-        },
-        tooltip: {
-            trigger: 'axis',
-        },
-        legend: {
-          data: ['Продажи'],
-          top: '10%'
-        },
-        xAxis: {
-            type: 'category',
-            data: chartDataByMonth.labels 
-        },
-        yAxis: [
-            {
-                type: 'value',
-                name: 'Продажи',
-                position: 'left',
-                axisLabel: {
-                    formatter: '{value} €'
-                }
-            },
-        ],
-        series: [
-            {
+            tooltip: { trigger: 'axis' },
+            legend: { data: ['Продажи'], top: '10%' },
+            xAxis: { type: 'category', data: chartDataByMonth.labels },
+            yAxis: [{ type: 'value', name: 'Продажи', axisLabel: { formatter: '{value} €' } }],
+            series: [{
                 name: 'Продажи',
                 type: 'line',
                 smooth: true,
-                data: chartDataByMonth.data, 
-                lineStyle: {
-                    color: 'rgba(255, 158, 68, 1)'
-                },
+                data: chartDataByMonth.data,
+                lineStyle: { color: 'rgba(255, 158, 68, 1)' },
                 areaStyle: {
-                    color: new echarts.graphic.LinearGradient(
-                        0, 0, 0, 1,
-                        [
-                            { offset: 0, color: 'rgba(255, 148, 0, 0.8)' },
-                            { offset: 1, color: 'rgba(255, 70, 131, 0.2)' }
-                        ]
-                    )
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        { offset: 0, color: 'rgba(255, 148, 0, 0.8)' },
+                        { offset: 1, color: 'rgba(255, 70, 131, 0.2)' }
+                    ])
                 },
-                itemStyle: {
-                    color: '#ef8b00'
-                }
-            },
-        ]
-    };
+                itemStyle: { color: '#ef8b00' }
+            }]
+        });
 
-    //Clients
-    var chartContainerByMonthClients = document.querySelector('.quickcode-chart-by-month-clients');
-    var myChartByMonthClients = echarts.init(chartContainerByMonthClients);
-    var optionByMonthClients = {
-        title: {
-            text: 'Общее количество клиентов за месяц',
-            left: 'center',
-            textStyle: {
-                color: `rgba(${primaryColor}, 1)`,
+        // Мои клиенты по месяцам
+        var chartContainerByMonthClients = document.querySelector('.quickcode-chart-by-month-clients');
+        var myChartByMonthClients = echarts.init(chartContainerByMonthClients);
+        myChartByMonthClients.setOption({
+            title: {
+                text: 'Мои клиенты по месяцам',
+                left: 'center',
+                textStyle: { color: `rgba(${primaryColor}, 1)` }
             },
-        },
-        tooltip: {
-            trigger: 'axis',
-        },
-        legend: {
-          data: ['Клиенты'],
-          top: '10%'
-        },
-        xAxis: {
-            type: 'category',
-            data: chartDataByMonth.labels 
-        },
-        yAxis: [
-            {
-                type: 'value',
-                name: 'Клиенты',
-                position: 'left',
-            },
-        ],
-        series: [
-            {
+            tooltip: { trigger: 'axis' },
+            legend: { data: ['Клиенты'], top: '10%' },
+            xAxis: { type: 'category', data: chartDataByMonth.labels },
+            yAxis: [{ type: 'value', name: 'Клиенты' }],
+            series: [{
                 name: 'Клиенты',
                 type: 'bar',
-                data: chartDataByMonth.counts, 
+                data: chartDataByMonth.counts,
                 itemStyle: {
-                    color: new echarts.graphic.LinearGradient(
-                        0, 0, 0, 1,
-                        [
-                            { offset: 0, color: 'rgba(137, 110, 181, 0.8)' },
-                            { offset: 1, color: 'rgba(190, 178, 211, 0.2)' }
-                        ]
-                    )
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        { offset: 0, color: 'rgba(137, 110, 181, 0.8)' },
+                        { offset: 1, color: 'rgba(190, 178, 211, 0.2)' }
+                    ])
                 }
-            },
-        ]
-    };
+            }]
+        });
 
-    //gauge
-    var chartGauge = document.querySelector('.quickcode-gauge-by-day');
-    var myChartGauge = echarts.init(chartGauge);
-    var optionGauge = {
-        title: {
-            text: 'Активность на сегодняшний день',
-            left: 'center',
-            textStyle: {
-                color: `rgba(${primaryColor}, 1)`,
-            },
-        },
-        tooltip: {
-          trigger: 'axis',
-          padding: [7, 10],
-          backgroundColor: `rgba(${primaryColor}, 1)`,
-          borderColor: `rgba(${primaryColor}, 1)`,
-          textStyle: { color: `rgba(${primaryColor}, 1)` },
-          borderWidth: 1,
-          formatter: params => tooltipFormatter(params),
-          transitionDuration: 0,
-          axisPointer: {
-            type: 'none'
-          }
-        },
-        series: [
-          {
-            type: 'gauge',
-            center: ['50%', '60%'],
-            radius: '100%',
-            startAngle: 180,
-            endAngle: 0,
-            progress: {
-              show: true,
-              width: 18,
-              itemStyle: {
-                color: '#a088c2',
-                shadowColor: `#c6bcd5`,
-              }
-            },
-            itemStyle: {
-              color: `rgba(${primaryColor}, 1)`,
-              shadowColor: `rgba(${primaryColor}, 1)`,
-              shadowBlur: 10,
-              shadowOffsetX: 2,
-              shadowOffsetY: 2
-            },
-            axisLine: {
-              lineStyle: {
-                width: 18,
-                color: [[1, '#cfd1d9']]
-              }
-            },
-            axisTick: {
-              show: false
-            },
-            splitLine: {
-              lineStyle: {
-                width: 2,
-                color: `#cfd1d9` 
-              }
-            },
-            axisLabel: {
-              distance: 25,
-              color: `#acaeb9` //цвет текста потом поменять в зависимости от темы (10 20 30)
-            },
-            anchor: {
-              show: true,
-              showAbove: true,
-              size: 25,
-              itemStyle: {
-                color: `rgba(${primaryColor}, 1)`
-              }
-            },
+        // Gauge активности
+        var chartGauge = document.querySelector('.quickcode-gauge-by-day');
+        var myChartGauge = echarts.init(chartGauge);
+        myChartGauge.setOption({
             title: {
-              show: false
+                text: 'Активность на сегодняшний день',
+                left: 'center',
+                textStyle: { color: `rgba(${primaryColor}, 1)` }
             },
-            detail: {
-              valueAnimation: true,
-              fontSize: 80,
-              offsetCenter: [0, '70%']
+            tooltip: {
+                trigger: 'axis',
+                padding: [7, 10],
+                backgroundColor: `rgba(${primaryColor}, 1)`,
+                borderColor: `rgba(${primaryColor}, 1)`,
+                textStyle: { color: `rgba(${primaryColor}, 1)` },
+                borderWidth: 1,
+                transitionDuration: 0,
+                axisPointer: { type: 'none' }
             },
-            data: [
-              {
-                value: @json($activity),
-                detail: {
-                  fontSize: 30,
-                  color: `rgba(${primaryColor}, 1)`,
-                  offsetCenter: [0, '40%'],
-                  formatter: '{value}%'
-                }
-              }
-            ]
-          }
-        ]
-    };
+            series: [{
+                type: 'gauge',
+                center: ['50%', '60%'],
+                radius: '100%',
+                startAngle: 180,
+                endAngle: 0,
+                progress: {
+                    show: true,
+                    width: 18,
+                    itemStyle: { color: '#a088c2', shadowColor: '#c6bcd5' }
+                },
+                itemStyle: {
+                    color: `rgba(${primaryColor}, 1)`,
+                    shadowColor: `rgba(${primaryColor}, 1)`,
+                    shadowBlur: 10,
+                    shadowOffsetX: 2,
+                    shadowOffsetY: 2
+                },
+                axisLine: { lineStyle: { width: 18, color: [[1, '#cfd1d9']] } },
+                axisTick: { show: false },
+                splitLine: { lineStyle: { width: 2, color: '#cfd1d9' } },
+                axisLabel: { distance: 25, color: '#acaeb9' },
+                anchor: {
+                    show: true,
+                    showAbove: true,
+                    size: 25,
+                    itemStyle: { color: `rgba(${primaryColor}, 1)` }
+                },
+                title: { show: false },
+                detail: { valueAnimation: true, fontSize: 80, offsetCenter: [0, '70%'] },
+                data: [{
+                    value: @json($activity),
+                    detail: {
+                        fontSize: 30,
+                        color: `rgba(${primaryColor}, 1)`,
+                        offsetCenter: [0, '40%'],
+                        formatter: '{value}%'
+                    }
+                }]
+            }]
+        });
 
-      myChartByDay.setOption(optionByDay);
-      myChartByMonthSales.setOption(optionByMonthSales);
-      myChartByMonthClients.setOption(optionByMonthClients);
+        @can('is-superadmin')
+        // Все продажи по месяцам (все мастера)
+        var chartContainerAllByMonthSales = document.querySelector('.quickcode-chart-all-by-month-sales');
+        if (chartContainerAllByMonthSales) {
+            var myChartAllByMonthSales = echarts.init(chartContainerAllByMonthSales);
+            myChartAllByMonthSales.setOption({
+                title: {
+                    text: 'Все продажи по месяцам (все мастера)',
+                    left: 'center',
+                    textStyle: { color: `rgba(${primaryColor}, 1)` }
+                },
+                tooltip: { trigger: 'axis' },
+                legend: { data: ['Продажи'], top: '10%' },
+                xAxis: { type: 'category', data: chartDataByMonth.all_labels },
+                yAxis: [{ type: 'value', name: 'Продажи', axisLabel: { formatter: '{value} €' } }],
+                series: [{
+                    name: 'Продажи',
+                    type: 'line',
+                    smooth: true,
+                    data: chartDataByMonth.all_data,
+                    lineStyle: { color: '#28a745' },
+                    areaStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: 'rgba(40, 167, 69, 0.8)' },
+                            { offset: 1, color: 'rgba(40, 167, 69, 0.1)' }
+                        ])
+                    },
+                    itemStyle: { color: '#28a745' }
+                }]
+            });
+        }
+
+        // Все клиенты по месяцам (все мастера)
+        var chartContainerAllByMonthClients = document.querySelector('.quickcode-chart-all-by-month-clients');
+        if (chartContainerAllByMonthClients) {
+            var myChartAllByMonthClients = echarts.init(chartContainerAllByMonthClients);
+            myChartAllByMonthClients.setOption({
+                title: {
+                    text: 'Все клиенты по месяцам (все мастера)',
+                    left: 'center',
+                    textStyle: { color: `rgba(${primaryColor}, 1)` }
+                },
+                tooltip: { trigger: 'axis' },
+                legend: { data: ['Клиенты'], top: '10%' },
+                xAxis: { type: 'category', data: chartDataByMonth.all_labels },
+                yAxis: [{ type: 'value', name: 'Клиенты' }],
+                series: [{
+                    name: 'Клиенты',
+                    type: 'bar',
+                    data: chartDataByMonth.all_counts,
+                    itemStyle: { color: 'rgba(40, 167, 69, 0.6)' }
+                }]
+            });
+        }
+        @endcan
     </script>
     @endpush
   </x-dashboard-layout>

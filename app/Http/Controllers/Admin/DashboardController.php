@@ -21,12 +21,13 @@ class DashboardController extends Controller
         $data = $this->dashboardService->index();
          
         return view('admin.dashboard.index', [
-            'appointments' => $data['appointments'], 
+            'appointments' => $data['appointments'],
             'services' => $data['services'],
             'stats' => $data['stats'],
             'chartDataByDay' => $data['chartDataByDay'],
             'chartDataByMonth' => $data['chartDataByMonth'],
-            'events' => $data['events'],
+            'events' => $data['events']['my'],
+            'allEvents' => $data['events']['all'],
             'activity' => $data['activity'],
         ]);
     }

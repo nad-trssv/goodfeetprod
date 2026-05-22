@@ -48,80 +48,136 @@ class DashboardService
                 return Services::with('users')->get();
             }
             function getStats() {
+                $userId = Auth::user()->id;
                 $currentMonthStart = Carbon::now()->startOfMonth()->toDateString();
-                $currentMonthEnd = Carbon::now()->endOfMonth()->toDateString(); 
+                $currentMonthEnd = Carbon::now()->endOfMonth()->toDateString();
                 $previousMonthStart = Carbon::now()->subMonth()->startOfMonth()->toDateString();
                 $previousMonthEnd = Carbon::now()->subMonth()->endOfMonth()->toDateString();
-                function calculateMonthlyDifference($query, $field,$currentRange, $previousRange, $operation = 'count', $column = null) {
+
+                function calculateMonthlyDifference($query, $field, $currentRange, $previousRange, $operation = 'count', $column = null) {
                     if ($operation === 'count') {
                         $currentValue = (clone $query)->whereBetween($field, $currentRange)->count();
                         $preventValue = (clone $query)->whereBetween($field, $previousRange)->count();
-                        $difference = $currentValue - $preventValue;
                     } elseif ($operation === 'sum' && $column) {
                         $currentValue = (clone $query)->whereBetween($field, $currentRange)->sum($column);
                         $preventValue = (clone $query)->whereBetween($field, $previousRange)->sum($column);
-                        $difference = $currentValue - $preventValue;
                     }
-                    $output = ($difference != 0 ? ($difference > 0 ? '+' : '') . $difference : '0');
-                    return $output;
+                    $difference = $currentValue - $preventValue;
+                    return ($difference != 0 ? ($difference > 0 ? '+' : '') . $difference : '0');
                 }
+
                 $currentRange = [$currentMonthStart, $currentMonthEnd];
                 $previousRange = [$previousMonthStart, $previousMonthEnd];
-                $clientsStats = calculateMonthlyDifference(Appointments::query(), 'appointment_start', $currentRange, $previousRange, 'count');
-                $salaryStats = calculateMonthlyDifference(Appointments::query(), 'appointment_start', $currentRange, $previousRange, 'sum', 'price');
-    
-                return  [
-                    'redDays' => RedDay::whereBetween('date', [$currentMonthStart, $currentMonthEnd])->count(),
-                    'clients' => Appointments::whereBetween('appointment_start', [$currentMonthStart, $currentMonthEnd])->count(),
-                    'salary' => Appointments::whereBetween('appointment_start', [$currentMonthStart, $currentMonthEnd])->sum('price'),
-                    'clientsDifference' => $clientsStats,
-                    'salaryDifference' => $salaryStats,
+
+                // Статистика по конкретному мастеру
+                $myQuery = Appointments::where('user_id', $userId);
+                $myClients = (clone $myQuery)->whereBetween('appointment_start', $currentRange)->count();
+                $mySalary = (clone $myQuery)->whereBetween('appointment_start', $currentRange)->sum('price');
+                $myClientsDiff = calculateMonthlyDifference(clone $myQuery, 'appointment_start', $currentRange, $previousRange, 'count');
+                $mySalaryDiff = calculateMonthlyDifference(clone $myQuery, 'appointment_start', $currentRange, $previousRange, 'sum', 'price');
+
+                // Общая статистика
+                $allClients = Appointments::whereBetween('appointment_start', $currentRange)->count();
+                $allSalary = Appointments::whereBetween('appointment_start', $currentRange)->sum('price');
+                $allClientsDiff = calculateMonthlyDifference(Appointments::query(), 'appointment_start', $currentRange, $previousRange, 'count');
+                $allSalaryDiff = calculateMonthlyDifference(Appointments::query(), 'appointment_start', $currentRange, $previousRange, 'sum', 'price');
+
+                return [
+                    'redDays' => RedDay::visibleFor($userId)->whereBetween('date', [$currentMonthStart, $currentMonthEnd])->count(),
+                    // Мои
+                    'clients' => $myClients,
+                    'salary' => $mySalary,
+                    'clientsDifference' => $myClientsDiff,
+                    'salaryDifference' => $mySalaryDiff,
+                    // Все
+                    'all_clients' => $allClients,
+                    'all_salary' => $allSalary,
+                    'all_clientsDifference' => $allClientsDiff,
+                    'all_salaryDifference' => $allSalaryDiff,
                 ];
             }
             function getChartDataByDay() {
-                $salesChartByDay = Appointments::orderBy('appointment_start')
-                ->get(['price', 'appointment_start'])
-                ->groupBy(function ($item) {
-                    return Carbon::parse($item->appointment_start)->format('Y-m-d');
-                })
-                ->map(function ($group, $date) {
-                    $formattedDate = Carbon::parse($date)->format('d.m.y');
-                    return [
-                        'date' => $formattedDate,
-                        'total_price' => $group->sum('price'),
-                        'appointments_count' => $group->count()
-                    ];
-                })
-                ->take(15)
-                ->values(); 
+                $userId = Auth::user()->id;
+
+                // Мои данные
+                $myData = Appointments::where('user_id', $userId)
+                    ->orderBy('appointment_start')
+                    ->get(['price', 'appointment_start'])
+                    ->groupBy(function ($item) {
+                        return Carbon::parse($item->appointment_start)->format('Y-m-d');
+                    })
+                    ->map(function ($group, $date) {
+                        return [
+                            'date' => Carbon::parse($date)->format('d.m.y'),
+                            'total_price' => $group->sum('price'),
+                            'appointments_count' => $group->count()
+                        ];
+                    })
+                    ->take(15)->values();
+
+                // Все данные
+                $allData = Appointments::orderBy('appointment_start')
+                    ->get(['price', 'appointment_start'])
+                    ->groupBy(function ($item) {
+                        return Carbon::parse($item->appointment_start)->format('Y-m-d');
+                    })
+                    ->map(function ($group, $date) {
+                        return [
+                            'date' => Carbon::parse($date)->format('d.m.y'),
+                            'total_price' => $group->sum('price'),
+                            'appointments_count' => $group->count()
+                        ];
+                    })
+                    ->take(15)->values();
 
                 return [
-                    'labels' => $salesChartByDay->pluck('date'),
-                    'data' => $salesChartByDay->pluck('total_price'),
-                    'counts' => $salesChartByDay->pluck('appointments_count'),
+                    'labels' => $myData->pluck('date'),
+                    'data' => $myData->pluck('total_price'),
+                    'counts' => $myData->pluck('appointments_count'),
+                    'all_labels' => $allData->pluck('date'),
+                    'all_data' => $allData->pluck('total_price'),
+                    'all_counts' => $allData->pluck('appointments_count'),
                 ];
             }
             function getChartDataByMonth() {
-                $salesChartByMonth = Appointments::orderBy('appointment_start')
-                ->get(['price', 'appointment_start'])
-                ->groupBy(function ($item) {
-                    return Carbon::parse($item->appointment_start)->format('Y-m');
-                })
-                ->map(function ($group, $month) {
-                    $formattedMonth = Carbon::parse($month)->locale('et')->isoFormat('MMMM YYYY');
-                    return [
-                        'month' => ucfirst($formattedMonth),
-                        'total_price' => $group->sum('price'),
-                        'appointments_count' => $group->count()
-                    ];
-                })
-                ->take(12)
-                ->values();
-            
+                $userId = Auth::user()->id;
+
+                $myData = Appointments::where('user_id', $userId)
+                    ->orderByDesc('appointment_start')
+                    ->get(['price', 'appointment_start'])
+                    ->groupBy(function ($item) {
+                        return Carbon::parse($item->appointment_start)->format('Y-m');
+                    })
+                    ->map(function ($group, $month) {
+                        return [
+                            'month' => ucfirst(Carbon::parse($month)->locale('et')->isoFormat('MMMM YYYY')),
+                            'total_price' => $group->sum('price'),
+                            'appointments_count' => $group->count()
+                        ];
+                    })
+                    ->take(12)->values();
+
+                $allData = Appointments::orderByDesc('appointment_start')
+                    ->get(['price', 'appointment_start'])
+                    ->groupBy(function ($item) {
+                        return Carbon::parse($item->appointment_start)->format('Y-m');
+                    })
+                    ->map(function ($group, $month) {
+                        return [
+                            'month' => ucfirst(Carbon::parse($month)->locale('et')->isoFormat('MMMM YYYY')),
+                            'total_price' => $group->sum('price'),
+                            'appointments_count' => $group->count()
+                        ];
+                    })
+                    ->take(12)->values();
+
                 return [
-                    'labels' => $salesChartByMonth->pluck('month'),
-                    'data' => $salesChartByMonth->pluck('total_price'),
-                    'counts' => $salesChartByMonth->pluck('appointments_count'),
+                    'labels' => $myData->pluck('month'),
+                    'data' => $myData->pluck('total_price'),
+                    'counts' => $myData->pluck('appointments_count'),
+                    'all_labels' => $allData->pluck('month'),
+                    'all_data' => $allData->pluck('total_price'),
+                    'all_counts' => $allData->pluck('appointments_count'),
                 ];
             }
             function getEvents(){
@@ -176,8 +232,39 @@ class DashboardService
                     $redDay->organized_by = null;
                     return $redDay;
                 });
+                $combined = $events->merge($birthdays)->merge($redDays)->unique('id');
+                // Все события для администратора
+                $allEvents = Events::where(function ($query) use ($today) {
+                    $query->whereDate('date', $today->toDateString())
+                        ->orWhere(function ($q) use ($today) {
+                            $q->where('repeat', 1)
+                                ->whereMonth('date', $today->month)
+                                ->whereDay('date', $today->day);
+                        });
+                })->get()->map(function ($event) {
+                    $event->type = 'event';
+                    return $event;
+                });
 
-                return $events->merge($birthdays)->merge($redDays)->unique('id');
+                $allRedDays = RedDay::where(function ($query) use ($today) {
+                    $query->whereDate('date', $today->toDateString())
+                        ->orWhere(function ($q) use ($today) {
+                            $q->where('repeat', 1)
+                                ->whereMonth('date', $today->month)
+                                ->whereDay('date', $today->day);
+                        });
+                })->get()->map(function ($redDay) {
+                    $redDay->type = 'redday';
+                    $redDay->user_id = null;
+                    $redDay->organized_by = null;
+                    return $redDay;
+                });
+
+                $allCombined = $allEvents->merge($allRedDays)->unique('id');
+                return [
+                    'my' => $combined,
+                    'all' => $allCombined,
+                ];
             }
             function getActivity(){
                 $appointments = Appointments::whereDate('appointment_start', Carbon::now()->toDateString())
