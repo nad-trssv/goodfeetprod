@@ -17,7 +17,7 @@
           </li>
 
           <li class="nav-item">
-            <p class="navbar-vertical-label">Приложения</p>
+            <p class="navbar-vertical-label">Мои записи</p>
             <hr class="navbar-vertical-line" />
             <div class="nav-item-wrapper">
               <a class="nav-link {{ request()->routeIs('calendar.index') ? 'active' : '' }} label-1" href="{{ route('calendar.index') }}" role="button" data-bs-toggle="" aria-expanded="false">

@@ -96,6 +96,9 @@ class AppointmentService
             }
 
             foreach ($redTimes as $item) {
+                if (!$item->start_time || !$item->end_time) {
+                    continue;
+                }
                 $date = $item->date;
                 $dateCarbon = Carbon::parse($date);
                 $start = $dateCarbon->copy()->setTimeFromTimeString($item->start_time);

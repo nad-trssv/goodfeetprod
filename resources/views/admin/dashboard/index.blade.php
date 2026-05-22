@@ -123,48 +123,54 @@
             <div class="card h-100">
               <div class="card-body">
                 <div class="card-title mb-1 d-flex pb-4 border-bottom border-dashed align-items-end">
-                  <h3 class="flex-1 mb-0">События</h3><a class="fw-bold fs-9" href="#!">Все события</a>
+                  <h3 class="flex-1 mb-0">События</h3>
+                  <a class="fw-bold fs-9" href="{{ route('calendarList') }}">Все записи</a>
                 </div>
                 @if ($events->isNotEmpty())
                   @foreach ($events as $event)
-                    <div class="py-3">
+                    <div class="py-3 border-bottom border-dashed">
                       <div class="d-flex flex-between-center">
                         <p class="text-warning fs-10 mb-0 fw-bold mb-1 text-uppercase">
                           @if ($event['start_time'] !== null && $event['end_time'] !== null)
-                            {{ \Carbon\Carbon::parse($event['date'] . ' ' . $event['start_time'])->translatedFormat('D, M d H:i') }} 
-                            - 
-                            {{ \Carbon\Carbon::parse($event['date'] . ' ' . $event['end_time'])->translatedFormat('H:i') }}    
-                            @else
-                            {{ \Carbon\Carbon::parse($event['date'] . ' ' . $event['start_time'])->translatedFormat('D, M d') }}
+                            {{ \Carbon\Carbon::parse($event['date'] . ' ' . $event['start_time'])->translatedFormat('D, M d H:i') }}
+                            - {{ \Carbon\Carbon::parse($event['date'] . ' ' . $event['end_time'])->translatedFormat('H:i') }}
+                          @else
+                            {{ \Carbon\Carbon::parse($event['date'])->translatedFormat('D, M d') }}
                           @endif
                         </p>
                       </div>
-                      <a class="text-primary-hover text-body-highlight fw-bold mb-2 line-clamp-1 me-5 lh-base" href="#!">
-                        @if ($event['type'] === 'redday' )
-                          <i class="far fa-calendar-times text-danger"></i>
-                        @elseif ($event['type'] === 'event' )
-                        <i class="far fa-bell text-success"></i>
-                        @endif
-                        {{ $event['name'] }}
-                      </a>
-                      @if ($event['user_id'])
-                        <p class="text-body-secondary fs-9 mb-2">Именинник: 
-                          <a class="fw-bold text-primary" href="#!">
-                            {{ $event->celebrant->name }}
-                          </a>
+
+                      @if ($event['type'] === 'redday')
+                        <p class="fw-bold mb-1">
+                          <i class="far fa-calendar-times text-danger me-1"></i>
+                          {{ $event['name'] }}
                         </p>
-                      @endif
-                      @if ($event['organized_by'])
-                        <p class="text-body-secondary fs-9 mb-2">Организатор: <a class="fw-bold text-primary" href="#!">{{ $event->organizer->name }}</a></p>
-                      @endif
-                      <p class="fs-10 text-body-tertiary text-opacity-85">{{ $event['description'] }} </p>
-                      @if ($event['start_time'] !== null)
-                        <p class="fs-9 text-body-tertiary fw-bold mb-1"><span class="fa-solid fa-clock text-body-secondary me-1"></span>
-                          {{ $event['start_time'] }} 
-                          @if ($event['end_time'] !== null)
-                            - {{ $event['end_time'] }} 
+                      @elseif ($event['type'] === 'birthday')
+                        <p class="fw-bold mb-1">
+                          <i class="fas fa-birthday-cake text-warning me-1"></i>
+                          {{ $event['name'] }}
+                          @if($event->celebrant)
+                            — @can('is-superadmin')
+                              <a class="text-primary" href="{{ route('member.edit', $event->celebrant->id) }}">{{ $event->celebrant->name }}</a>
+                            @else
+                              <span class="fw-bold text-primary">{{ $event->celebrant->name }}</span>
+                            @endcan
                           @endif
                         </p>
+                      @elseif ($event['type'] === 'event')
+                        <p class="fw-bold mb-1">
+                          <i class="far fa-bell text-success me-1"></i>
+                          {{ $event['name'] }}
+                        </p>
+                        @if ($event['organized_by'] && $event->organizer)
+                          <p class="text-body-secondary fs-9 mb-1">
+                            Организатор: <span class="fw-bold">{{ $event->organizer->name }}</span>
+                          </p>
+                        @endif
+                      @endif
+
+                      @if($event['description'])
+                        <p class="fs-10 text-body-tertiary mb-0">{{ $event['description'] }}</p>
                       @endif
                     </div>
                   @endforeach

@@ -84,10 +84,10 @@
                   <div class="row g-3 align-items-end">
                     <div class="col-md-6">
                       <label class="form-label">Количество дней вперёд для бронирования</label>
-                      <input class="form-control {{ $bookingLimit['active'] == false ? 'bookingLimit_disabled' : '' }}"
-                             type="number" id="bookingLimit_days"
-                             value="{{ $bookingLimit['days'] }}"
-                             {{ $bookingLimit['active'] == false ? 'disabled' : '' }}>
+                      <input class="form-control"
+                            type="number" id="bookingLimit_days"
+                            value="{{ $bookingLimit['days'] }}"
+                            min="1" max="365">
                       <div class="invalid-feedback" id="bookingLimit-error"></div>
                     </div>
                     <div class="col-md-2">

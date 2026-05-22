@@ -7,7 +7,6 @@ use App\Models\Events;
 use App\Models\RedDay;
 use App\Models\Services;
 use App\Models\SiteSettings;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Exception;
@@ -127,35 +126,58 @@ class DashboardService
             }
             function getEvents(){
                 $today = Carbon::now();
+                $userId = Auth::user()->id;
+
+                // События — только свои
                 $events = Events::where(function ($query) use ($today) {
-                    $query->whereDate('date', $today->toDateString()) 
-                          ->orWhere(function ($q) use ($today) {
-                              $q->where('repeat', 1) 
+                    $query->whereDate('date', $today->toDateString())
+                        ->orWhere(function ($q) use ($today) {
+                            $q->where('repeat', 1)
                                 ->whereMonth('date', $today->month)
                                 ->whereDay('date', $today->day);
-                          });
+                        });
                 })->get();
-                $redDays = RedDay::where(function ($query) use ($today) {
-                    $query->whereDate('date', $today->toDateString())
-                    ->orWhere(function ($q) use ($today) {
-                        $q->where('repeat', 1) 
-                          ->whereMonth('date', $today->month)
-                          ->whereDay('date', $today->day);
-                    });
-                })->get();
+
+                // Именинники — все пользователи
+                $birthdays = Events::where('name', 'Sünnipäev')
+                    ->where(function ($q) use ($today) {
+                        $q->whereDate('date', $today->toDateString())
+                        ->orWhere(function ($q2) use ($today) {
+                            $q2->where('repeat', 1)
+                                ->whereMonth('date', $today->month)
+                                ->whereDay('date', $today->day);
+                        });
+                    })->get();
+
+                // Нерабочие дни — только свои + общие
+                $redDays = RedDay::visibleFor($userId)
+                    ->where(function ($query) use ($today) {
+                        $query->whereDate('date', $today->toDateString())
+                        ->orWhere(function ($q) use ($today) {
+                            $q->where('repeat', 1)
+                            ->whereMonth('date', $today->month)
+                            ->whereDay('date', $today->day);
+                        });
+                    })->get();
+
                 $events = $events->map(function ($event) {
                     $event->type = 'event';
                     return $event;
                 });
 
+                $birthdays = $birthdays->map(function ($event) {
+                    $event->type = 'birthday';
+                    return $event;
+                });
+
                 $redDays = $redDays->map(function ($redDay) {
                     $redDay->type = 'redday';
+                    $redDay->user_id = null;
+                    $redDay->organized_by = null;
                     return $redDay;
                 });
 
-                $combined = $events->merge($redDays);
-                
-                return $combined;
+                return $events->merge($birthdays)->merge($redDays)->unique('id');
             }
             function getActivity(){
                 $appointments = Appointments::whereDate('appointment_start', Carbon::now()->toDateString())

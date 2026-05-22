@@ -94,37 +94,33 @@ class User extends Authenticatable
 
     public function lastSeen(): string
     {
-        if ($this->last_active && $this->last_active->diffInMinutes(now()) < 5) {
-            return 'Online';
-        }
-
         if (!$this->last_active) {
             return 'Never active';
         }
+
         if ($this->last_active->isFuture()) {
             return 'Invalid timestamp';
+        }
+
+        if ($this->last_active->diffInMinutes(now()) < 5) {
+            return 'Online';
         }
 
         $diff = abs((int) now()->diffInMinutes($this->last_active));
 
         if ($diff < 60) {
-            return $diff . ' minutes ago';
+            return $diff . ' мин. назад';
         }
 
-        if ($diff > 60 && $diff < 1440) {
+        if ($diff < 1440) {
             $hours = abs((int) now()->diffInHours($this->last_active));
-            return $hours . ' hours ago';
-        }
-        if ($diff > 1440 && $diff < 10080) {
-            $days = abs((int) now()->diffInDays($this->last_active));
-            return $days . ' days ago';
-        }
-        if ($diff > 10080) {
-            $days = abs((int) now()->diffInDays($this->last_active));
-            return $days . ' days ago';
+            return $hours . ' ч. назад';
         }
 
+        $days = abs((int) now()->diffInDays($this->last_active));
+        return $days . ' дн. назад';
     }
+
     public function schedule()
     {
         return $this->hasOne(UserSchedule::class);
