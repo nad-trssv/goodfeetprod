@@ -21,8 +21,12 @@ Route::get('/localization/{lang}', [LanguageController::class, 'change'])->name(
 Route::get('/gf-administraator', [AuthenticatedSessionController::class, 'create'])->name('login');
 Route::post('/gf-administraator', [AuthenticatedSessionController::class, 'store'])->name('login.store');
 
-Route::get('/login', function () { abort(404); });
-Route::post('/login', function () { abort(404); });
+Route::get('/login', function () {
+    abort(404);
+});
+Route::post('/login', function () {
+    abort(404);
+});
 
 Route::resource('/booking', BookingController::class);
 Route::get('/services', [ServiceController::class, 'index'])->name('clientservice');
@@ -82,6 +86,7 @@ Route::middleware([
         Route::get('member/{id}/edit', [MemberController::class, 'edit'])->name('member.edit');
         Route::put('member/{id}', [MemberController::class, 'update'])->name('member.update');
         Route::delete('member/{id}', [MemberController::class, 'destroy'])->name('member.destroy');
+        Route::post('admin/red-days/store', [App\Http\Controllers\Admin\MasterScheduleController::class, 'storeRedDayForMaster'])->name('admin.red-days.store');
 
         Route::resource('settings', SettingsController::class);
         Route::post('settings/updateWorkHours', [SettingsController::class, 'updateWorkHours']);

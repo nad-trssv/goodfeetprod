@@ -49,7 +49,7 @@ class BookingController extends Controller
         $limitDate = Carbon::now()->addDays($days)->format('Y-m-d');
 
         $formattedServices = ServiceResource::collection($services)->toArray(request());
-        
+
         return view('pages.booking.index', [
             'chooseService' => null,
             'services' => $formattedServices,
@@ -73,7 +73,7 @@ class BookingController extends Controller
             return (int) json_decode($siteSettings->payload, true)['days'];
         }
 
-        return 30; 
+        return 30;
     }
 
 
@@ -143,7 +143,8 @@ class BookingController extends Controller
      */
     public function create(Request $request)
     {
-        function getService($id, $chooseDate){
+        function getService($id, $chooseDate)
+        {
             $locale = app()->getLocale();
             $service = Services::with(['users', 'rules', 'futureRules', 'translations'])
                 ->where('id', $id)
@@ -160,19 +161,21 @@ class BookingController extends Controller
             return $service;
         }
 
-        function getDay($date){
+        function getDay($date)
+        {
             $formattedDate = Carbon::parse($date)->isoFormat('dddd D, MMMM');
             return $formattedDate;
         }
-        
+
         $data = $request->all();
         $service = getService($request->service_id, $request->choose_date);
-
+        $master = \App\Models\User::find($request->user_id);
         return view('pages.booking.create', [
             'bookingData' => $data,
             'settings' => $this->getSettings(),
             'service' => $service,
             'choose_date' => getDay($request->choose_date),
+            'master' => $master,
         ]);
     }
 
@@ -198,7 +201,7 @@ class BookingController extends Controller
         $dateTimeStart = Carbon::parse($booking->appointment_start);
         $dateTimeEnd = Carbon::parse($booking->appointment_end);
 
-        $booking->booking_date = $dateTimeStart->format('Y-m-d'); 
+        $booking->booking_date = $dateTimeStart->format('Y-m-d');
         $booking->booking_start = $dateTimeStart->format('H:i');
         $booking->booking_end = $dateTimeEnd->format('H:i');
 
@@ -207,7 +210,7 @@ class BookingController extends Controller
             $service->translation = $service->translations()->where('locale', $locale)->first();
             return $service;
         });
-        
+
         return view('pages.booking.success', [
             'locale' => $locale,
             'services' => $services,
@@ -215,7 +218,6 @@ class BookingController extends Controller
             'translation' => $translation,
             'settings' => $this->getSettings(),
         ]);
-        
     }
 
     /**
@@ -241,20 +243,22 @@ class BookingController extends Controller
     {
         //
     }
-    function getSettings(){
+    function getSettings()
+    {
         $siteSettings = SiteSettings::where('group', 'company')->get();
         if ($siteSettings) {
             $formattedSettings = $siteSettings->pluck('payload', 'key')->map(function ($value) {
                 return trim($value, '"');
             })->toArray();
-    
+
             return $formattedSettings;
         }
-    
+
         return [];
     }
-    
-    function getWorkHours(){
+
+    function getWorkHours()
+    {
         // Возвращаем пустой массив — выходные дни определяются
         // индивидуально для каждого мастера через getBusyDays
         return [];

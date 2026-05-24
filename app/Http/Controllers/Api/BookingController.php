@@ -23,25 +23,29 @@ class BookingController extends Controller
         $this->bookedService = $bookedService;
     }
 
-    public function getFullyBooked(getFullyBookedRequest $request) 
+    public function getFullyBooked(getFullyBookedRequest $request)
     {
         $data = $this->bookedService->getList($request);
         return $data['slots'];
     }
-    
-    public function getBusyDays(getFullyBookedRequest $request) 
+
+    public function getBusyDays(getFullyBookedRequest $request)
     {
         $data = $this->bookedService->getBusyDays($request);
         return $data;
     }
 
-    public function sendEmail($email, $service_name, $client_name, $client_email, $client_phone, $mastername, $booking_date, $booking_start, $booking_end, $company_address, $price_can_change, $company_phone, $company_email, $price){
+    public function sendEmail($email, $service_name, $client_name, $client_email, $client_phone, $mastername, $booking_date, $booking_start, $booking_end, $company_address, $price_can_change, $company_phone, $company_email, $price)
+    {
         Mail::to($email)->send(new BookingMail($email, $service_name, $mastername, $booking_date, $booking_start, $booking_end, $company_address, $price_can_change, $company_phone, $company_email, $price));
-        Mail::to('goodfeet.ee@gmail.com')->send(new BookingAdminMail($email, $service_name, $client_name, $client_email, $client_phone, $mastername, $booking_date, $booking_start, $booking_end, $company_address, $price_can_change, $company_phone, $company_email, $price));
+
+        $masterEmail = Appointments::find($appointmentId)->user->email;
+        Mail::to($masterEmail)->send(new BookingAdminMail($email, $service_name, $client_name, $client_email, $client_phone, $mastername, $booking_date, $booking_start, $booking_end, $company_address, $price_can_change, $company_phone, $company_email, $price));
+        //Mail::to('goodfeet.ee@gmail.com')->send(new BookingAdminMail($email, $service_name, $client_name, $client_email, $client_phone, $mastername, $booking_date, $booking_start, $booking_end, $company_address, $price_can_change, $company_phone, $company_email, $price));
         return true;
     }
 
-    public function storeBooking(BookingRequest $request) 
+    public function storeBooking(BookingRequest $request)
     {
         $response = $this->bookedService->store($request);
         $data = $response->getData(true);
@@ -70,7 +74,7 @@ class BookingController extends Controller
             $company_email = $settings['company_email'];
             $price = $effectivePrice;
             $service_name = $service->translation ? $service->translation['name'] : $service->name;
-            
+
             $this->sendEmail(
                 $email,
                 $service_name,
@@ -100,16 +104,17 @@ class BookingController extends Controller
         }
     }
 
-    function getSettings(){
+    function getSettings()
+    {
         $siteSettings = SiteSettings::where('group', 'company')->get();
         if ($siteSettings) {
             $formattedSettings = $siteSettings->pluck('payload', 'key')->map(function ($value) {
                 return trim($value, '"');
             })->toArray();
-    
+
             return $formattedSettings;
         }
-    
+
         return [];
     }
 }

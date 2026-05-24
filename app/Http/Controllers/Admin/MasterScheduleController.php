@@ -126,7 +126,7 @@ class MasterScheduleController extends Controller
 
         return response()->json(['status' => 'success']);
     }
-    
+
     public function destroyRedDay(string $id)
     {
         $user = Auth::user();
@@ -184,6 +184,45 @@ class MasterScheduleController extends Controller
 
         return view('admin.red-days.index', [
             'redDays' => $redDays,
+        ]);
+    }
+    public function storeRedDayForMaster(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string',
+            'date' => 'required|date',
+            'user_id' => 'nullable|exists:users,id',
+            'full_day' => 'required|boolean',
+            'start_time' => 'nullable|date_format:H:i',
+            'end_time' => 'nullable|date_format:H:i',
+            'repeat' => 'required|boolean',
+        ]);
+
+        $redDay = RedDay::create([
+            'name' => $request->name,
+            'date' => $request->date,
+            'user_id' => $request->user_id ?: null,
+            'full_day' => $request->full_day,
+            'start_time' => $request->full_day ? null : $request->start_time,
+            'end_time' => $request->full_day ? null : $request->end_time,
+            'repeat' => $request->repeat,
+        ]);
+
+        $redDay->load('user');
+
+        return response()->json([
+            'status' => 'success',
+            'redDay' => [
+                'id' => $redDay->id,
+                'name' => $redDay->name,
+                'date' => \Carbon\Carbon::parse($redDay->date)->format('Y-m-d'),
+                'full_day' => $redDay->full_day,
+                'start_time' => $redDay->start_time,
+                'end_time' => $redDay->end_time,
+                'repeat' => $redDay->repeat,
+                'user_id' => $redDay->user_id,
+                'master_name' => $redDay->user ? $redDay->user->name : 'Общий',
+            ]
         ]);
     }
 }
