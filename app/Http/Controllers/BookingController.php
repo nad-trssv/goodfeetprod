@@ -217,6 +217,7 @@ class BookingController extends Controller
             'appointment' => $booking,
             'translation' => $translation,
             'settings' => $this->getSettings(),
+            'master' => $booking->user,
         ]);
     }
 

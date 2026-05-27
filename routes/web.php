@@ -74,6 +74,11 @@ Route::middleware([
     Route::post('master/services/{service}/toggle', [App\Http\Controllers\Admin\MasterServiceController::class, 'toggle'])->name('master.service.toggle');
     Route::get('master/services', [App\Http\Controllers\Admin\MasterServiceController::class, 'index'])->name('master.services.index');
 
+    Route::get('master/time-off', [App\Http\Controllers\Admin\MasterScheduleController::class, 'timeOff'])->name('master.time-off.index');
+    Route::post('master/time-off/store', [App\Http\Controllers\Admin\MasterScheduleController::class, 'storeTimeOff'])->name('master.time-off.store');
+    Route::post('master/time-off/{id}/update', [App\Http\Controllers\Admin\MasterScheduleController::class, 'updateTimeOff'])->name('master.time-off.update');
+    Route::post('master/time-off/{id}/destroy', [App\Http\Controllers\Admin\MasterScheduleController::class, 'destroyTimeOff'])->name('master.time-off.destroy');
+
     // Только для администратора (super-admin)
     Route::middleware('super-admin')->group(function () {
         Route::resource('calendarAllMasters', AppointmentControllerAllMasters::class);
@@ -97,5 +102,7 @@ Route::middleware([
 
         Route::get('admin/red-days', [App\Http\Controllers\Admin\MasterScheduleController::class, 'allRedDays'])->name('admin.red-days.index');
         Route::get('admin/masters/schedule', [MemberController::class, 'allSchedules'])->name('admin.masters.schedule');
+        Route::post('admin/red-days/{id}/update', [App\Http\Controllers\Admin\MasterScheduleController::class, 'updateRedDayForMaster'])->name('admin.red-days.update');
+        Route::post('admin/red-days/{id}/destroy', [App\Http\Controllers\Admin\MasterScheduleController::class, 'destroyRedDayForMaster'])->name('admin.red-days.destroy');
     });
 });

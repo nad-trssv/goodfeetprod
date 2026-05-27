@@ -35,13 +35,11 @@ class BookingController extends Controller
         return $data;
     }
 
-    public function sendEmail($email, $service_name, $client_name, $client_email, $client_phone, $mastername, $booking_date, $booking_start, $booking_end, $company_address, $price_can_change, $company_phone, $company_email, $price)
+    public function sendEmail($email, $service_name, $client_name, $client_email, $client_phone, $mastername, $booking_date, $booking_start, $booking_end, $company_address, $price_can_change, $master_phone, $master_email, $price)
     {
-        Mail::to($email)->send(new BookingMail($email, $service_name, $mastername, $booking_date, $booking_start, $booking_end, $company_address, $price_can_change, $company_phone, $company_email, $price));
+        Mail::to($email)->send(new BookingMail($email, $service_name, $mastername, $booking_date, $booking_start, $booking_end, $company_address, $price_can_change, $master_phone, $master_email, $price));
 
-        $masterEmail = Appointments::find($appointmentId)->user->email;
-        Mail::to($masterEmail)->send(new BookingAdminMail($email, $service_name, $client_name, $client_email, $client_phone, $mastername, $booking_date, $booking_start, $booking_end, $company_address, $price_can_change, $company_phone, $company_email, $price));
-        //Mail::to('goodfeet.ee@gmail.com')->send(new BookingAdminMail($email, $service_name, $client_name, $client_email, $client_phone, $mastername, $booking_date, $booking_start, $booking_end, $company_address, $price_can_change, $company_phone, $company_email, $price));
+        Mail::to($master_email)->send(new BookingAdminMail($email, $service_name, $client_name, $client_email, $client_phone, $mastername, $booking_date, $booking_start, $booking_end, $company_address, $price_can_change, $master_phone, $master_email, $price));
         return true;
     }
 
@@ -70,10 +68,10 @@ class BookingController extends Controller
             $booking_end = $request->appointment_end;
             $company_address = $settings['company_address'];
             $price_can_change = $service['price_can_change'];
-            $company_phone = $settings['company_phone'];
-            $company_email = $settings['company_email'];
             $price = $effectivePrice;
             $service_name = $service->translation ? $service->translation['name'] : $service->name;
+            $masterEmail = Appointments::find($appointmentId)->user->email;
+            $masterPhone = Appointments::find($appointmentId)->user->phone;
 
             $this->sendEmail(
                 $email,
@@ -87,8 +85,8 @@ class BookingController extends Controller
                 $booking_end,
                 $company_address,
                 $price_can_change,
-                $company_phone,
-                $company_email,
+                $masterPhone,
+                $masterEmail,
                 $price
             );
 

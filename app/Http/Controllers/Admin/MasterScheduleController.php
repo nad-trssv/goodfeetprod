@@ -82,19 +82,31 @@ class MasterScheduleController extends Controller
         $request->validate([
             'name' => 'required|string',
             'date' => 'required|date_format:Y-m-d',
-            'start_time' => 'nullable|date_format:H:i',
-            'end_time' => 'nullable|date_format:H:i|required_with:start_time|after:start_time',
+            'start_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
+            'end_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
             'repeat' => 'required|boolean',
         ]);
 
-        $fullDay = !$request->start_time || !$request->end_time;
+        $startTime = $request->start_time ? substr($request->start_time, 0, 5) : null;
+        $endTime = $request->end_time ? substr($request->end_time, 0, 5) : null;
+
+        if ($startTime && $endTime) {
+            if (strtotime($endTime) <= strtotime($startTime)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Время окончания должно быть позже времени начала'
+                ], 422);
+            }
+        }
+
+        $fullDay = !$startTime || !$endTime;
 
         $redDay = RedDay::create([
             'name' => $request->name,
             'date' => $request->date,
             'description' => $request->description,
-            'start_time' => $request->start_time,
-            'end_time' => $request->end_time,
+            'start_time' => $fullDay ? null : $startTime,
+            'end_time' => $fullDay ? null : $endTime,
             'full_day' => $fullDay,
             'repeat' => $request->repeat,
             'user_id' => $user->id,
@@ -144,18 +156,30 @@ class MasterScheduleController extends Controller
         $request->validate([
             'name' => 'required|string',
             'date' => 'required|date_format:Y-m-d',
-            'start_time' => 'nullable|date_format:H:i',
-            'end_time' => 'nullable|date_format:H:i|after:start_time',
+            'start_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
+            'end_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
             'repeat' => 'required|boolean',
         ]);
 
-        $fullDay = !$request->start_time || !$request->end_time;
+        $startTime = $request->start_time ? substr($request->start_time, 0, 5) : null;
+        $endTime = $request->end_time ? substr($request->end_time, 0, 5) : null;
+
+        if ($startTime && $endTime) {
+            if (strtotime($endTime) <= strtotime($startTime)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Время окончания должно быть позже времени начала'
+                ], 422);
+            }
+        }
+
+        $fullDay = !$startTime || !$endTime;
 
         $redDay->update([
             'name' => $request->name,
             'date' => $request->date,
-            'start_time' => $fullDay ? null : $request->start_time,
-            'end_time' => $fullDay ? null : $request->end_time,
+            'start_time' => $fullDay ? null : $startTime,
+            'end_time' => $fullDay ? null : $endTime,
             'full_day' => $fullDay,
             'repeat' => $request->repeat,
         ]);
@@ -163,7 +187,7 @@ class MasterScheduleController extends Controller
         return response()->json(['status' => 'success', 'redDay' => $redDay->fresh()]);
     }
 
-    public function allRedDays()
+    public function allRedDays(Request $request)
     {
         $redDays = RedDay::with('user')
             ->orderByDesc('date')
@@ -173,8 +197,8 @@ class MasterScheduleController extends Controller
                     'id' => $day->id,
                     'name' => $day->name,
                     'date' => \Carbon\Carbon::parse($day->date)->format('Y-m-d'),
-                    'start_time' => $day->start_time,
-                    'end_time' => $day->end_time,
+                    'start_time' => $day->start_time ? substr($day->start_time, 0, 5) : null,
+                    'end_time' => $day->end_time ? substr($day->end_time, 0, 5) : null,
                     'full_day' => $day->full_day,
                     'repeat' => $day->repeat,
                     'master_name' => $day->user ? $day->user->name : 'Общий',
@@ -192,37 +216,222 @@ class MasterScheduleController extends Controller
             'name' => 'required|string',
             'date' => 'required|date',
             'user_id' => 'nullable|exists:users,id',
-            'full_day' => 'required|boolean',
-            'start_time' => 'nullable|date_format:H:i',
-            'end_time' => 'nullable|date_format:H:i',
-            'repeat' => 'required|boolean',
+            'full_day' => 'nullable|boolean',
+            'start_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
+            'end_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
+            'repeat' => 'nullable|boolean',
+        ], [
+            'name.required' => 'Заполните название',
+            'date.required' => 'Заполните дату',
         ]);
 
-        $redDay = RedDay::create([
+        $fullDay = $request->has('full_day') && $request->full_day == '1';
+        $startTime = $request->start_time ? substr($request->start_time, 0, 5) : null;
+        $endTime = $request->end_time ? substr($request->end_time, 0, 5) : null;
+
+        if (!$fullDay) {
+            if (!$startTime || !$endTime) {
+                return redirect()->route('admin.red-days.index')
+                    ->with('error', 'Укажите время начала и конца');
+            }
+            if (strtotime($endTime) <= strtotime($startTime)) {
+                return redirect()->route('admin.red-days.index')
+                    ->with('error', 'Время окончания должно быть позже времени начала');
+            }
+        }
+
+        RedDay::create([
             'name' => $request->name,
             'date' => $request->date,
             'user_id' => $request->user_id ?: null,
-            'full_day' => $request->full_day,
-            'start_time' => $request->full_day ? null : $request->start_time,
-            'end_time' => $request->full_day ? null : $request->end_time,
-            'repeat' => $request->repeat,
+            'full_day' => $fullDay,
+            'start_time' => $fullDay ? null : $startTime,
+            'end_time' => $fullDay ? null : $endTime,
+            'repeat' => $request->has('repeat') ? 1 : 0,
         ]);
 
-        $redDay->load('user');
+        return redirect()->route('admin.red-days.index')
+            ->with('success', 'Запись добавлена!');
+    }
+    public function timeOff(Request $request)
+    {
+        $user = Auth::user();
+        $redDays = RedDay::where(function ($query) use ($user) {
+            $query->where('user_id', $user->id)
+                ->orWhereNull('user_id');
+        })->orderByDesc('date')->get();
 
-        return response()->json([
-            'status' => 'success',
-            'redDay' => [
-                'id' => $redDay->id,
-                'name' => $redDay->name,
-                'date' => \Carbon\Carbon::parse($redDay->date)->format('Y-m-d'),
-                'full_day' => $redDay->full_day,
-                'start_time' => $redDay->start_time,
-                'end_time' => $redDay->end_time,
-                'repeat' => $redDay->repeat,
-                'user_id' => $redDay->user_id,
-                'master_name' => $redDay->user ? $redDay->user->name : 'Общий',
-            ]
+        $success = session('success');
+        $error = session('error');
+        $editId = $request->query('edit');
+        $editDay = $editId ? RedDay::find($editId) : null;
+
+        return view('admin.master.time-off', [
+            'redDays' => $redDays,
+            'user' => $user,
+            'success' => $success,
+            'error' => $error,
+            'editDay' => $editDay,
         ]);
+    }
+
+    public function storeTimeOff(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'name' => 'required|string',
+            'date' => 'required|date',
+            'full_day' => 'nullable|boolean',
+            'start_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
+            'end_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
+            'repeat' => 'nullable|boolean',
+        ], [
+            'name.required' => 'Заполните название',
+            'date.required' => 'Заполните дату',
+        ]);
+
+        $fullDay = $request->has('full_day') && $request->full_day == '1';
+        $startTime = $request->start_time ? substr($request->start_time, 0, 5) : null;
+        $endTime = $request->end_time ? substr($request->end_time, 0, 5) : null;
+
+        if (!$fullDay) {
+            if (!$startTime || !$endTime) {
+                return redirect()->route('master.time-off.index')
+                    ->with('error', 'Укажите время начала и конца');
+            }
+            if (strtotime($endTime) <= strtotime($startTime)) {
+                return redirect()->route('master.time-off.index')
+                    ->with('error', 'Время окончания должно быть позже времени начала');
+            }
+        }
+
+        RedDay::create([
+            'name' => $request->name,
+            'date' => $request->date,
+            'user_id' => $user->id,
+            'full_day' => $fullDay,
+            'start_time' => $fullDay ? null : $startTime,
+            'end_time' => $fullDay ? null : $endTime,
+            'repeat' => $request->has('repeat') ? 1 : 0,
+        ]);
+
+        return redirect()->route('master.time-off.index')
+            ->with('success', 'Запись добавлена!');
+    }
+
+    public function updateTimeOff(Request $request, string $id)
+    {
+        $user = Auth::user();
+        if ($user->role_id == 1) {
+            $redDay = RedDay::where('id', $id)->firstOrFail();
+        } else {
+            $redDay = RedDay::where('id', $id)->where('user_id', $user->id)->firstOrFail();
+        }
+
+        $request->validate([
+            'name' => 'required|string',
+            'date' => 'required|date',
+            'full_day' => 'nullable|boolean',
+            'start_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
+            'end_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
+            'repeat' => 'nullable|boolean',
+        ], [
+            'name.required' => 'Заполните название',
+            'date.required' => 'Заполните дату',
+        ]);
+
+        $fullDay = $request->has('full_day') && $request->full_day == '1';
+        $startTime = $request->start_time ? substr($request->start_time, 0, 5) : null;
+        $endTime = $request->end_time ? substr($request->end_time, 0, 5) : null;
+
+        if (!$fullDay) {
+            if (!$startTime || !$endTime) {
+                return redirect()->route('master.time-off.index')
+                    ->with('error', 'Укажите время начала и конца');
+            }
+            if (strtotime($endTime) <= strtotime($startTime)) {
+                return redirect()->route('master.time-off.index')
+                    ->with('error', 'Время окончания должно быть позже времени начала');
+            }
+        }
+
+        $redDay->update([
+            'name' => $request->name,
+            'date' => $request->date,
+            'full_day' => $fullDay,
+            'start_time' => $fullDay ? null : $startTime,
+            'end_time' => $fullDay ? null : $endTime,
+            'repeat' => $request->has('repeat') ? 1 : 0,
+        ]);
+
+        return redirect()->route('master.time-off.index')
+            ->with('success', 'Запись обновлена!');
+    }
+
+    public function destroyTimeOff(string $id)
+    {
+        $user = Auth::user();
+        if ($user->role_id == 1) {
+            $redDay = RedDay::where('id', $id)->firstOrFail();
+        } else {
+            $redDay = RedDay::where('id', $id)->where('user_id', $user->id)->firstOrFail();
+        }
+        $redDay->delete();
+
+        return redirect()->route('master.time-off.index')
+            ->with('success', 'Запись удалена!');
+    }
+    public function updateRedDayForMaster(Request $request, string $id)
+    {
+        $redDay = RedDay::findOrFail($id);
+
+        $request->validate([
+            'name' => 'required|string',
+            'date' => 'required|date',
+            'full_day' => 'nullable|boolean',
+            'start_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
+            'end_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
+            'repeat' => 'nullable|boolean',
+        ], [
+            'name.required' => 'Заполните название',
+            'date.required' => 'Заполните дату',
+        ]);
+
+        $fullDay = $request->has('full_day') && $request->full_day == '1';
+        $startTime = $request->start_time ? substr($request->start_time, 0, 5) : null;
+        $endTime = $request->end_time ? substr($request->end_time, 0, 5) : null;
+
+        if (!$fullDay) {
+            if (!$startTime || !$endTime) {
+                return redirect()->route('admin.red-days.index')
+                    ->with('error', 'Укажите время начала и конца');
+            }
+            if (strtotime($endTime) <= strtotime($startTime)) {
+                return redirect()->route('admin.red-days.index')
+                    ->with('error', 'Время окончания должно быть позже времени начала');
+            }
+        }
+
+        $redDay->update([
+            'name' => $request->name,
+            'date' => $request->date,
+            'full_day' => $fullDay,
+            'start_time' => $fullDay ? null : $startTime,
+            'end_time' => $fullDay ? null : $endTime,
+            'repeat' => $request->has('repeat') ? 1 : 0,
+        ]);
+
+        return redirect()->route('admin.red-days.index')
+            ->with('success', 'Запись обновлена!');
+    }
+
+    public function destroyRedDayForMaster(string $id)
+    {
+        $redDay = RedDay::findOrFail($id);
+        $redDay->delete();
+
+        return redirect()->route('admin.red-days.index')
+            ->with('success', 'Запись удалена!');
     }
 }

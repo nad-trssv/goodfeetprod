@@ -103,7 +103,7 @@
                                     <li class="nav-item"><a class="nav-link"
                                             href="{{ route('admin.masters.schedule') }}">
                                             <div class="d-flex align-items-center">
-                                                <span class="nav-link-text">Расписание</span>
+                                                <span class="nav-link-text">Расписание мастеров</span>
                                             </div>
                                         </a>
                                     </li>
@@ -158,8 +158,8 @@
                                 href="{{ route('admin.red-days.index') }}" role="button">
                                 <div class="d-flex align-items-center">
                                     <span class="nav-link-icon"><span class="fas fa-calendar-times"></span></span>
-                                    <span class="nav-link-text-wrapper"><span class="nav-link-text">Нерабочее
-                                            время</span></span>
+                                    <span class="nav-link-text-wrapper"><span class="nav-link-text">Закрытые
+                                            окна</span></span>
                                 </div>
                             </a>
                         </div>
@@ -171,6 +171,15 @@
                                 <span class="nav-link-icon"><span class="fas fa-clipboard-list"></span></span>
                                 <span class="nav-link-text-wrapper"><span class="nav-link-text">Мои
                                         услуги</span></span>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="nav-item-wrapper">
+                        <a class="nav-link {{ request()->routeIs('master.time-off.index') ? 'active' : '' }} label-1"
+                            href="{{ route('master.time-off.index') }}" role="button">
+                            <div class="d-flex align-items-center">
+                                <span class="nav-link-icon"><span class="fas fa-calendar-times"></span></span>
+                                <span class="nav-link-text-wrapper"><span class="nav-link-text">Мои закрытые окна</span></span>
                             </div>
                         </a>
                     </div>
