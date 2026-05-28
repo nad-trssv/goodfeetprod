@@ -10,7 +10,7 @@
 
         <div class="row mb-4 align-items-center">
             <div class="col">
-                <h2 class="mb-0">Записи мастеров</h2>
+                <h2 class="mb-0">Нагрузка мастеров</h2>
                 <p class="text-muted fs-9 mt-1">
                     {{ $today->locale('ru')->isoFormat('dddd, D MMMM YYYY') }}
                 </p>

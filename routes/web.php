@@ -41,8 +41,6 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
-
-    // Доступно всем (admin + master)
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('calendar', AppointmentController::class);
@@ -107,5 +105,7 @@ Route::middleware([
 
         Route::get('admin/masters/today', [App\Http\Controllers\Admin\MasterScheduleController::class, 'mastersToday'])->name('admin.masters.today');
         Route::get('admin/masters/day/{date}', [App\Http\Controllers\Admin\MasterScheduleController::class, 'mastersToday'])->name('admin.masters.day');
+
+        Route::get('admin/appointments', [App\Http\Controllers\Admin\AppointmentController::class, 'allAppointments'])->name('admin.appointments.index');
     });
 });
