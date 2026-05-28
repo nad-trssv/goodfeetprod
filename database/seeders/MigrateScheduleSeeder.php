@@ -55,9 +55,12 @@ class MigrateScheduleSeeder extends Seeder
             $this->command->info('Расписание для user_id=1 создано.');
         }
 
-        // 3. Общие red_days (user_id IS NULL) оставляем как есть — они видны всем
-        $commonCount = DB::table('red_days')->whereNull('user_id')->count();
-        $this->command->info("Общих нерабочих дней (user_id=NULL): {$commonCount} — оставляем как есть.");
+        // 3. Переносим общие red_days на user_id=1
+        $updated = DB::table('red_days')
+            ->whereNull('user_id')
+            ->update(['user_id' => 1, 'updated_at' => now()]);
+
+        $this->command->info("Перенесено нерабочих дней на user_id=1: {$updated}");
 
         // 4. Проверяем есть ли уже расписание у user_id=1
         $userSchedule = DB::table('user_schedules')->where('user_id', 1)->first();
