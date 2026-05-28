@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Appointments;
 use App\Models\RedDay;
 use App\Models\SiteSettings;
+use App\Models\User;
 use App\Models\UserSchedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -433,5 +435,87 @@ class MasterScheduleController extends Controller
 
         return redirect()->route('admin.red-days.index')
             ->with('success', 'Запись удалена!');
+    }
+    public function mastersToday(Request $request, $date = null)
+    {
+        $today = $date ? \Carbon\Carbon::parse($date) : \Carbon\Carbon::now();
+        $todayStr = $today->format('Y-m-d');
+        $dayOfWeek = strtolower($today->format('l'));
+
+        $masters = User::with(['schedule', 'services'])
+            ->whereIn('role_id', [1, 2])
+            ->orderBy('name')
+            ->get()
+            ->map(function ($master) use ($today, $todayStr, $dayOfWeek) {
+
+                $schedule = $master->schedule;
+
+                // Рабочие часы сегодня
+                $workStart = $schedule ? $schedule->{$dayOfWeek . '_start'} : null;
+                $workEnd = $schedule ? $schedule->{$dayOfWeek . '_end'} : null;
+
+                // Обед
+                $lunchStart = $schedule ? $schedule->lunch_start : null;
+                $lunchEnd = $schedule ? $schedule->lunch_end : null;
+
+                // Статус дня
+                $isFullDayClosed = RedDay::where('full_day', 1)
+                    ->visibleFor($master->id)
+                    ->where(function ($q) use ($today, $todayStr) {
+                        $q->whereDate('date', $todayStr)
+                            ->orWhere(function ($q2) use ($today) {
+                                $q2->where('repeat', 1)
+                                    ->whereMonth('date', $today->month)
+                                    ->whereDay('date', $today->day);
+                            });
+                    })->exists();
+
+                // Закрытые окна сегодня
+                $closedWindows = RedDay::where('full_day', 0)
+                    ->visibleFor($master->id)
+                    ->where(function ($q) use ($today, $todayStr) {
+                        $q->whereDate('date', $todayStr)
+                            ->orWhere(function ($q2) use ($today) {
+                                $q2->where('repeat', 1)
+                                    ->whereMonth('date', $today->month)
+                                    ->whereDay('date', $today->day);
+                            });
+                    })->get();
+
+                // Записи сегодня
+                $appointments = Appointments::with('service')
+                    ->where('user_id', $master->id)
+                    ->whereDate('appointment_start', $todayStr)
+                    ->orderBy('appointment_start')
+                    ->get();
+
+                // Определяем статус
+                if ($isFullDayClosed) {
+                    $status = 'closed';
+                } elseif (!$workStart || !$workEnd) {
+                    $status = 'dayoff';
+                } else {
+                    $status = 'working';
+                }
+
+                return [
+                    'id' => $master->id,
+                    'name' => $master->name,
+                    'photo' => $master->profile_photo_url,
+                    'last_active' => $master->last_active,
+                    'status' => $status,
+                    'work_start' => $workStart ? substr($workStart, 0, 5) : null,
+                    'work_end' => $workEnd ? substr($workEnd, 0, 5) : null,
+                    'lunch_start' => $lunchStart ? substr($lunchStart, 0, 5) : null,
+                    'lunch_end' => $lunchEnd ? substr($lunchEnd, 0, 5) : null,
+                    'appointments' => $appointments,
+                    'closed_windows' => $closedWindows,
+                ];
+            });
+
+        return view('admin.master.today', [
+            'masters' => $masters,
+            'today' => $today,
+        ]);
     }
 }

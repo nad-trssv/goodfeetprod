@@ -110,6 +110,18 @@
                                 </ul>
                             </div>
                         </div>
+                        @can('is-superadmin')
+                            <div class="nav-item-wrapper">
+                                <a class="nav-link {{ request()->routeIs('admin.masters.today') ? 'active' : '' }} label-1"
+                                    href="{{ route('admin.masters.today') }}" role="button">
+                                    <div class="d-flex align-items-center">
+                                        <span class="nav-link-icon"><span class="fas fa-users-clock"></span></span>
+                                        <span class="nav-link-text-wrapper"><span class="nav-link-text">Записи
+                                                мастеров</span></span>
+                                    </div>
+                                </a>
+                            </div>
+                        @endcan
                     @endcan
 
                 </li>
@@ -179,7 +191,8 @@
                             href="{{ route('master.time-off.index') }}" role="button">
                             <div class="d-flex align-items-center">
                                 <span class="nav-link-icon"><span class="fas fa-calendar-times"></span></span>
-                                <span class="nav-link-text-wrapper"><span class="nav-link-text">Мои закрытые окна</span></span>
+                                <span class="nav-link-text-wrapper"><span class="nav-link-text">Мои закрытые
+                                        окна</span></span>
                             </div>
                         </a>
                     </div>

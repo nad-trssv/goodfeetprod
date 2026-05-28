@@ -104,5 +104,8 @@ Route::middleware([
         Route::get('admin/masters/schedule', [MemberController::class, 'allSchedules'])->name('admin.masters.schedule');
         Route::post('admin/red-days/{id}/update', [App\Http\Controllers\Admin\MasterScheduleController::class, 'updateRedDayForMaster'])->name('admin.red-days.update');
         Route::post('admin/red-days/{id}/destroy', [App\Http\Controllers\Admin\MasterScheduleController::class, 'destroyRedDayForMaster'])->name('admin.red-days.destroy');
+
+        Route::get('admin/masters/today', [App\Http\Controllers\Admin\MasterScheduleController::class, 'mastersToday'])->name('admin.masters.today');
+        Route::get('admin/masters/day/{date}', [App\Http\Controllers\Admin\MasterScheduleController::class, 'mastersToday'])->name('admin.masters.day');
     });
 });
