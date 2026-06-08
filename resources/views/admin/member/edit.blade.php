@@ -74,6 +74,11 @@
                   <span class="fas fa-clock me-1"></span>Расписание
                 </a>
               </li>
+              <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#tab-notifications">
+                  <span class="fas fa-bell me-1"></span>Уведомления
+                </a>
+              </li>
             </ul>
           </div>
           <div class="card-body">
@@ -215,6 +220,57 @@
                            value="{{ $schedule ? $schedule->lunch_end : '' }}">
                   </div>
                 </div>
+              </div>
+
+              {{-- Таб 4: Уведомления --}}
+              <div class="tab-pane fade" id="tab-notifications">
+                <h6 class="mb-1">Уведомления о записях</h6>
+                <p class="text-muted fs-9 mb-3">Выберите кому будут приходить письма когда клиент записывается к <strong>{{ $member->name }}</strong></p>
+
+                <form method="POST" action="{{ route('member.notification-recipients.update', $member->id) }}">
+                  @csrf
+                  @php $currentRecipientIds = $member->notificationRecipientsUsers->pluck('id')->toArray(); @endphp
+
+                  @if(count($currentRecipientIds) === 0)
+                    @php $currentRecipientIds = [$member->id]; @endphp
+                  @endif
+
+                  <div class="row g-2">
+                    @foreach($admins as $admin)
+                    <div class="col-12">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox"
+                          name="recipients[]"
+                          value="{{ $admin->id }}"
+                          id="recipient_{{ $admin->id }}"
+                          {{ in_array($admin->id, $currentRecipientIds) ? 'checked' : '' }}
+                          {{ $admin->id == $member->id ? 'disabled checked' : '' }}>
+                        <label class="form-check-label d-flex align-items-center gap-2" for="recipient_{{ $admin->id }}">
+                          <img src="{{ $admin->profile_photo_url }}" class="rounded-circle" style="width:24px;height:24px;object-fit:cover">
+                          <span>{{ $admin->name }}</span>
+                          @if($admin->id == $member->id)
+                            <span class="badge bg-primary fs-10">Сам мастер</span>
+                          @endif
+                          <span class="text-muted fs-10">{{ $admin->email }}</span>
+                        </label>
+                      </div>
+                    </div>
+                    @endforeach
+                  </div>
+
+                  {{-- Скрытое поле для самого мастера (disabled чекбоксы не отправляются) --}}
+                  <input type="hidden" name="recipients[]" value="{{ $member->id }}">
+
+                  <div class="mt-3">
+                    <button class="btn btn-primary btn-sm" type="submit">
+                      <span class="fas fa-save me-1"></span>Сохранить уведомления
+                    </button>
+                  </div>
+                </form>
+
+                @if(session('success'))
+                  <div class="alert alert-success mt-3">{{ session('success') }}</div>
+                @endif
               </div>
 
             </div>

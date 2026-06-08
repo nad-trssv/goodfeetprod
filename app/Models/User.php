@@ -125,4 +125,14 @@ class User extends Authenticatable
     {
         return $this->hasOne(UserSchedule::class);
     }
+    
+    public function notificationRecipients()
+    {
+        return $this->hasMany(UserNotificationRecipient::class, 'master_id');
+    }
+
+    public function notificationRecipientsUsers()
+    {
+        return $this->belongsToMany(User::class, 'user_notification_recipients', 'master_id', 'recipient_id');
+    }
 }

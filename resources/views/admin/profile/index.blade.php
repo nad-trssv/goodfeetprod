@@ -134,7 +134,7 @@
                             </div>
                             <p class="text-muted fs-10 mt-2">
                                 <span class="fas fa-info-circle me-1"></span>
-                                Для изменения услуг обратитесь к администратору
+                                Управляйте своими услугами на странице <a href="{{ route('master.services.index') }}">Мои услуги</a>
                             </p>
                         </div>
                     @endif

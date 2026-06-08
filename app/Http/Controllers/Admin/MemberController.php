@@ -84,14 +84,16 @@ class MemberController extends Controller
 
     public function edit(string $id): \Illuminate\View\View
     {
-        $member = User::with(['services', 'schedule'])->findOrFail($id);
+        $member = User::with(['services', 'schedule', 'notificationRecipientsUsers'])->findOrFail($id);
         $roles = Roles::all();
-        $services = Services::where('status', 1)->orderBy('name')->get();
+        $services = Services::where('status', 1)->where('is_deleted', 0)->orderBy('name')->get();
+        $admins = User::whereIn('role_id', [1, 2])->orderBy('name')->get();
 
         return view('admin.member.edit', [
             'member' => $member,
             'roles' => $roles,
             'services' => $services,
+            'admins' => $admins,
         ]);
     }
 
@@ -181,4 +183,28 @@ class MemberController extends Controller
         ]);
     }
     public function show(string $id) {}
+    public function updateNotificationRecipients(Request $request, string $id)
+    {
+        $master = User::findOrFail($id);
+        
+        $recipients = $request->recipients ?? [];
+        
+        // Всегда включаем самого мастера
+        if (!in_array($id, $recipients)) {
+            $recipients[] = $id;
+        }
+        
+        // Удаляем старые и сохраняем новые
+        \App\Models\UserNotificationRecipient::where('master_id', $id)->delete();
+        
+        foreach ($recipients as $recipientId) {
+            \App\Models\UserNotificationRecipient::create([
+                'master_id' => $id,
+                'recipient_id' => $recipientId,
+            ]);
+        }
+        
+        return redirect()->route('member.edit', $id)
+            ->with('success', 'Настройки уведомлений обновлены!');
+    }
 }

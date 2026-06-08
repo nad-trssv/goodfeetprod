@@ -107,5 +107,6 @@ Route::middleware([
         Route::get('admin/masters/day/{date}', [App\Http\Controllers\Admin\MasterScheduleController::class, 'mastersToday'])->name('admin.masters.day');
 
         Route::get('admin/appointments', [App\Http\Controllers\Admin\AppointmentController::class, 'allAppointments'])->name('admin.appointments.index');
+        Route::post('member/{id}/notification-recipients', [App\Http\Controllers\Admin\MemberController::class, 'updateNotificationRecipients'])->name('member.notification-recipients.update');
     });
 });

@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\BookingRequest;
 use App\Http\Requests\getFullyBookedRequest;
 use App\Mail\BookingAdminMail;
+use App\Models\UserNotificationRecipient;
+use App\Models\User;
 use App\Services\Api\GetFullyBookedService;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\BookingMail;
@@ -37,9 +39,44 @@ class BookingController extends Controller
 
     public function sendEmail($email, $service_name, $client_name, $client_email, $client_phone, $mastername, $booking_date, $booking_start, $booking_end, $company_address, $price_can_change, $master_phone, $master_email, $price)
     {
+        // Клиенту
         Mail::to($email)->send(new BookingMail($email, $service_name, $mastername, $booking_date, $booking_start, $booking_end, $company_address, $price_can_change, $master_phone, $master_email, $price));
 
-        Mail::to($master_email)->send(new BookingAdminMail($email, $service_name, $client_name, $client_email, $client_phone, $mastername, $booking_date, $booking_start, $booking_end, $company_address, $price_can_change, $master_phone, $master_email, $price));
+        // Найдём мастера по email
+        $master = User::where('email', $master_email)->first();
+
+        if ($master) {
+            // Получаем список получателей из таблицы
+            $recipients = UserNotificationRecipient::with('recipient')
+                ->where('master_id', $master->id)
+                ->get();
+
+            if ($recipients->isNotEmpty()) {
+                foreach ($recipients as $recipient) {
+                    if ($recipient->recipient && $recipient->recipient->email) {
+                        Mail::to($recipient->recipient->email)->send(new BookingAdminMail(
+                            $email, $service_name, $client_name, $client_email, $client_phone,
+                            $mastername, $booking_date, $booking_start, $booking_end,
+                            $company_address, $price_can_change, $master_phone, $master_email, $price
+                        ));
+                    }
+                }
+            } else {
+                // Если получателей нет — шлём только мастеру
+                Mail::to($master_email)->send(new BookingAdminMail(
+                    $email, $service_name, $client_name, $client_email, $client_phone,
+                    $mastername, $booking_date, $booking_start, $booking_end,
+                    $company_address, $price_can_change, $master_phone, $master_email, $price
+                ));
+            }
+        } else {
+            Mail::to($master_email)->send(new BookingAdminMail(
+                $email, $service_name, $client_name, $client_email, $client_phone,
+                $mastername, $booking_date, $booking_start, $booking_end,
+                $company_address, $price_can_change, $master_phone, $master_email, $price
+            ));
+        }
+
         return true;
     }
 
