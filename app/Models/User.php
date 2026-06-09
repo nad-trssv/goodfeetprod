@@ -126,6 +126,11 @@ class User extends Authenticatable
         return $this->hasOne(UserSchedule::class);
     }
     
+    public function rooms()
+    {
+        return $this->belongsToMany(Room::class, 'room_user');
+    }
+
     public function notificationRecipients()
     {
         return $this->hasMany(UserNotificationRecipient::class, 'master_id');

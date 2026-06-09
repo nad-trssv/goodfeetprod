@@ -108,5 +108,11 @@ Route::middleware([
 
         Route::get('admin/appointments', [App\Http\Controllers\Admin\AppointmentController::class, 'allAppointments'])->name('admin.appointments.index');
         Route::post('member/{id}/notification-recipients', [App\Http\Controllers\Admin\MemberController::class, 'updateNotificationRecipients'])->name('member.notification-recipients.update');
+
+        Route::get('admin/rooms', [App\Http\Controllers\Admin\RoomController::class, 'index'])->name('admin.rooms.index');
+        Route::post('admin/rooms/store', [App\Http\Controllers\Admin\RoomController::class, 'store'])->name('admin.rooms.store');
+        Route::post('admin/rooms/{id}/update', [App\Http\Controllers\Admin\RoomController::class, 'update'])->name('admin.rooms.update');
+        Route::post('admin/rooms/{id}/destroy', [App\Http\Controllers\Admin\RoomController::class, 'destroy'])->name('admin.rooms.destroy');
+        Route::post('admin/rooms/{id}/toggle', [App\Http\Controllers\Admin\RoomController::class, 'toggleActive'])->name('admin.rooms.toggle');
     });
 });

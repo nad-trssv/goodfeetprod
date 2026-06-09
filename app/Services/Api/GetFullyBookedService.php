@@ -429,10 +429,12 @@ class GetFullyBookedService
             }
 
             if ($isAvailable) {
-                $availableSlots[] = [
-                    'start' => $slotStart->format('H:i'),
-                    'end' => $slotEnd->format('H:i'),
-                ];
+                if ($this->getRoomCapacityForSlot($userId, $date, $slotStart->format('H:i'), $slotEnd->format('H:i'))) {
+                    $availableSlots[] = [
+                        'start' => $slotStart->format('H:i'),
+                        'end' => $slotEnd->format('H:i'),
+                    ];
+                }
             }
         }
 
@@ -491,13 +493,47 @@ class GetFullyBookedService
             }
 
             if ($isAvailable) {
-                $availableSlots[] = [
-                    'start' => $slotStart,
-                    'end' => $slotEnd,
-                ];
+                if ($this->getRoomCapacityForSlot($userId, $date, $slotStart, $slotEnd)) {
+                    $availableSlots[] = [
+                        'start' => $slotStart,
+                        'end' => $slotEnd,
+                    ];
+                }
             }
         }
 
         return $availableSlots;
+    }
+    
+    function getRoomCapacityForSlot($userId, $date, $slotStart, $slotEnd)
+    {
+        // Получаем кабинеты мастера
+        $user = \App\Models\User::with('rooms')->find($userId);
+        if (!$user || $user->rooms->isEmpty()) {
+            return true; // Нет кабинета — не проверяем
+        }
+
+        foreach ($user->rooms as $room) {
+            if (!$room->is_active) continue;
+
+            // Считаем сколько записей уже есть в этом кабинете в это время
+            $startDateTime = $date . ' ' . $slotStart;
+            $endDateTime = $date . ' ' . $slotEnd;
+
+            $busyCount = \App\Models\Appointments::whereHas('user.rooms', function($q) use ($room) {
+                $q->where('rooms.id', $room->id);
+            })
+            ->where(function($q) use ($startDateTime, $endDateTime) {
+                $q->where('appointment_start', '<', $endDateTime)
+                ->where('appointment_end', '>', $startDateTime);
+            })
+            ->count();
+
+            if ($busyCount < $room->capacity) {
+                return true; // Есть свободное место
+            }
+        }
+
+        return false; // Все кабинеты заняты
     }
 }
