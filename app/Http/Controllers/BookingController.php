@@ -20,8 +20,8 @@ class BookingController extends Controller
      */
     public function index()
     {
-        $redDays = RedDay::where('full_day', 1)->get();
-        $redDaysTime = RedDay::where('full_day', 0)->get();
+        $redDays = RedDay::where('full_day', 1)->whereNull('user_id')->get();
+$redDaysTime = RedDay::where('full_day', 0)->whereNull('user_id')->get();
         $locale = app()->getLocale();
         $today = Carbon::now()->toDateString();
 
@@ -100,8 +100,8 @@ class BookingController extends Controller
             }
         }
 
-        $redDays = RedDay::where('full_day', 1)->get();
-        $redDaysTime = RedDay::where('full_day', 0)->get();
+        $redDays = RedDay::where('full_day', 1)->whereNull('user_id')->get();
+$redDaysTime = RedDay::where('full_day', 0)->whereNull('user_id')->get();
 
         $services = Services::with(['users', 'rules', 'futureRules', 'translations'])
             ->where('status', 1)
