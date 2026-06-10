@@ -214,6 +214,15 @@
                                 </div>
                             </a>
                         </div>
+                        <div class="nav-item-wrapper">
+                            <a class="nav-link {{ request()->routeIs('admin.rooms.today') || request()->routeIs('admin.rooms.day') ? 'active' : '' }} label-1"
+                                href="{{ route('admin.rooms.today') }}" role="button">
+                                <div class="d-flex align-items-center">
+                                <span class="nav-link-icon"><span class="fas fa-door-open"></span></span>
+                                <span class="nav-link-text-wrapper"><span class="nav-link-text">Загрузка кабинетов</span></span>
+                                </div>
+                            </a>
+                        </div>
                     </li>
                 @endcan
 

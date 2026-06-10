@@ -114,5 +114,7 @@ Route::middleware([
         Route::post('admin/rooms/{id}/update', [App\Http\Controllers\Admin\RoomController::class, 'update'])->name('admin.rooms.update');
         Route::post('admin/rooms/{id}/destroy', [App\Http\Controllers\Admin\RoomController::class, 'destroy'])->name('admin.rooms.destroy');
         Route::post('admin/rooms/{id}/toggle', [App\Http\Controllers\Admin\RoomController::class, 'toggleActive'])->name('admin.rooms.toggle');
+        Route::get('admin/rooms/today', [App\Http\Controllers\Admin\RoomController::class, 'today'])->name('admin.rooms.today');
+        Route::get('admin/rooms/day/{date}', [App\Http\Controllers\Admin\RoomController::class, 'today'])->name('admin.rooms.day');
     });
 });

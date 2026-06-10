@@ -21,7 +21,9 @@ class GetFullyBookedService
     public function getList($request)
     {
         try {
-            $check = $this->isDayFree($request->user_id, $request->service_id, $request->choose_date);
+        \Log::info('getList userId='.$request->user_id.' serviceId='.$request->service_id.' date='.$request->choose_date);
+        $check = $this->isDayFree($request->user_id, $request->service_id, $request->choose_date);
+        \Log::info('getList isDayFree='.(string)$check);
             if ($check === true) {
                 return [
                     'status' => 'error',
@@ -106,46 +108,61 @@ class GetFullyBookedService
         }
     }
 
-    function getBusyDays($request)
-    {
-        $userId = $request->user_id;
-        $limit = $this->getBookingLimit($userId);
-        $days = (int) $limit['days'];
+function getBusyDays($request)
+{
+    $userId = $request->user_id;
+    $limit = $this->getBookingLimit($userId);
+    $days = (int) $limit['days'];
 
-        $today = Carbon::now()->format('Y-m-d');
-        $limitDay = Carbon::now()->addDays($days)->format('Y-m-d');
+    $today = Carbon::now()->format('Y-m-d');
+    $limitDay = Carbon::now()->addDays($days)->format('Y-m-d');
 
-        $busyDays = [];
+    $busyDays = [];
 
-        for ($date = Carbon::parse($today); $date->lte(Carbon::parse($limitDay)); $date->addDay()) {
-            $day = $date->format('Y-m-d');
-            $workingHours = $this->getWorkHours($day, $userId);
+    // Кэшируем данные мастера
+    $userSchedule = UserSchedule::where('user_id', $userId)->first();
+        $fixedBooking = SiteSettings::where('group', 'hours')->where('key', 'fixed_booking_hours')->value('payload');
+        $fixedData = json_decode($fixedBooking, true);
+        $hasFixed = ($userSchedule && $userSchedule->fixed_booking_enabled && !empty($userSchedule->fixed_booking_slots))
+            || (isset($fixedData['value']) && $fixedData['value'] == 1);
 
-            if ($workingHours && $workingHours['start'] !== null && $workingHours['end'] !== null) {
-                $availableSlots = $this->getAvailableSlots($day, $request->service_id, $userId);
-                $duration = $this->getServiceDuration($request->service_id, $day);
+    for ($date = Carbon::parse($today); $date->lte(Carbon::parse($limitDay)); $date->addDay()) {
+        $day = $date->format('Y-m-d');
+    \Log::info('getBusyDays checking day='.$day);
 
-                $hasEnoughSpace = false;
-                foreach ($availableSlots as $slot) {
-                    $slotStart = strtotime($slot['start']);
-                    $slotEnd = strtotime($slot['end']);
-                    if (($slotEnd - $slotStart) >= ($duration * 60)) {
-                        $hasEnoughSpace = true;
-                        break;
-                    }
-                }
+        // Проверяем полностью закрытый день
+        if ($this->isDayFree($userId, $request->service_id, $day)) {
+            $busyDays[] = $day;
+            continue;
+        }
 
-                if (!$hasEnoughSpace) {
-                    $busyDays[] = $day;
-                }
-            } else {
-                // Нет рабочих часов — день занят
-                $busyDays[] = $day;
+        $workingHours = $this->getWorkHours($day, $userId);
+        if (!$workingHours || !$workingHours['start'] || !$workingHours['end']) {
+            $busyDays[] = $day;
+            continue;
+        }
+        $availableSlots = $this->getAvailableSlots($day, $request->service_id, $userId);
+
+        $duration = $this->getServiceDuration($request->service_id, $day);
+        $hasEnoughSpace = false;
+
+        foreach ($availableSlots as $slot) {
+            $slotStart = strtotime($slot['start']);
+            $slotEnd = strtotime($slot['end']);
+            \Log::info('hasEnoughSpace slot='.$slot['start'].'-'.$slot['end'].' diff='.($slotEnd-$slotStart).' duration='.($duration*60));
+            if (($slotEnd - $slotStart) >= ($duration * 60)) {
+                $hasEnoughSpace = true;
+                break;
             }
         }
 
-        return $busyDays;
+        if (!$hasEnoughSpace) {
+            $busyDays[] = $day;
+        }
     }
+\Log::info('busyDays final: '.implode(',', array_slice($busyDays, 0, 15)));
+    return $busyDays;
+}
 
     /**
      * Рабочие часы мастера — сначала из user_schedules, потом из site_settings
@@ -287,20 +304,30 @@ class GetFullyBookedService
         return $events;
     }
 
-    function isDayFree($userId, $serviceId, $date){
-        $query = RedDay::where('full_day', 1)->where('date', $date);
+function isDayFree($userId, $serviceId, $date){
+    $query = RedDay::where('full_day', 1)->where(function($q) use ($date) {
+        $q->where('date', $date)
+          ->orWhere(function($q2) use ($date) {
+              $q2->where('repeat', 1)
+                 ->whereMonth('date', \Carbon\Carbon::parse($date)->month)
+                 ->whereDay('date', \Carbon\Carbon::parse($date)->day);
+          });
+    });
 
-        if ($userId && $userId !== 'all') {
-            $query->visibleFor($userId);
-        } else {
-            $query->whereNull('user_id');
-        }
-
-        if ($query->get()->isNotEmpty()) {
-            return true;
-        }
-        return false;
+    if ($userId && $userId !== 'all') {
+        $query->visibleFor($userId);
+    } else {
+        $query->whereNull('user_id');
     }
+
+    $result = $query->get();
+    \Log::info('isDayFree userId='.$userId.' date='.$date.' count='.$result->count().' ids='.$result->pluck('id')->join(',').' user_ids='.$result->pluck('user_id')->join(','));
+
+    if ($result->isNotEmpty()) {
+        return true;
+    }
+    return false;
+}
 
     function getAvailableSlots($date, $serviceId, $userId)
     {
@@ -373,10 +400,12 @@ class GetFullyBookedService
                 }
 
                 if ($isAvailable) {
-                    $availableSlots[] = [
-                        'start' => $slotStart->format('H:i'),
-                        'end' => $slotEnd->format('H:i'),
-                    ];
+                    if ($this->getRoomCapacityForSlot($userId, $date, $slotStart->format('H:i'), $slotEnd->format('H:i'))) {
+                        $availableSlots[] = [
+                            'start' => $slotStart->format('H:i'),
+                            'end' => $slotEnd->format('H:i'),
+                        ];
+                    }
                 }
             }
             return $availableSlots;
@@ -505,35 +534,35 @@ class GetFullyBookedService
         return $availableSlots;
     }
     
-    function getRoomCapacityForSlot($userId, $date, $slotStart, $slotEnd)
-    {
-        // Получаем кабинеты мастера
-        $user = \App\Models\User::with('rooms')->find($userId);
-        if (!$user || $user->rooms->isEmpty()) {
-            return true; // Нет кабинета — не проверяем
-        }
-
-        foreach ($user->rooms as $room) {
-            if (!$room->is_active) continue;
-
-            // Считаем сколько записей уже есть в этом кабинете в это время
-            $startDateTime = $date . ' ' . $slotStart;
-            $endDateTime = $date . ' ' . $slotEnd;
-
-            $busyCount = \App\Models\Appointments::whereHas('user.rooms', function($q) use ($room) {
-                $q->where('rooms.id', $room->id);
-            })
-            ->where(function($q) use ($startDateTime, $endDateTime) {
-                $q->where('appointment_start', '<', $endDateTime)
-                ->where('appointment_end', '>', $startDateTime);
-            })
-            ->count();
-
-            if ($busyCount < $room->capacity) {
-                return true; // Есть свободное место
-            }
-        }
-
-        return false; // Все кабинеты заняты
+function getRoomCapacityForSlot($userId, $date, $slotStart, $slotEnd)
+{
+    $user = \App\Models\User::with('rooms')->find($userId);
+    if (!$user || $user->rooms->isEmpty()) {
+        return true;
     }
+
+    foreach ($user->rooms as $room) {
+        if (!$room->is_active) continue;
+
+        $startDateTime = $date . ' ' . $slotStart . ':00';
+        $endDateTime = $date . ' ' . $slotEnd . ':00';
+
+        \Log::info('getRoomCapacityForSlot room='.$room->name.' capacity='.$room->capacity.' start='.$startDateTime.' end='.$endDateTime);
+
+        $busyCount = \App\Models\Appointments::whereHas('user.rooms', function($q) use ($room) {
+            $q->where('rooms.id', $room->id);
+        })
+        ->where('appointment_start', '<', $endDateTime)
+        ->where('appointment_end', '>', $startDateTime)
+        ->count();
+
+        \Log::info('getRoomCapacityForSlot busyCount='.$busyCount);
+
+        if ($busyCount < $room->capacity) {
+            return true;
+        }
+    }
+
+    return false;
+}
 }
