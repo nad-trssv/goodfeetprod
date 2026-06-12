@@ -9,7 +9,7 @@ class Appointments extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'client_name', 'client_lastname', 'client_phone', 'client_email', 'service_id', 'user_id', 'appointment_start', 'appointment_end', 'description', 'price'];
+    protected $fillable = ['title', 'client_name', 'client_lastname', 'client_phone', 'client_email', 'service_id', 'user_id', 'room_id', 'appointment_start', 'appointment_end', 'description', 'price'];
 
     public function service()
     {
@@ -19,6 +19,11 @@ class Appointments extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function room()
+    {
+        return $this->belongsTo(Room::class);
     }
 
     public function media()

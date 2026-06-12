@@ -137,12 +137,16 @@
                                                             <span>{{ $event['price'] }} </span>&euro; )
                                                         </h5>
                                                         <p class="fs-9 mb-0 event-item">Клиент: <a class="fw-semibold"
-                                                                href="#!">{{ $event['client_lastname'] }},
-                                                                {{ $event['client_name'] }}</a></p>
+                                                            href="{{ route('calendar.show', $event['id']) }}">{{ $event['client_lastname'] }},
+                                                            {{ $event['client_name'] }}</a></p>
                                                         <p class="fs-9 mb-0 event-item">Мастер: <a class="fw-semibold"
-                                                                href="#!">{{ $event['master'] }}</a></p>
-                                                        <p class="fs-9 event-item">Номер клиента: <a class="fw-semibold"
-                                                                href="#!">{{ $event['client_phone'] }}</a></p>
+                                                            href="{{ route('profile.index') }}">{{ $event['master'] }}</a></p>
+                                                        <p class="fs-9 mb-0 event-item">Номер клиента: <a class="fw-semibold"
+                                                            href="tel:{{ $event['client_phone'] }}">{{ $event['client_phone'] }}</a></p>
+                                                        @if($event['room'])
+                                                            <p class="fs-9 mb-0 event-item">Кабинет: <a class="fw-semibold"
+                                                                href="{{ route('admin.rooms.today') }}">{{ $event['room'] }}</a></p>
+                                                        @endif
                                                         @if ($event['description'])
                                                             <p class="fs-9 text-body-secondary mb-5 event-item">
                                                                 {{ $event['description'] }}</p>

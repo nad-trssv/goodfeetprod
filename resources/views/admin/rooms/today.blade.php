@@ -1,4 +1,4 @@
-@section('title', 'Загрузка кабинетов')
+@section('title', 'Нагрузка кабинетов')
 
 <x-dashboard-layout>
   <div class="content">
@@ -11,7 +11,7 @@
 
     <div class="row mb-4 align-items-center">
       <div class="col">
-        <h2 class="mb-0">Загрузка кабинетов</h2>
+        <h2 class="mb-0">Нагрузка кабинетов</h2>
         <p class="text-muted fs-9 mt-1">{{ $today->locale('ru')->isoFormat('dddd, D MMMM YYYY') }}</p>
       </div>
     </div>

@@ -22,7 +22,7 @@ class DashboardService
         try {
             function getAppointments(){
                 $userId = Auth::user()->id;
-                $appointments = Appointments::where('user_id', $userId)->whereDate('appointment_start', Carbon::now()->toDateString())->orderBy('appointment_start')->get();
+                $appointments = Appointments::with(['service', 'user', 'room'])->where('user_id', $userId)->whereDate('appointment_start', Carbon::now()->toDateString())->orderBy('appointment_start')->get();
                 $events = array();
                 foreach($appointments as $appint)
                 {
@@ -40,6 +40,7 @@ class DashboardService
                         'start' => $appint->appointment_start,
                         'end' => $appint->appointment_end,
                         'master' => $appint->user->name,
+                        'room' => $appint->room ? $appint->room->name : null,
                     ];
                 }
                 return $events;

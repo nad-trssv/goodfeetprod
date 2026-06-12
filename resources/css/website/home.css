@@ -747,6 +747,9 @@ td.fc-past {
 
 .fc-day-top.disabled-day:not(.fc-today) span.fc-day-number{
     color: var(--text-primary);
+}
+
+.fc-day-top.disabled-day span.fc-day-number{
     text-decoration: line-through !important;
     cursor: not-allowed !important;
 }

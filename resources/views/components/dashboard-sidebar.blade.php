@@ -219,7 +219,7 @@
                                 href="{{ route('admin.rooms.today') }}" role="button">
                                 <div class="d-flex align-items-center">
                                 <span class="nav-link-icon"><span class="fas fa-door-open"></span></span>
-                                <span class="nav-link-text-wrapper"><span class="nav-link-text">Загрузка кабинетов</span></span>
+                                <span class="nav-link-text-wrapper"><span class="nav-link-text">Нагрузка кабинетов</span></span>
                                 </div>
                             </a>
                         </div>

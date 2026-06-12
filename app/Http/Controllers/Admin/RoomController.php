@@ -81,8 +81,14 @@ class RoomController extends Controller
 
             // Записи в этом кабинете сегодня
             $appointments = \App\Models\Appointments::with(['service', 'user'])
-                ->whereHas('user.rooms', function($q) use ($room) {
-                    $q->where('rooms.id', $room->id);
+                ->where(function($q) use ($room) {
+                    $q->where('room_id', $room->id)
+                    ->orWhere(function($q2) use ($room) {
+                        $q2->whereNull('room_id')
+                            ->whereHas('user.rooms', function($q3) use ($room) {
+                                $q3->where('rooms.id', $room->id);
+                            });
+                    });
                 })
                 ->whereDate('appointment_start', $todayStr)
                 ->orderBy('appointment_start')
