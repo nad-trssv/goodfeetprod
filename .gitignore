@@ -4,3 +4,8 @@
 /vendor
 /public/storage
 readme.md
+/public/build/*.jpg
+/public/build/*.png
+/public/build/*.svg
+/storage/app/public/appointments
+/storage/app/public/users
