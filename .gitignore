@@ -9,3 +9,4 @@ readme.md
 /public/build/*.svg
 /storage/app/public/appointments
 /storage/app/public/users
+.htaccess
