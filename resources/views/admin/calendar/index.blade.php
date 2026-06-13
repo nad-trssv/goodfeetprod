@@ -18,7 +18,7 @@
             <span id="currentDate" class="calendar-date"></span></h4>
         </div>
         <div class="col-7 col-md-6 d-flex justify-content-end">
-          <button id="clearEventModal" class="btn btn-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#addEventModal"><span class="fas fa-plus pe-2 fs-10"></span>Новая запись</button>
+          <a href="{{ route('calendar.create') }}" class="btn btn-primary btn-sm"><span class="fas fa-plus pe-2 fs-10"></span>Новая запись</a>
         </div>
       </div>
         <div class="calendar-outline mt-6 mb-9 fc fc-media-screen fc-direction-ltr fc-theme-standard" id="calendar"></div>
@@ -206,42 +206,8 @@
                       }
                   },
                   select: function(start, end, allDay) {
-                    $('#calendar').fullCalendar('changeView', 'agendaDay', start);
-                    clearErrors();
-                    modalStatus = 'STORE';
-                    $('#modalTitle').html("Добавить новую запись");
-                    var clicked_date = moment(start).format('YYYY-MM-DD hh:mm');
-                    if(clicked_date) { 
-                        $("#eventStartDate").val(clicked_date);
-                        $("#eventEndDate").val(clicked_date);
-                        $("#client_name").val('');
-                        $("#client_lastname").val('');
-                        $("#eventDescription").val('');
-                        $("#eventPrice").val('');
-                        $("#phone").val('');
-                        $("#eventService").val('');
-                        $('#userSelect').empty();
-                        $('#eventDetailBtn').empty();
-                        flatpickr($("#eventStartDate"), {
-                            enableTime: true,
-                            dateFormat: "Y-m-d H:i",
-                            time_24hr: true,
-                            disableMobile: true,
-                            defaultDate: clicked_date,
-                            locale: "et",
-                            allowInput: true,
-                        });
-                        flatpickr($("#eventEndDate"), {
-                            enableTime: true,
-                            dateFormat: "Y-m-d H:i",
-                            time_24hr: true,
-                            disableMobile: true,
-                            defaultDate: clicked_date,
-                            locale: "et",
-                            allowInput: true,
-                        });
-                    }
-                    $('#addEventModal').modal('toggle');
+                      var date = moment(start).format('YYYY-MM-DD');
+                      window.location.href = "{{ route('calendar.create') }}?date=" + date;
                   },
                   eventDragStart: function(event, jsEvent, ui, view) {
                       $('#destroyEvent').show();
@@ -345,17 +311,28 @@
                           },
                           error:function(err)
                           {
-                            clearErrors()       
+                            clearErrors();
+                            revertFunc();
+                            if (!err.responseJSON) return;
                             const errors = err.responseJSON.errors;
                             if (errors) {
+                              if (errors.appointment_start) {
+                                Swal.fire({
+                                  position: "top",
+                                  icon: "error",
+                                  title: errors.appointment_start[0],
+                                  showConfirmButton: false,
+                                  timerProgressBar: true,
+                                  timer: 3000,
+                                });
+                              }
                               $('#phoneError').html(errors.client_phone || "");
                               $('#serviceError').html(errors.service_id || "");
                               $('#nameError').html(errors.client_name || "");
                               $('#lastnameError').html(errors.client_lastname || "");
-                              $('#dateError').html(errors.appointment_end || "");
+                              $('#dateError').html(errors.appointment_start || errors.appointment_end || "");
                               $('#descriptionError').html(errors.description || "");
                             }
-                            revertFunc();
                           }
                       })
                   },
@@ -536,19 +513,30 @@
                         $('#calendar').fullCalendar('refetchEvents');
 
                       },
-                        error:function(err)
-                        {
-                          clearErrors()    
-                          const errors = err.responseJSON.errors;
-                          if (errors) {
-                            $('#phoneError').html(errors.client_phone || "");
-                            $('#serviceError').html(errors.service_id || "");
-                            $('#nameError').html(errors.client_name || "");
-                            $('#lastnameError').html(errors.client_lastname || "");
-                            $('#dateError').html(errors.appointment_end || "");
-                            $('#descriptionError').html(errors.description || "");
+                      error:function(err)
+                          {
+                            clearErrors()
+                            if (!err.responseJSON) return;
+                            const errors = err.responseJSON.errors;
+                            if (errors) {
+                              $('#phoneError').html(errors.client_phone || "");
+                              $('#serviceError').html(errors.service_id || "");
+                              $('#nameError').html(errors.client_name || "");
+                              $('#lastnameError').html(errors.client_lastname || "");
+                              $('#dateError').html(errors.appointment_start || errors.appointment_end || "");
+                              $('#descriptionError').html(errors.description || "");
+                              if (errors.appointment_start) {
+                                Swal.fire({
+                                  position: "top",
+                                  icon: "error",
+                                  title: errors.appointment_start[0],
+                                  showConfirmButton: false,
+                                  timerProgressBar: true,
+                                  timer: 6000,
+                                });
+                              }
+                            }
                           }
-                        }
                     });
                   }
                   if(modalStatus === 'UPDATE'){
@@ -608,19 +596,29 @@
                           });
                         },
                         error:function(err)
-                        {
-                          $(' #phoneError, #serviceError, #dateError, #descriptionError, #lastnameError, #nameError').html("");          
-                          
-                          const errors = err.responseJSON.errors;
-                          if (errors) {
-                            $('#phoneError').html(errors.client_phone || "");
-                            $('#serviceError').html(errors.service_id || "");
-                            $('#nameError').html(errors.client_name || "");
-                            $('#lastnameError').html(errors.client_lastname || "");
-                            $('#dateError').html(errors.appointment_end || "");
-                            $('#descriptionError').html(errors.description || "");
+                          {
+                            clearErrors()
+                            if (!err.responseJSON) return;
+                            const errors = err.responseJSON.errors;
+                            if (errors) {
+                              $('#phoneError').html(errors.client_phone || "");
+                              $('#serviceError').html(errors.service_id || "");
+                              $('#nameError').html(errors.client_name || "");
+                              $('#lastnameError').html(errors.client_lastname || "");
+                              $('#dateError').html(errors.appointment_start || errors.appointment_end || "");
+                              $('#descriptionError').html(errors.description || "");
+                              if (errors.appointment_start) {
+                                Swal.fire({
+                                  position: "top",
+                                  icon: "error",
+                                  title: errors.appointment_start[0],
+                                  showConfirmButton: false,
+                                  timerProgressBar: true,
+                                  timer: 6000,
+                                });
+                              }
+                            }
                           }
-                        }
                     })
                   }
                 });
@@ -667,7 +665,7 @@
                         showConfirmButton: false,
                         iconColor: '#6da37d',
                         timerProgressBar: true,
-                        timer: 3000,
+                        timer: 6000,
                       });
                     }
 

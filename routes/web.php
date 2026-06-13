@@ -45,6 +45,7 @@ Route::middleware([
 
     Route::resource('calendar', AppointmentController::class);
     Route::get('calendarList', [AppointmentController::class, 'calendarList'])->name('calendarList');
+    Route::get('calendar/create', [AppointmentController::class, 'createAppointment'])->name('calendar.create');
     Route::get('calendar/details/{appointment}', [AppointmentController::class, 'show'])->name('calendar.show');
 
     Route::resource('service', AdminServiceController::class);

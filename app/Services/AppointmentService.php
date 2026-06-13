@@ -146,25 +146,54 @@ class AppointmentService
     public function store(AppointmentRequest $request)
     {
         try {
-            $events = Appointments::create($request->validated());
+            $bookedService = new \App\Services\Api\GetFullyBookedService();
+            
+            $startTime = \Carbon\Carbon::parse($request->appointment_start)->format('H:i');
+            $endTime = \Carbon\Carbon::parse($request->appointment_end)->format('H:i');
+            $date = \Carbon\Carbon::parse($request->appointment_start)->format('Y-m-d');
+            
+            $roomId = $bookedService->assignRoom($request->user_id, $date, $startTime, $endTime);
+
+            if ($roomId === null && \App\Models\User::with('rooms')->find($request->user_id)?->rooms->isNotEmpty()) {
+                throw new Exception('На это время нет свободных мест в кабинетах. Выберите другое время.');
+            }
+                        
+            $events = Appointments::create(array_merge($request->validated(), ['room_id' => $roomId]));
             return $events;
         } catch (Exception $exception) {
             Log::info($exception->getMessage());
             throw new Exception($exception->getMessage(), 422);
         }
     }
-    
+
     public function update(AppointmentRequest $request)
     {
         try {
             $appointment = Appointments::find($request->id);
-            $appointment->update($request->validated());
+            
+            $bookedService = new \App\Services\Api\GetFullyBookedService();
+            
+            $startTime = \Carbon\Carbon::parse($request->appointment_start)->format('H:i');
+            $endTime = \Carbon\Carbon::parse($request->appointment_end)->format('H:i');
+            $date = \Carbon\Carbon::parse($request->appointment_start)->format('Y-m-d');
+            
+            // Сбрасываем room_id текущей записи чтобы не мешала при расчёте
+            $appointment->update(['room_id' => null]);
+            
+            $roomId = $bookedService->assignRoom($request->user_id, $date, $startTime, $endTime);
+
+            if ($roomId === null && \App\Models\User::with('rooms')->find($request->user_id)?->rooms->isNotEmpty()) {
+                throw new Exception('На это время нет свободных мест в кабинетах. Выберите другое время.');
+            }
+            
+            $appointment->update(array_merge($request->validated(), ['room_id' => $roomId]));
             return $appointment;
         } catch (Exception $exception) {
             Log::info($exception->getMessage());
             throw new Exception($exception->getMessage(), 422);
         }
     }
+
     public function show(Appointments $appointment)
     {
         try {

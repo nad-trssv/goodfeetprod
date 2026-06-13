@@ -569,7 +569,6 @@ function isDayFree($userId, $serviceId, $date){
         $key = $room->id . '_' . $excludedMasterId;
         
         if (in_array($key, $visited)) {
-            \Log::info('canRoomAccommodate CYCLE DETECTED - returning false');
             return false;
         }
         $visited[] = $key;

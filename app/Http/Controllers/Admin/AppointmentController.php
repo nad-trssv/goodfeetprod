@@ -105,10 +105,12 @@ class AppointmentController extends Controller
                 'message' => 'Запись добавлена успешно!'
             ], 200);
         } catch (Exception $exception) {
-            return redirect()
-                ->back()
-                ->withInput()
-                ->withErrors(['error' => $exception->getMessage()]);
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'errors' => ['appointment_start' => [$exception->getMessage()]]
+                ], 422);
+            }
+            return redirect()->back()->withInput()->withErrors(['error' => $exception->getMessage()]);
         }
     }
 
@@ -149,10 +151,12 @@ class AppointmentController extends Controller
                 'message' => 'Запись успешно обновлена!'
             ], 200);
         } catch (Exception $exception) {
-            return redirect()
-                ->back()
-                ->withInput()
-                ->withErrors(['error' => $exception->getMessage()]);
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'errors' => ['appointment_start' => [$exception->getMessage()]]
+                ], 422);
+            }
+            return redirect()->back()->withInput()->withErrors(['error' => $exception->getMessage()]);
         }
     }
 
@@ -210,6 +214,14 @@ class AppointmentController extends Controller
             'appointments' => $appointments,
             'masters' => $masters,
             'services' => $services,
+        ]);
+    }
+    public function createAppointment()
+    {
+        $data = $this->appointmentService->list('admin');
+        return view('admin.calendar.create', [
+            'services' => $data['services'],
+            'users' => $data['users'],
         ]);
     }
 }
