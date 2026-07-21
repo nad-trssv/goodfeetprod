@@ -25,7 +25,7 @@ class AppointmentController extends Controller
      */
     public function index()
     {
-        $data = $this->appointmentService->list('admin');
+        $data = $this->appointmentService->list($this->calendarScope());
 
         return view('admin.calendar.index', [
             'appointments' => $data['appointments'],
@@ -39,11 +39,16 @@ class AppointmentController extends Controller
 
     public function calendarList()
     {
-        $data = $this->appointmentService->list('admin');
+        $data = $this->appointmentService->list($this->calendarScope());
         return view('admin.calendar.list', [
             'appointments' => $data['appointments'],
             'title' => 'Мои записи',
         ]);
+    }
+
+    private function calendarScope(): string
+    {
+        return auth()->user()?->role_id === 1 ? 'superAdmin' : 'admin';
     }
 
     public function masterCalendar(string $id)

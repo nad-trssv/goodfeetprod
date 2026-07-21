@@ -45,6 +45,7 @@ class SettingsController extends Controller
             'workHours'     => $sortedWorkHours,
             'lunchHours'    => $data['lunchHours'],
             'bookingLimit'    => $data['bookingLimit'],
+            'supportedLocales' => config('supported_locales'),
         ]);
     }
 

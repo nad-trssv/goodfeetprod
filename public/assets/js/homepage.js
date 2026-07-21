@@ -3,6 +3,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const logoLarge = document.querySelector(".logoLarge");
     const logoSmall = document.querySelector(".logoSmall");
 
+    if (!logoLarge || !logoSmall) {
+      return;
+    }
+
     let isScrolled = false; 
 
     window.addEventListener("scroll", function () {

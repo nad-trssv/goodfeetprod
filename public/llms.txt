@@ -1,0 +1,13 @@
+# Booking application
+
+This website belongs to a service business and provides information about its services, prices and contacts.
+
+## Public pages
+
+- / — services and contact summary
+- /services — full service catalogue
+- /booking — secure appointment booking
+- /contacts — company contact information
+- /policy — privacy policy
+
+Booking prices, staff eligibility and available time slots are validated by the server. Administrative pages and individual booking confirmations are private and must not be indexed or used as public sources.

@@ -9,6 +9,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let benefitsWrapper = document.querySelector(".benefits");
     let container = document.querySelector(".container-medium");
 
+    if (!benefits || !benefitsWrapper || !container) {
+        return;
+    }
+
     let containerPadding = (window.innerWidth - container.clientWidth) / 2;
     let totalWidth = benefitsWrapper.scrollWidth - benefits.clientWidth + containerPadding;
 

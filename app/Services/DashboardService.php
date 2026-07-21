@@ -22,7 +22,12 @@ class DashboardService
         try {
             function getAppointments(){
                 $userId = Auth::user()->id;
-                $appointments = Appointments::with(['service', 'user', 'room'])->where('user_id', $userId)->whereDate('appointment_start', Carbon::now()->toDateString())->orderBy('appointment_start')->get();
+                $query = Appointments::with(['service', 'user', 'room'])
+                    ->whereDate('appointment_start', Carbon::now()->toDateString());
+                if (Auth::user()->role_id !== 1) {
+                    $query->where('user_id', $userId);
+                }
+                $appointments = $query->orderBy('appointment_start')->get();
                 $events = array();
                 foreach($appointments as $appint)
                 {

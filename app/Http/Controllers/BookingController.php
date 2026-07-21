@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 class BookingController extends Controller
 {
@@ -49,6 +50,7 @@ $redDaysTime = RedDay::where('full_day', 0)->whereNull('user_id')->get();
         $limitDate = Carbon::now()->addDays($days)->format('Y-m-d');
 
         $formattedServices = ServiceResource::collection($services)->toArray(request());
+        $bookingMasters = collect($formattedServices)->flatMap(fn ($service) => $service['users'] ?? [])->unique('id')->values();
 
         return view('pages.booking.index', [
             'chooseService' => null,
@@ -60,6 +62,8 @@ $redDaysTime = RedDay::where('full_day', 0)->whereNull('user_id')->get();
             'bookLimit' => $days,
             'workHours' => $this->getWorkHours(),
             'settings' => $this->getSettings(),
+            'bookingTemplate' => $this->bookingTemplate(),
+            'bookingMasters' => $bookingMasters,
         ]);
     }
 
@@ -74,6 +78,14 @@ $redDaysTime = RedDay::where('full_day', 0)->whereNull('user_id')->get();
         }
 
         return 30;
+    }
+
+    protected function bookingTemplate(): string
+    {
+        $payload = SiteSettings::where('key', 'booking_template')->value('payload');
+        $template = $payload ? json_decode($payload, true) : 'classic';
+
+        return in_array($template, ['classic', 'wizard', 'compact'], true) ? $template : 'classic';
     }
 
 
@@ -124,6 +136,7 @@ $redDaysTime = RedDay::where('full_day', 0)->whereNull('user_id')->get();
         $today = Carbon::now()->format('Y-m-d');
         $limitDate = Carbon::now()->addDays($days)->format('Y-m-d');
         $formattedServices = ServiceResource::collection($services)->toArray(request());
+        $bookingMasters = collect($formattedServices)->flatMap(fn ($service) => $service['users'] ?? [])->unique('id')->values();
 
         return view('pages.booking.index', [
             'chooseService' => $chooseService,
@@ -135,6 +148,8 @@ $redDaysTime = RedDay::where('full_day', 0)->whereNull('user_id')->get();
             'bookLimit' => $days,
             'workHours' => $this->getWorkHours(),
             'settings' => $this->getSettings(),
+            'bookingTemplate' => $this->bookingTemplate(),
+            'bookingMasters' => $bookingMasters,
         ]);
     }
 
@@ -190,9 +205,9 @@ $redDaysTime = RedDay::where('full_day', 0)->whereNull('user_id')->get();
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function show(Appointments $appointment)
     {
-        $booking = Appointments::with(['service', 'user'])->find($id);
+        $booking = $appointment->load(['service', 'user']);
         $translation = $booking->service ? $booking->service->getTranslation(app()->getLocale(), 'name') : null;
 
         if (!$booking) {
@@ -246,11 +261,17 @@ $redDaysTime = RedDay::where('full_day', 0)->whereNull('user_id')->get();
     }
     function getSettings()
     {
-        $siteSettings = SiteSettings::where('group', 'company')->get();
+        $siteSettings = SiteSettings::whereIn('group', ['company', 'branding'])->get();
         if ($siteSettings) {
             $formattedSettings = $siteSettings->pluck('payload', 'key')->map(function ($value) {
-                return trim($value, '"');
+                return json_decode($value, true);
             })->toArray();
+
+            foreach (['logo', 'footer_logo', 'favicon'] as $key) {
+                if (!empty($formattedSettings[$key])) {
+                    $formattedSettings[$key.'_url'] = Storage::disk('public')->url($formattedSettings[$key]);
+                }
+            }
 
             return $formattedSettings;
         }

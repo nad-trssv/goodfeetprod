@@ -5,9 +5,150 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/locale/et.js"></script>
+<style>
+  .booking-template .booking-template__intro { display:none; }
+  .booking-template--wizard .booking-template__intro,
+  .booking-template--compact .booking-template__intro { display:block; }
+  .booking-progress { display:flex; justify-content:center; gap:0; max-width:760px; margin:0 auto 2rem; }
+  .booking-progress__item { flex:1; position:relative; text-align:center; color:#7d8590; font-size:.875rem; }
+  .booking-progress__item:not(:last-child)::after { content:""; position:absolute; height:2px; background:#d8dde3; top:17px; left:58%; right:-42%; }
+  .booking-progress__number { display:flex; width:36px; height:36px; margin:0 auto .5rem; align-items:center; justify-content:center; border-radius:50%; border:2px solid #d8dde3; background:#fff; position:relative; z-index:1; font-weight:700; }
+  .booking-progress__item.is-active, .booking-progress__item.is-complete { color:var(--phoenix-primary); }
+  .booking-progress__item.is-active .booking-progress__number, .booking-progress__item.is-complete .booking-progress__number { border-color:var(--phoenix-primary); }
+  .booking-progress__item.is-active .booking-progress__number { background:var(--phoenix-primary); color:#fff; }
+  .booking-progress__item.is-complete::after { background:var(--phoenix-primary); }
+
+  .booking-template--wizard { background:linear-gradient(180deg, rgba(238,242,246,.9), #fff 420px); }
+  .booking-template--wizard > .row { max-width:1180px; margin:auto; }
+  .booking-template--wizard #steps { margin:auto; }
+  .booking-template--wizard .bookingSteps { background:#fff; border-radius:24px; padding:2rem; box-shadow:0 18px 60px rgba(28,39,49,.09); }
+  .booking-template--wizard .choose__item { border:1px solid #e1e6eb; border-radius:16px; padding:1rem 1.25rem; transition:.2s ease; }
+  .booking-template--wizard .choose__item:hover { transform:translateY(-2px); border-color:var(--phoenix-primary); box-shadow:0 10px 25px rgba(28,39,49,.08); }
+  .booking-template--wizard #info { margin:auto; }
+  .booking-template--wizard #info .card { border:0; border-radius:20px; box-shadow:0 12px 35px rgba(28,39,49,.08); }
+
+  .booking-template--compact { background:#f7f8fa; }
+  .booking-template--compact > .row { max-width:1400px; margin:auto; align-items:flex-start; }
+  .booking-template--compact .bookingSteps { background:#fff; border:1px solid #e3e6ea; border-radius:14px; padding:1.25rem; }
+  .booking-template--compact #step1 > .row:last-child,
+  .booking-template--compact #mastersContainer { display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.75rem; }
+  .booking-template--compact .choose__item { width:100% !important; margin:0 !important; border:1px solid #e3e6ea; border-radius:10px; padding:.75rem; cursor:pointer; }
+  .booking-template--compact .choose__item:hover { border-color:var(--phoenix-primary); background:rgba(56,116,255,.04); }
+  .booking-template .choose__item.is-selected { border-color:var(--phoenix-primary); box-shadow:0 0 0 2px rgba(56,116,255,.12); }
+  .booking-template--compact #info .card { position:sticky; top:110px; border-radius:14px; }
+  .booking-template--compact .booking_calendar { margin-top:0; }
+  @media(max-width:767px) {
+    .booking-template--wizard .bookingSteps { padding:1rem; border-radius:16px; }
+    .booking-template--compact #step1 > .row:last-child,
+    .booking-template--compact #mastersContainer { grid-template-columns:1fr; }
+    .booking-progress__label { font-size:.72rem; }
+  }
+  .booking-alternative { background:#f6f7f9; min-height:70vh; }
+  .booking-template, .booking-template *, .booking-alternative, .booking-alternative * { box-sizing:border-box; }
+  .booking-template, .booking-alternative { max-width:100%; overflow-x:clip; }
+  .booking-template .row, .booking-alternative .row { max-width:100%; }
+  .booking-template img, .booking-alternative img { max-width:100%; height:auto; }
+  .booking-alternative button, .booking-alternative strong, .booking-alternative small, .booking-alternative h1, .booking-alternative h2, .booking-alternative h3, .booking-alternative p { min-width:0; overflow-wrap:anywhere; }
+  .booking-board { display:grid; grid-template-columns:minmax(260px,.8fr) minmax(260px,.8fr) minmax(480px,1.6fr); gap:1rem; align-items:start; }
+  .booking-board__panel, .master-directory, .master-workspace { background:#fff; border:1px solid #e1e5ea; border-radius:18px; padding:1.25rem; }
+  .booking-board__panel, .master-directory, .master-workspace, #altCalendar, #altSlots { min-width:0; max-width:100%; }
+  #altCalendar { overflow-x:auto; }
+  #altCalendar .fc-toolbar { display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; }
+  #altCalendar .fc-toolbar > * { float:none; min-width:0; }
+  #altCalendar .fc-left { flex:1 1 150px; }
+  #altCalendar .fc-right { flex:0 0 auto; }
+  #altCalendar .fc-view-container { min-width:280px; }
+  #altCalendar .fc-row table { width:100% !important; table-layout:fixed !important; }
+  #altCalendar td.fc-day,
+  #altCalendar td.fc-day-top,
+  #altCalendar th.fc-day-header { width:14.285714% !important; max-width:14.285714% !important; overflow:hidden; }
+  #altCalendar td.fc-day-top { padding:0 !important; }
+  #altCalendar td.fc-day-top .fc-day-number {
+    float:none !important;
+    display:flex !important;
+    width:100% !important;
+    min-width:0 !important;
+    height:2.35rem;
+    padding:.45rem .2rem !important;
+    align-items:center;
+    justify-content:center;
+    border-radius:0;
+    overflow:hidden;
+  }
+  #altCalendar { position:relative; }
+  #altCalendar.is-loading-availability::after {
+    content:'';
+    position:absolute;
+    top:.85rem;
+    right:5.5rem;
+    width:1rem;
+    height:1rem;
+    border:2px solid rgba(61,116,255,.2);
+    border-top-color:#3d74ff;
+    border-radius:50%;
+    animation:booking-calendar-spin .7s linear infinite;
+    pointer-events:none;
+  }
+  @keyframes booking-calendar-spin { to { transform:rotate(360deg); } }
+  #altCalendar td.disabled-day { background:rgba(125,133,144,.08); cursor:not-allowed; pointer-events:none; }
+  #altCalendar td.disabled-day .fc-day-number { text-decoration:line-through; opacity:.38; }
+  .booking-template #bookingCalendar td.disabled-day { background:rgba(125,133,144,.08); cursor:not-allowed; pointer-events:none; }
+  .booking-template #bookingCalendar td.disabled-day .fc-day-number { text-decoration:line-through; opacity:.38; }
+  #altCalendar td.selected-day { box-shadow:inset 0 0 0 2px var(--phoenix-primary); }
+  .booking-board__panel.is-locked, .master-workspace.is-locked { opacity:.48; pointer-events:none; }
+  .booking-board__heading, .master-workspace__title { display:flex; gap:.75rem; align-items:center; margin-bottom:1rem; }
+  .booking-board__heading > span, .master-workspace__title > span { display:flex; width:34px; height:34px; flex:0 0 34px; align-items:center; justify-content:center; border-radius:50%; background:var(--phoenix-primary); color:#fff; font-weight:700; }
+  .booking-board__heading h2, .master-workspace__title h2 { font-size:1rem; margin:0; }
+  .booking-board__heading small, .master-workspace__title p { color:#77808b; font-size:.75rem; margin:0; }
+  .booking-board__scroll { max-height:520px; overflow:auto; padding-right:.25rem; }
+  .booking-option, .master-directory__item { display:flex; width:100%; border:1px solid #e3e7eb; background:#fff; border-radius:12px; padding:.85rem; margin-bottom:.6rem; text-align:left; justify-content:space-between; align-items:center; gap:.75rem; transition:.18s ease; }
+  .booking-option:hover, .booking-option.is-selected, .master-directory__item:hover, .master-directory__item.is-selected { border-color:var(--phoenix-primary); background:rgba(56,116,255,.045); box-shadow:0 0 0 2px rgba(56,116,255,.1); }
+  .booking-option span, .master-directory__item span:nth-child(2) { min-width:0; }
+  .booking-option strong, .booking-option small, .master-directory__item strong, .master-directory__item small { display:block; }
+  .booking-option small, .master-directory__item small { color:#77808b; font-size:.72rem; margin-top:.2rem; }
+  .booking-placeholder { padding:2rem 1rem; text-align:center; color:#8a929b; border:1px dashed #ccd2d8; border-radius:12px; }
+  .booking-selection-bar { position:sticky; bottom:1rem; z-index:10; display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-top:1rem; padding:1rem 1.25rem; background:rgba(25,31,38,.94); color:#fff; border-radius:16px; box-shadow:0 12px 35px rgba(0,0,0,.18); backdrop-filter:blur(10px); }
+  #altMastersPanel, #altServicesPanel, #altDatePanel { scroll-margin-top:90px; }
+  .booking-selection-bar small, .booking-selection-bar strong { display:block; }
+  .booking-selection-bar small { opacity:.65; font-size:.68rem; text-transform:uppercase; }
+  .booking-selection-bar strong { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .alt-slots { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.5rem; }
+  .alt-slot { border:1px solid var(--phoenix-primary); color:var(--phoenix-primary); background:#fff; border-radius:9px; padding:.65rem .4rem; font-weight:700; }
+  .alt-slot:hover { background:var(--phoenix-primary); color:#fff; }
+  .booking-flow-pills { display:flex; justify-content:flex-end; gap:.5rem; flex-wrap:wrap; }
+  .booking-flow-pills span { padding:.55rem .85rem; border-radius:999px; background:#e8ebef; color:#6d7580; font-size:.78rem; }
+  .booking-flow-pills span.is-active { background:var(--phoenix-primary); color:#fff; }
+  .master-directory { position:sticky; top:105px; }
+  .master-directory__avatar { display:flex; width:42px; height:42px; flex:0 0 42px; border-radius:50%; align-items:center; justify-content:center; background:#eef1f5; font-weight:700; }
+  .master-directory__item i { margin-left:auto; }
+  .service-tiles { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.75rem; }
+  .service-tiles .booking-option { margin:0; }
+  @media(max-width:1199px) { .booking-board { grid-template-columns:1fr 1fr; }.booking-board__calendar { grid-column:1/-1; }.master-directory { position:static; } }
+  @media(max-width:767px) { .booking-board { grid-template-columns:minmax(0,1fr); }.booking-board__calendar { grid-column:auto; }.service-tiles { grid-template-columns:minmax(0,1fr); }.booking-selection-bar { position:relative; grid-template-columns:minmax(0,1fr); gap:.45rem; bottom:auto; width:100%; }.booking-board__scroll { max-height:none; }.booking-flow-pills { justify-content:flex-start; }.alt-slots { grid-template-columns:repeat(3,minmax(0,1fr)); }.booking-template .row, .booking-alternative .row { width:100%; margin-left:0; margin-right:0; }.booking-template [class*="col-"], .booking-alternative [class*="col-"] { min-width:0; padding-left:.4rem; padding-right:.4rem; } }
+  @media(max-width:420px) { .alt-slots { grid-template-columns:repeat(2,minmax(0,1fr)); }.booking-board__panel, .master-directory, .master-workspace { padding:1rem; border-radius:14px; } }
+</style>
 @endpush
 <x-app-layout>
-      <section class="pt-6 pt-md-10 pb-10 calendar_bg ff_secondary">
+      @if($bookingTemplate === 'classic')
+        @include('pages.booking.templates.single-page')
+      @elseif($bookingTemplate === 'wizard')
+        @include('pages.booking.templates.master-first')
+      @else
+        @include('pages.booking.templates.compact')
+      @endif
+
+      @if(false)
+      @if($bookingTemplate === 'classic')
+      <section class="booking-template booking-template--classic pt-6 pt-md-10 pb-10 calendar_bg ff_secondary" data-booking-template="classic">
+        <div class="booking-template__intro container mb-5 text-center">
+          <h1 class="fs-4 fs-md-2 mb-2">{{ __('msg.menu_booking') }}</h1>
+          <p class="text-body-secondary mb-4">{{ __('msg.choose_service') }} · {{ __('msg.choose_master') }} · {{ __('msg.choose_date') }}</p>
+          <div class="booking-progress" aria-label="Booking progress">
+            <div class="booking-progress__item is-active" data-progress-step="1"><span class="booking-progress__number">1</span><span class="booking-progress__label">{{ __('msg.choose_service') }}</span></div>
+            <div class="booking-progress__item" data-progress-step="2"><span class="booking-progress__number">2</span><span class="booking-progress__label">{{ __('msg.choose_master') }}</span></div>
+            <div class="booking-progress__item" data-progress-step="3"><span class="booking-progress__number">3</span><span class="booking-progress__label">{{ __('msg.choose_date') }}</span></div>
+          </div>
+        </div>
         <div class="row col-12 d-flex justify-content-end">
           <div id="steps" class="row col-12 col-xl-8 p-0">
             <div class="bookingSteps">
@@ -116,9 +257,9 @@
           <div id="info" class="row col-12 col-xl-4">
             <div class="card mt-5 mt-lg-0">
               <div class="card-body d-flex flex-column align-items-between">
-                <img class="rounded-2 mb-3 mx-auto" src="{{ asset('assets/img/logos/logo.svg') }}" alt="GoodFeet" width="60%" class="logoLarge logoContainer" />
-                <p class="mb-1 text-body-tertiary fs-7 text-center">{{ $settings['company_name'] }}</p>
-                <p class="mb-1 text-body-tertiary fs-9 text-center">{{ $settings['company_address'] }}</p>
+                <img class="rounded-2 mb-3 mx-auto logoLarge logoContainer" src="{{ $settings['logo_url'] ?? asset('assets/img/logos/logo.svg') }}" alt="{{ $settings['company_name'] ?? config('app.name') }}" width="60%" />
+                <p class="mb-1 text-body-tertiary fs-7 text-center">{{ $settings['company_name'] ?? config('app.name') }}</p>
+                @if(!empty($settings['company_address']))<p class="mb-1 text-body-tertiary fs-9 text-center">{{ $settings['company_address'] }}</p>@endif
                 <p class="mb-5 text-body-tertiary fs-9 text-center">
                   <span class="fw-semibold">{{ __('msg.book__working_hourstitle') }}: </span>
                   {{ __('msg.book__working_hours') }}
@@ -133,14 +274,21 @@
           </div>
         </div>
       </section>
+      @elseif($bookingTemplate === 'wizard')
+        @include('pages.booking.templates.wizard')
+      @else
+        @include('pages.booking.templates.compact')
+      @endif
+      @endif
       
+    @if($bookingTemplate === 'compact')
     @push('scripts')
     <script>
         $(document).ready(function() {
           function updateServiceInfoForDate(serviceId, dateStr) {
               if (!serviceId || !dateStr) return;
               $.ajax({
-                  url: "{{ route('api.service.effective') }}",
+                  url: "{{ route('booking.service.effective') }}",
                   type: "POST",
                   dataType: "json",
                   data: {
@@ -193,6 +341,8 @@
             let choose_date = null;
             let choose_price = null;
             var bookedSlots = [];
+            var compactSlotsRequest = null;
+            var compactSelectedDate = null;
 
             var services = @json($services);
             var redDays = @json($redDays); 
@@ -212,6 +362,14 @@
                 "pühapäev": "sunday"
             };
             var busyDays = [];
+
+            function updateBookingProgress() {
+              $('.booking-progress__item').each(function() {
+                const step = Number($(this).data('progressStep'));
+                $(this).toggleClass('is-active', step === bookingStep);
+                $(this).toggleClass('is-complete', step < bookingStep);
+              });
+            }
 
             let chooseService = @json($chooseService);
 
@@ -261,11 +419,13 @@
 
             function nextStep(){
               bookingStep++;
+              updateBookingProgress();
               stepRules(bookingStep, 'inc');
               scrollToTop();
             }
             function prevStep(){
               bookingStep--;
+              updateBookingProgress();
               stepRules(bookingStep, 'dec');
               scrollToTop();
             }
@@ -356,6 +516,8 @@
             });
             
             $('.serviceChoose').on('click', function () {
+                    $('.serviceChoose').removeClass('is-selected');
+                    $(this).addClass('is-selected');
                     const loop = $(this).data('loop'); 
                     const name = $(this).data('name'); 
                     service_id = $(this).data('id'); 
@@ -415,6 +577,8 @@
 
             $('#mastersContainer').on('click', '.masterChoose', function (e) {
               e.preventDefault();
+              $('.masterChoose').removeClass('is-selected');
+              $(this).addClass('is-selected');
               user_id= $(this).data('userId');
               user_name= $(this).data('userName');
               
@@ -435,6 +599,8 @@
             });
 
             function renderSlots(service_id, user_id, choose_date){
+                compactSelectedDate = choose_date;
+                if (compactSlotsRequest) compactSlotsRequest.abort();
                 moment.locale('et');
                 let formattedDate = moment(choose_date).format('dddd D MMMM');
                 $('#dateName').text(formattedDate);
@@ -442,13 +608,14 @@
                 if (closedDays.includes(choose_date)) {
                         return false;
                 } else {
-                  $.ajax({
-                    url: "{{  route('api.booking.getFullyBooked') }}",
+                  compactSlotsRequest = $.ajax({
+                    url: "{{ route('booking.slots') }}",
                     type:"POST",
                     dataType: 'json',
                     data:{ service_id, user_id, choose_date},
                     success:function(response)
                     {
+                      if (compactSelectedDate !== choose_date) return;
                       bookedSlots = response.map(item => ({
                           start: item.start,
                           end: item.end,
@@ -456,6 +623,8 @@
                       
                       $('#availableSlots').empty();
                       if(bookedSlots.length === 0){
+                        if (!busyDays.includes(choose_date)) busyDays.push(choose_date);
+                        $(`#bookingCalendar td[data-date="${choose_date}"]`).addClass('disabled-day');
                         $('#availableSlots').html(`<div class="alert-message">${bookingerrorText}</div>`);
                       }
 
@@ -469,6 +638,13 @@
                           let url = `/booking/create?start=${appointment_start}&end=${appointment_end}&user_id=${user_id}&service_id=${service_id}&choose_date=${choose_date}`;
                           window.location.href = url;
                       });
+                    },
+                    error:function(xhr, status)
+                    {
+                      if (status === 'abort' || compactSelectedDate !== choose_date) return;
+                      if (!busyDays.includes(choose_date)) busyDays.push(choose_date);
+                      $(`#bookingCalendar td[data-date="${choose_date}"]`).addClass('disabled-day').removeClass('selected-day');
+                      $('#availableSlots').html(`<div class="alert-message">${bookingerrorText}</div>`);
                     },
                   });
                 }
@@ -584,7 +760,7 @@
                 $('#bookingCalendar').html('<div class="text-center py-5"><i class="fas fa-spinner fa-spin fs-4"></i></div>');
                 
                 $.ajax({
-                    url: "{{ route('api.booking.getBusyDays') }}",
+                    url: "{{ route('booking.busy-days') }}",
                     type: "POST",
                     dataType: 'json',
                     data: { service_id, user_id },
@@ -599,4 +775,5 @@
 
     </script>
 @endpush
+    @endif
 </x-app-layout>

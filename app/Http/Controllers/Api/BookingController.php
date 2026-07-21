@@ -127,7 +127,8 @@ class BookingController extends Controller
                 $price
             );
 
-            $redirectUrl = route('booking.show', [$data['appointmentId']]);
+            $appointment = Appointments::findOrFail($data['appointmentId']);
+            $redirectUrl = route('booking.show', ['appointment' => $appointment->public_uuid]);
 
             return response()->json([
                 'redirectUrl' => $redirectUrl,

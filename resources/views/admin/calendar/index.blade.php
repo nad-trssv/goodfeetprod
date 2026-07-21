@@ -7,6 +7,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/locale/et.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/et.js"></script>
+    <style>
+      #calendar .fc-day-header { padding: .65rem .25rem; font-weight: 700; text-transform: capitalize; }
+      #calendar .fc-day-top { border: 1px solid var(--phoenix-border-color, #e3e6ed); padding: .35rem .45rem; }
+      #calendar .fc-day-top .fc-day-number { float: none; display: inline-flex; min-width: 1.75rem; min-height: 1.75rem; align-items: center; justify-content: center; }
+      #calendar .fc-bg table,
+      #calendar .fc-content-skeleton table { width: 100%; table-layout: fixed; }
+      #calendar .fc-event { white-space: normal; line-height: 1.25; padding: .15rem .25rem; }
+      #calendar .fc-title { font-weight: 600; }
+    </style>
 @endpush
 <x-dashboard-layout>
     <div class="content">
@@ -21,6 +30,15 @@
           <a href="{{ route('calendar.create') }}" class="btn btn-primary btn-sm"><span class="fas fa-plus pe-2 fs-10"></span>Новая запись</a>
         </div>
       </div>
+        @isset($master)
+          <div class="alert alert-subtle-primary d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <div><strong>{{ $master->name }}</strong> — персональный календарь</div>
+            <span>{{ count($appointments) }} записей</span>
+          </div>
+          @if(count($appointments) === 0)
+            <div class="alert alert-subtle-secondary mb-3">У этого пользователя пока нет записей. Календарь ниже отображает его личное расписание.</div>
+          @endif
+        @endisset
         <div class="calendar-outline mt-6 mb-9 fc fc-media-screen fc-direction-ltr fc-theme-standard" id="calendar"></div>
         <div id="destroyEvent"><span class="text-danger fs-5 uil uil-trash-alt"></span></div>
         <div class="modal fade" id="eventDetailsModal" tabindex="-1">
@@ -156,6 +174,7 @@
                     center:'prev, title, next',
                     right:'month,agendaWeek, agendaDay'
                   },
+                  columnFormat: 'dddd',
                   events: appointments,
                   timeFormat: 'HH:mm',
                   selectable: true,
@@ -191,6 +210,10 @@
                           marginRight: '10px'
                       });
                       element.find('.fc-time').prepend(circle);
+                      if (event.master) {
+                          element.find('.fc-title').text(event.master + ' · ' + event.title);
+                          element.attr('title', event.master + ' — ' + event.title);
+                      }
 
                       var eventDate = event.start.format('YYYY-MM-DD'); 
                       if (redDates.includes(eventDate)) {

@@ -24,6 +24,9 @@ class getFullyBookedRequest extends FormRequest
         return [
             'service_id'    => ['required', 'integer'],
             'user_id'       => ['required', 'integer'],
+            'choose_date'   => ['nullable', 'date_format:Y-m-d'],
+            'range_start'   => ['nullable', 'date_format:Y-m-d'],
+            'range_end'     => ['nullable', 'date_format:Y-m-d', 'after_or_equal:range_start'],
         ];
     }
 }

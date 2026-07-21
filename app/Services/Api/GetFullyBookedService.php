@@ -3,7 +3,6 @@
 namespace App\Services\Api;
 
 use App\Http\Requests\BookingRequest;
-use App\Models\AppointmentMedia;
 use App\Models\Appointments;
 use App\Models\RedDay;
 use App\Models\Services;
@@ -11,17 +10,26 @@ use App\Models\SiteSettings;
 use App\Models\UserSchedule;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
 use Exception;
+use App\Services\Booking\BookingCreator;
+use App\Services\Booking\BookingCalendarService;
+use App\Services\Booking\RoomAllocationService;
+use App\Services\Booking\SlotAvailabilityService;
 
 class GetFullyBookedService
 {
-    public $appointments;
+    public function __construct(
+        private readonly RoomAllocationService $rooms,
+        private readonly BookingCreator $creator,
+        private readonly BookingCalendarService $calendar,
+        private readonly SlotAvailabilityService $availability,
+    ) {
+    }
 
     public function getList($request)
     {
         try {
-        $check = $this->isDayFree($request->user_id, $request->service_id, $request->choose_date);
+        $check = $this->calendar->isClosed($request->choose_date, $request->user_id);
             if ($check === true) {
                 return [
                     'status' => 'error',
@@ -43,87 +51,52 @@ class GetFullyBookedService
 
         } catch (Exception $exception) {
             Log::info($exception->getMessage());
-            throw new Exception($exception->getMessage(), 422);
+            throw $exception;
         }
     }
 
     public function store(BookingRequest $request)
     {
-        $date = $request->choose_date;
-        $startTime = $request->appointment_start;
-        $endTime = $request->appointment_end;
+        $service = Services::where('status', 1)->where('is_deleted', 0)->findOrFail($request->service_id);
+        abort_unless($service->users()->whereKey($request->user_id)->exists(), 422);
+        $slot = collect($this->getList($request)['slots'])->first(
+            fn ($slot) => $slot['start'] === $request->appointment_start && $slot['end'] === $request->appointment_end
+        );
+        abort_unless($slot, 409, 'The selected slot is no longer available.');
+        $appointment = $this->creator->create($request, $slot, $service);
 
-        $startDateTime = Carbon::createFromFormat('Y-m-d H:i', "$date $startTime");
-        $endDateTime = Carbon::createFromFormat('Y-m-d H:i', "$date $endTime");
-
-        $existingAppointment = Appointments::where('user_id', $request->user_id)->where(function ($query) use ($startDateTime, $endDateTime) {
-            $query->where(function ($query) use ($startDateTime, $endDateTime) {
-                $query->where('appointment_start', '<', $endDateTime)
-                      ->where('appointment_end', '>', $startDateTime);
-            });
-        })->exists();
-
-        if ($existingAppointment) {
-            return response()->json([
-                'error' => 'В это время уже существует бронирование.'
-            ], 400);
-        }
-
-        try {
-            return DB::transaction(function () use ($request, $startDateTime, $endDateTime) {
-                $roomId = $this->assignRoom(
-                    $request->user_id,
-                    $request->choose_date,
-                    $request->appointment_start,
-                    $request->appointment_end
-                );
-
-                $appointment = Appointments::create([
-                    'user_id' => $request->user_id,
-                    'room_id' => $roomId,
-                    'service_id' => $request->service_id,
-                    'price' => $request->price,
-                    'appointment_start' => $startDateTime,
-                    'appointment_end' => $endDateTime,
-                    'client_email' => $request->client_email,
-                    'client_phone' => $request->client_phone,
-                    'client_name' => $request->client_name,
-                    'client_lastname' => $request->client_lastname,
-                    'description' => $request->description,
-                ]);
-
-                if ($request->hasFile('files')) {
-                    foreach ($request->file('files') as $file) {
-                        $path = $file->store('appointments', 'public');
-                        AppointmentMedia::create([
-                            'appointment_id' => $appointment->id,
-                            'photo_path' => $path,
-                        ]);
-                    }
-                }
-
-                return response()->json([
-                    'message' => 'Бронирование успешно создано!',
-                    'appointment' => $appointment,
-                    'appointmentId' => $appointment['id'],
-                ], 201);
-            });
-        } catch (Exception $exception) {
-            Log::info($exception->getMessage());
-            throw new Exception($exception->getMessage(), 422);
-        }
+        return response()->json([
+            'message' => 'Booking created successfully.',
+            'appointment' => $appointment,
+            'appointmentId' => $appointment->id,
+        ], 201);
     }
 
 function getBusyDays($request)
 {
     $userId = $request->user_id;
-    $limit = $this->getBookingLimit($userId);
+    $limit = $this->calendar->bookingLimit();
     $days = (int) $limit['days'];
 
     $today = Carbon::now()->format('Y-m-d');
     $limitDay = Carbon::now()->addDays($days)->format('Y-m-d');
+    $rangeStart = $request->input('range_start', $today);
+    $rangeEnd = $request->input('range_end', $limitDay);
+    $start = Carbon::parse($rangeStart)->max(Carbon::parse($today));
+    $end = Carbon::parse($rangeEnd)->min(Carbon::parse($limitDay));
+
+    // A calendar view contains at most six weeks. Clamp arbitrary public
+    // requests so this endpoint can never trigger an unbounded day-by-day scan.
+    if ($start->diffInDays($end, false) > 62) {
+        $end = $start->copy()->addDays(62);
+    }
+
+    if ($end->lt($start)) {
+        return [];
+    }
 
     $busyDays = [];
+    $service = Services::where('status', 1)->where('is_deleted', 0)->findOrFail($request->service_id);
 
     // Кэшируем данные мастера
     $userSchedule = UserSchedule::where('user_id', $userId)->first();
@@ -132,23 +105,25 @@ function getBusyDays($request)
         $hasFixed = ($userSchedule && $userSchedule->fixed_booking_enabled && !empty($userSchedule->fixed_booking_slots))
             || (isset($fixedData['value']) && $fixedData['value'] == 1);
 
-    for ($date = Carbon::parse($today); $date->lte(Carbon::parse($limitDay)); $date->addDay()) {
+    for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
         $day = $date->format('Y-m-d');
 
         // Проверяем полностью закрытый день
-        if ($this->isDayFree($userId, $request->service_id, $day)) {
+        if ($this->calendar->isClosed($day, $userId)) {
             $busyDays[] = $day;
             continue;
         }
 
-        $workingHours = $this->getWorkHours($day, $userId);
+        $workingHours = $this->calendar->workHours($day, $userId);
         if (!$workingHours || !$workingHours['start'] || !$workingHours['end']) {
             $busyDays[] = $day;
             continue;
         }
-        $availableSlots = $this->getAvailableSlots($day, $request->service_id, $userId);
+        $availableSlots = $service->has_fixed_time === 1
+            ? $this->getAvailableSlotsForFixed($day, $request->service_id, $userId)
+            : $this->getAvailableSlots($day, $request->service_id, $userId);
 
-        $duration = $this->getServiceDuration($request->service_id, $day);
+        $duration = $this->calendar->serviceDuration($request->service_id, $day);
         $hasEnoughSpace = false;
 
         foreach ($availableSlots as $slot) {
@@ -341,17 +316,19 @@ function isDayFree($userId, $serviceId, $date){
 
     function getAvailableSlots($date, $serviceId, $userId)
     {
-        $workHours = $this->getWorkHours($date, $userId);
+        return $this->availability->slots($date, (int) $serviceId, (int) $userId);
+
+        $workHours = $this->calendar->workHours($date, $userId);
 
         // Нет рабочих часов — нет слотов
         if (!$workHours || !$workHours['start'] || !$workHours['end']) {
             return [];
         }
 
-        $lunchHours = $this->getLunchHours($userId);
-        $redDays = $this->getRedDays($date, $userId);
-        $bookedEvents = $this->getBookedEvents($userId, $date);
-        $serviceDuration = $this->getServiceDuration($serviceId, $date);
+        $lunchHours = $this->calendar->lunchHours($userId);
+        $redDays = $this->calendar->partialClosures($date, $userId);
+        $bookedEvents = $this->calendar->bookedEvents($userId, $date);
+        $serviceDuration = $this->calendar->serviceDuration($serviceId, $date);
 
         // Проверяем персональное фиксированное время мастера
         $userSchedule = $userId && $userId !== 'all' ? UserSchedule::where('user_id', $userId)->first() : null;
@@ -410,7 +387,7 @@ function isDayFree($userId, $serviceId, $date){
                 }
 
                 if ($isAvailable) {
-                    if ($this->getRoomCapacityForSlot($userId, $date, $slotStart->format('H:i'), $slotEnd->format('H:i'))) {
+                    if ($this->rooms->hasCapacity($userId, $date, $slotStart->format('H:i'), $slotEnd->format('H:i'))) {
                         $availableSlots[] = [
                             'start' => $slotStart->format('H:i'),
                             'end' => $slotEnd->format('H:i'),
@@ -468,7 +445,7 @@ function isDayFree($userId, $serviceId, $date){
             }
 
             if ($isAvailable) {
-                if ($this->getRoomCapacityForSlot($userId, $date, $slotStart->format('H:i'), $slotEnd->format('H:i'))) {
+                if ($this->rooms->hasCapacity($userId, $date, $slotStart->format('H:i'), $slotEnd->format('H:i'))) {
                     $availableSlots[] = [
                         'start' => $slotStart->format('H:i'),
                         'end' => $slotEnd->format('H:i'),
@@ -482,6 +459,8 @@ function isDayFree($userId, $serviceId, $date){
 
     function getAvailableSlotsForFixed($date, $serviceId, $userId)
     {
+        return $this->availability->slots($date, (int) $serviceId, (int) $userId);
+
         $fixedTimeCheck = Services::where('id', $serviceId)->first(['time_from', 'time_to']);
 
         $workHours = [
@@ -489,10 +468,10 @@ function isDayFree($userId, $serviceId, $date){
             'end' => $fixedTimeCheck->time_to,
         ];
 
-        $lunchHours = $this->getLunchHours($userId);
-        $redDays = $this->getRedDays($date, $userId);
-        $bookedEvents = $this->getBookedEvents($userId, $date);
-        $serviceDuration = $this->getServiceDuration($serviceId, $date);
+        $lunchHours = $this->calendar->lunchHours($userId);
+        $redDays = $this->calendar->partialClosures($date, $userId);
+        $bookedEvents = $this->calendar->bookedEvents($userId, $date);
+        $serviceDuration = $this->calendar->serviceDuration($serviceId, $date);
         $availableSlots = [];
 
         $startTime = strtotime($workHours['start']);
@@ -532,7 +511,7 @@ function isDayFree($userId, $serviceId, $date){
             }
 
             if ($isAvailable) {
-                if ($this->getRoomCapacityForSlot($userId, $date, $slotStart, $slotEnd)) {
+                if ($this->rooms->hasCapacity($userId, $date, $slotStart, $slotEnd)) {
                     $availableSlots[] = [
                         'start' => $slotStart,
                         'end' => $slotEnd,

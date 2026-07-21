@@ -8,7 +8,6 @@
                 <form id="storeBooking" class="needs-validation" novalidate="">
                     @csrf
                     <input type="hidden" name="service_id" value="{{ $service['id'] }}">
-                    <input type="hidden" name="price" value="{{ $service['effective_price'] }}">
                     <input type="hidden" name="user_id" value="{{ $bookingData['user_id'] }}">
                     <input type="hidden" name="choose_date" value="{{ $bookingData['choose_date'] }}">
                     <input type="hidden" name="appointment_start" value="{{ $bookingData['start'] }}">
@@ -189,7 +188,7 @@
                     e.preventDefault();
 
                     let formData = new FormData(this);
-                    let url = "{{ route('api.booking.store') }}";
+                    let url = "{{ route('booking.store') }}";
 
                     $.ajax({
                         url: url,

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\RedDay;
 use App\Models\SiteSettings;
+use Illuminate\Support\Facades\Storage;
 
 class SettingService
 {
@@ -120,10 +121,50 @@ class SettingService
 
     public function updateMainSettings($request)
     {
-        foreach ($request->all() as $key => $value) {
-            SiteSettings::where('key', $key)
-                ->update(['payload' => json_encode($value, JSON_UNESCAPED_UNICODE)]);
+        $groups = [
+            'google' => 'map', 'waze' => 'map',
+            'social_media_facebook' => 'social_media', 'social_media_youtube' => 'social_media',
+            'social_media_instagram' => 'social_media', 'social_media_twitter' => 'social_media',
+            'logo' => 'branding', 'footer_logo' => 'branding', 'favicon' => 'branding',
+            'booking_template' => 'booking',
+        ];
+
+        foreach ($request->safe()->except(['logo', 'footer_logo', 'favicon']) as $key => $value) {
+            if ($key === 'company_short_description') {
+                $value = collect($value ?? [])->mapWithKeys(function ($html, $locale) {
+                    if (!array_key_exists($locale, config('supported_locales'))) {
+                        return [];
+                    }
+
+                    return [$locale => strip_tags((string) $html, '<p><br><strong><b><em><i><u><ul><ol><li>')];
+                })->all();
+            }
+
+            SiteSettings::updateOrCreate(
+                ['key' => $key],
+                ['group' => $groups[$key] ?? 'company', 'payload' => json_encode($value, JSON_UNESCAPED_UNICODE)]
+            );
         }
-        return $this->setting;
+
+        foreach (['logo', 'footer_logo', 'favicon'] as $key) {
+            if (!$request->hasFile($key)) {
+                continue;
+            }
+
+            $setting = SiteSettings::where('key', $key)->first();
+            $oldPath = $setting ? json_decode($setting->payload, true) : null;
+            $path = $request->file($key)->store('branding', 'public');
+
+            SiteSettings::updateOrCreate(
+                ['key' => $key],
+                ['group' => 'branding', 'payload' => json_encode($path, JSON_UNESCAPED_UNICODE)]
+            );
+
+            if (is_string($oldPath) && str_starts_with($oldPath, 'branding/') && $oldPath !== $path) {
+                Storage::disk('public')->delete($oldPath);
+            }
+        }
+
+        return true;
     }
 }

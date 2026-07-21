@@ -180,7 +180,7 @@
 
 
                 $.ajax({
-                  url: 'api/profile/setProfile',
+                  url: '{{ route('profile.ajax.update') }}',
                   type: "POST",
                   headers: {
                       'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),

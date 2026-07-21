@@ -14,8 +14,14 @@ use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 use App\Http\Controllers\Admin\ServiceRuleController;
+use App\Http\Controllers\Api\BookingController as AjaxBookingController;
+use App\Http\Controllers\Api\ServiceController as AjaxServiceController;
+use App\Http\Controllers\Api\RedDayController as AjaxRedDayController;
+use App\Http\Controllers\Api\MainSettingController as AjaxMainSettingController;
+use App\Http\Controllers\Api\FixedBookingController as AjaxFixedBookingController;
 
 Route::get('/', [PageController::class, 'index'])->name('home');
+Route::get('/sitemap.xml', [PageController::class, 'sitemap'])->name('sitemap');
 Route::get('/localization/{lang}', [LanguageController::class, 'change'])->name('lang.change');
 
 Route::get('/gf-administraator', [AuthenticatedSessionController::class, 'create'])->name('login');
@@ -28,12 +34,17 @@ Route::post('/login', function () {
     abort(404);
 });
 
-Route::resource('/booking', BookingController::class);
+Route::get('/booking/create', [BookingController::class, 'create'])->name('booking.create');
+Route::get('/booking/confirmation/{appointment:public_uuid}', [BookingController::class, 'show'])->name('booking.show');
 Route::get('/services', [ServiceController::class, 'index'])->name('clientservice');
 Route::get('/galerii', [PageController::class, 'gallery'])->name('gallery.index');
 Route::get('/booking', [BookingController::class, 'serviceBooking'])->name('serviceBooking');
 Route::get('/contacts', [PageController::class, 'contacts'])->name('contacts');
 Route::get('/policy', [PageController::class, 'policy'])->name('policy');
+Route::post('/booking/slots', [AjaxBookingController::class, 'getFullyBooked'])->name('booking.slots');
+Route::post('/booking/busy-days', [AjaxBookingController::class, 'getBusyDays'])->name('booking.busy-days');
+Route::post('/booking', [AjaxBookingController::class, 'storeBooking'])->name('booking.store');
+Route::post('/booking/effective-service', [AjaxServiceController::class, 'effective'])->name('booking.service.effective');
 
 Route::middleware([
     'auth:sanctum',
@@ -61,6 +72,7 @@ Route::middleware([
     Route::get('member', [MemberController::class, 'index'])->name('member.index');
 
     Route::resource('profile', ProfileController::class);
+    Route::post('profile/update', [ProfileController::class, 'update'])->name('profile.ajax.update');
 
     Route::get('master/schedule', [App\Http\Controllers\Admin\MasterScheduleController::class, 'index'])->name('master.schedule.index');
     Route::post('master/schedule/updateWorkHours', [App\Http\Controllers\Admin\MasterScheduleController::class, 'updateWorkHours'])->name('master.schedule.updateWorkHours');
@@ -92,12 +104,18 @@ Route::middleware([
         Route::delete('member/{id}', [MemberController::class, 'destroy'])->name('member.destroy');
         Route::post('admin/red-days/store', [App\Http\Controllers\Admin\MasterScheduleController::class, 'storeRedDayForMaster'])->name('admin.red-days.store');
 
-        Route::resource('settings', SettingsController::class);
+        Route::resource('settings', SettingsController::class)->only(['index']);
         Route::post('settings/updateWorkHours', [SettingsController::class, 'updateWorkHours']);
         Route::post('settings/updateLunchHours', [SettingsController::class, 'updateLunchHours']);
         Route::post('settings/storeRedDay', [SettingsController::class, 'storeRedDay']);
         Route::post('settings/updateFixedBooking', [SettingsController::class, 'updateFixedBooking']);
-        Route::post('settings/updateMainSettings', [SettingsController::class, 'updateMainSettings']);
+        Route::post('settings/updateMainSettings', [SettingsController::class, 'updateMainSettings'])->name('settings.main.update');
+        Route::get('settings/red-days', [AjaxRedDayController::class, 'getRedDays'])->name('settings.red-days.index');
+        Route::delete('settings/red-days/{id}', [AjaxRedDayController::class, 'destroy'])->name('settings.red-days.destroy');
+        Route::put('settings/red-days/{id}', [AjaxRedDayController::class, 'update'])->name('settings.red-days.update');
+        Route::get('settings/main', [AjaxMainSettingController::class, 'mainSettings'])->name('settings.main');
+        Route::put('settings/booking-limit', [AjaxMainSettingController::class, 'updateLimitDays'])->name('settings.booking-limit.update');
+        Route::get('settings/fixed-booking', [AjaxFixedBookingController::class, 'getFixedBooking'])->name('settings.fixed-booking');
 
         Route::get('admin/red-days', [App\Http\Controllers\Admin\MasterScheduleController::class, 'allRedDays'])->name('admin.red-days.index');
         Route::get('admin/masters/schedule', [MemberController::class, 'allSchedules'])->name('admin.masters.schedule');

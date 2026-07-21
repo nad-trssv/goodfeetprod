@@ -6,9 +6,18 @@ use App\Models\Services;
 use App\Models\SiteSettings;
 use Illuminate\Contracts\View\View;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Response;
 
 class PageController extends Controller
 {
+    public function sitemap(): Response
+    {
+        return response()
+            ->view('seo.sitemap', ['routes' => ['home', 'clientservice', 'gallery.index', 'contacts', 'policy']])
+            ->header('Content-Type', 'application/xml; charset=UTF-8');
+    }
+
     public function index(): View
     {
         $locale = app()->getLocale();
@@ -67,11 +76,22 @@ class PageController extends Controller
     }
 
     function getSettings(){
-        $siteSettings = SiteSettings::where('group', 'company')->get();
+        $siteSettings = SiteSettings::whereIn('group', ['company', 'branding'])->get();
         if ($siteSettings) {
             $formattedSettings = $siteSettings->pluck('payload', 'key')->map(function ($value) {
-                return trim($value, '"');
+                return json_decode($value, true);
             })->toArray();
+
+            foreach (['logo', 'footer_logo', 'favicon'] as $key) {
+                if (!empty($formattedSettings[$key])) {
+                    $formattedSettings[$key.'_url'] = Storage::disk('public')->url($formattedSettings[$key]);
+                }
+            }
+            $locale = app()->getLocale();
+            $descriptions = $formattedSettings['company_short_description'] ?? [];
+            $formattedSettings['company_short_description'] = is_array($descriptions)
+                ? ($descriptions[$locale] ?? $descriptions[config('app.fallback_locale')] ?? '')
+                : '';
     
             return $formattedSettings;
         }

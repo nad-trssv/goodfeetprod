@@ -1,2 +1,14 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /gf-administraator
+Disallow: /dashboard
+Disallow: /calendar
+Disallow: /service
+Disallow: /member
+Disallow: /profile
+Disallow: /settings
+Disallow: /admin
+Disallow: /master
+Disallow: /booking/create
+Disallow: /booking/confirmation/
+Disallow: /login

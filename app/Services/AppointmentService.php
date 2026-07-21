@@ -146,13 +146,12 @@ class AppointmentService
     public function store(AppointmentRequest $request)
     {
         try {
-            $bookedService = new \App\Services\Api\GetFullyBookedService();
-            
             $startTime = \Carbon\Carbon::parse($request->appointment_start)->format('H:i');
             $endTime = \Carbon\Carbon::parse($request->appointment_end)->format('H:i');
             $date = \Carbon\Carbon::parse($request->appointment_start)->format('Y-m-d');
             
-            $roomId = $bookedService->assignRoom($request->user_id, $date, $startTime, $endTime);
+            $roomId = app(\App\Services\Booking\RoomAllocationService::class)
+                ->assign($request->user_id, $date, $startTime, $endTime);
 
             if ($roomId === null && \App\Models\User::with('rooms')->find($request->user_id)?->rooms->isNotEmpty()) {
                 throw new Exception('На это время нет свободных мест в кабинетах. Выберите другое время.');
@@ -171,8 +170,6 @@ class AppointmentService
         try {
             $appointment = Appointments::find($request->id);
             
-            $bookedService = new \App\Services\Api\GetFullyBookedService();
-            
             $startTime = \Carbon\Carbon::parse($request->appointment_start)->format('H:i');
             $endTime = \Carbon\Carbon::parse($request->appointment_end)->format('H:i');
             $date = \Carbon\Carbon::parse($request->appointment_start)->format('Y-m-d');
@@ -180,7 +177,8 @@ class AppointmentService
             // Сбрасываем room_id текущей записи чтобы не мешала при расчёте
             $appointment->update(['room_id' => null]);
             
-            $roomId = $bookedService->assignRoom($request->user_id, $date, $startTime, $endTime);
+            $roomId = app(\App\Services\Booking\RoomAllocationService::class)
+                ->assign($request->user_id, $date, $startTime, $endTime);
 
             if ($roomId === null && \App\Models\User::with('rooms')->find($request->user_id)?->rooms->isNotEmpty()) {
                 throw new Exception('На это время нет свободных мест в кабинетах. Выберите другое время.');

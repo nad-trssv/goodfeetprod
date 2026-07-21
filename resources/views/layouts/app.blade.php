@@ -5,12 +5,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="canonical" href="{{ url()->current() }}">
+    @if(request()->routeIs('booking.create', 'booking.show', 'login*', 'dashboard', 'calendar*', 'service.*', 'member.*', 'profile.*', 'settings.*', 'admin.*', 'master.*'))
+      <meta name="robots" content="noindex, nofollow">
+    @endif
     <!-- Internal application build signature - do not remove -->
     <meta name="x-qc-fingerprint-f5HG-JH25-CDKb-5F54" content="{{ \App\Services\FingerprintService::make() }}">
     <title>@yield('title', 'Esileht')</title>
-    <link rel="apple-touch-icon" sizes="180x180" href="../../public/assets/img/favicons/180x180.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="../../public/assets/img/favicons/32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="../../public/assets/img/favicons/16x16.png">
+    <link rel="icon" href="{{ $settings['favicon_url'] ?? asset('assets/img/favicons/32x32.png') }}">
     <meta name="theme-color" content="#ffffff">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,7 +25,6 @@
         $manifest = json_decode(file_get_contents(public_path('build/manifest.json')), true);
     @endphp
     <link rel="stylesheet" href="{{ asset('build/' . $manifest['resources/css/homepage.css']['file']) }}">
-    <script type="module" src="{{ asset('build/' . $manifest['resources/js/homepage.js']['file']) }}"></script>
     <script type="module" src="{{ asset('build/' . $manifest['resources/js/app.js']['file']) }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     @stack('styles')
@@ -36,25 +37,15 @@
           <div class="header">
             <div class="row justify-content-between mx-2">
               <div class="row col-9 gap-1">
-                <p class="col-12 lh-1 fc_main fw-bold mb-0 fs-10 fs-lg-9 px-1 d-flex align-items-center">{{ __('msg.wordays') }} (09:00 - 18:00)</p>
-                <a class="col-12 lh-1 fc_main fw-bold fs-10 fs-lg-9 px-1 d-flex align-items-center" href="tel:{{ $settings['company_phone'] }}">
-                  {{ $settings['company_phone'] }}
-                </a>
-                <a class="col-12 lh-1 fc_main fw-bold fs-10 fs-lg-9 px-1 d-flex align-items-center" href="mailto:{{ $settings['company_email'] }}">
-                  {{ $settings['company_email'] }}
-                </a>
+                @if(!empty($settings['company_address']))<p class="col-12 lh-1 fc_main fw-bold mb-0 fs-10 fs-lg-9 px-1 d-flex align-items-center">{{ $settings['company_address'] }}</p>@endif
+                @if(!empty($settings['company_phone']))<a class="col-12 lh-1 fc_main fw-bold fs-10 fs-lg-9 px-1 d-flex align-items-center" href="tel:{{ $settings['company_phone'] }}">{{ $settings['company_phone'] }}</a>@endif
+                @if(!empty($settings['company_email']))<a class="col-12 lh-1 fc_main fw-bold fs-10 fs-lg-9 px-1 d-flex align-items-center" href="mailto:{{ $settings['company_email'] }}">{{ $settings['company_email'] }}</a>@endif
               </div>
               <div class="row col-3 align-items-center justify-content-end">
                 <ul class="col-12 d-flex list-unstyled mb-0 p-0 w-100 justify-content-end">
-                  <li class="me-2">
-                    <a class="lh-1 fc_primary fw-bold fs-9" href="{{ route('lang.change', 'et') }}">ET</a>
-                  </li>
-                  <li class="me-2">
-                    <a class="lh-1 fc_primary fw-bold fs-9" href="{{ route('lang.change', 'en') }}">EN</a>
-                  </li>
-                  <li>
-                    <a class="lh-1 fc_primary fw-bold fs-9" href="{{ route('lang.change', 'ru') }}">RU</a>
-                  </li>
+                  @foreach(config('supported_locales') as $locale => $language)
+                    <li class="{{ $loop->last ? '' : 'me-2' }}"><a class="lh-1 fc_primary fw-bold fs-9" href="{{ route('lang.change', $locale) }}">{{ strtoupper($locale) }}</a></li>
+                  @endforeach
                 </ul>
               </div>
             </div>
@@ -68,8 +59,8 @@
           <a class="navbar-brand flex-1 flex-lg-grow-0 me-lg-8 me-xl-13" href="{{  route('home') }}">
             <div class="d-flex align-items-center">
               <div class="logoWrapper">
-                <img src="{{ asset('assets/img/logos/logo.svg') }}" alt="GoodFeet" width="240" height="60" class="logoLarge logoContainer" />
-                <img src="{{ asset('assets/img/logos/logo.svg') }}" alt="GoodFeet" width="140" height="60" class="logoSmall logoContainer d-none" />
+                <img src="{{ $settings['logo_url'] ?? asset('assets/img/logos/logo.svg') }}" alt="{{ $settings['company_name'] ?? config('app.name') }}" width="240" height="60" class="logoLarge logoContainer" />
+                <img src="{{ $settings['logo_url'] ?? asset('assets/img/logos/logo.svg') }}" alt="{{ $settings['company_name'] ?? config('app.name') }}" width="140" height="60" class="logoSmall logoContainer d-none" />
               </div>
             </div>
           </a>
@@ -86,15 +77,9 @@
               <li class="nav-item border-bottom border-translucent border-bottom-lg-0 text-center"><a class="btn_primary" href="{{ route('serviceBooking') }}" target="_blank">{{ __('msg.menu_booking') }}</a></li>
               
               <ul class="col-12 d-flex d-lg-none list-unstyled w-100 justify-content-center mt-4">
-                <li class="me-2">
-                  <a class="lh-1 fc_primary fw-bold fs-9" href="{{ route('lang.change', ['lang' => 'et']) }}">ET</a>
-                </li>
-                <li class="me-2">
-                  <a class="lh-1 fc_primary fw-bold fs-9" href="{{ route('lang.change', ['lang' => 'en']) }}">EN</a>
-                </li>
-                <li>
-                  <a class="lh-1 fc_primary fw-bold fs-9" href="{{ route('lang.change', ['lang' => 'ru']) }}">RU</a>
-                </li>
+                @foreach(config('supported_locales') as $locale => $language)
+                  <li class="{{ $loop->last ? '' : 'me-2' }}"><a class="lh-1 fc_primary fw-bold fs-9" href="{{ route('lang.change', $locale) }}">{{ strtoupper($locale) }}</a></li>
+                @endforeach
               </ul>
             </ul>
           </div>
@@ -109,50 +94,43 @@
         <div class="container">
           <div class="row gy-8 justify-content-between">
             <div class="col-12">
-              <img class="footer_logo mb-2" src="{{ asset('assets/img/logos/logo.svg') }}" alt="GoofeetLogo" height="60">
+              <img class="footer_logo mb-2" src="{{ $settings['footer_logo_url'] ?? $settings['logo_url'] ?? asset('assets/img/logos/logo.svg') }}" alt="{{ $settings['company_name'] ?? config('app.name') }}" height="60">
+              @if(!empty($settings['company_short_description']))
+                <div class="ff_secondary fs-9 fc_primary mt-3 mb-0 col-xl-6">{!! $settings['company_short_description'] !!}</div>
+              @endif
             </div>
             <div class="col-6 col-xl-8 footer_container">
               <h2 class="fs-6 fs-md-5 fs-xl-4 mb-4 fc_main">{{ __('msg.services') }}</h2>
               <div class="container d-flex row col-12">
-                  <ul class="list fc_primary mt-4 col-12 col-xl-6">
-                    <li class="fw_regular fs-10 fs-md-9 fs-xl-8 ff_secondary">{{ __('msg.medical_pedicure') }}</li>
-                    <li class="fw_regular fs-10 fs-md-9 fs-xl-8 ff_secondary">{{ __('msg.medical_pedicure_complex') }}</li>
-                    <li class="fw_regular fs-10 fs-md-9 fs-xl-8 ff_secondary">{{ __('msg.classic_pedicure') }}</li>
-
-                    <li class="fw_regular fs-10 fs-md-9 fs-xl-8 ff_secondary">{{ __('msg.deep_moisturizing_pedicure') }}</li>
-                    <li class="fw_regular fs-10 fs-md-9 fs-xl-8 ff_secondary">{{ __('msg.aesthetic_pedicure') }}</li>
-                    <li class="fw_regular fs-10 fs-md-9 fs-xl-8 ff_secondary">{{ __('msg.ingrown_nail_correction') }}</li>
-                  </ul> 
-                  <ul class="list fc_primary mt-4 col-12 col-xl-6">
-                    <li class="fw_regular fs-10 fs-md-9 fs-xl-8 ff_secondary">{{ __('msg.crack_callus_treatment') }}</li>
-                    <li class="fw_regular fs-10 fs-md-9 fs-xl-8 ff_secondary">{{ __('msg.foot_treatment') }}</li>
-                    <li class="fw_regular fs-10 fs-md-9 fs-xl-8 ff_secondary">{{ __('msg.nail_treatment') }}</li>
-                    <li class="fw_regular fs-10 fs-md-9 fs-xl-8 ff_secondary">{{ __('msg.paraffin_therapy') }}</li>
-                    <li class="fw_regular fs-10 fs-md-9 fs-xl-8 ff_secondary">{{ __('msg.paraffin_therapy_complex') }}</li>
-                    <li class="fw_regular fs-10 fs-md-9 fs-xl-8 ff_secondary">{{ __('msg.sos_services') }}</li>
-                  </ul> 
+                  @foreach($services->take(12)->chunk(6) as $serviceColumn)
+                    <ul class="list fc_primary mt-4 col-12 col-xl-6">
+                      @foreach($serviceColumn as $service)
+                        <li class="fw_regular fs-10 fs-md-9 fs-xl-8 ff_secondary">{{ $service->translation['name'] ?? $service['name'] }}</li>
+                      @endforeach
+                    </ul>
+                  @endforeach
                 </div>
             </div>
             <div class="col-6 col-xl-4 footer_container">
                 <h2 class="fs-6 fs-md-5 fs-xl-4 mb-4 fc_main">{{ __('msg.menu_contact') }}</h2>
                 <div class="contact_list">
                   <div class="contact">
-                    <p class="title fc_primary fs-10 fs-md-9 fs-xl-8 mb-1 ff_secondary mb-3"><i class="fa-solid fa-location-dot me-2"></i>{{ $settings['company_address'] }}</p>
+                    @if(!empty($settings['company_address']))<p class="title fc_primary fs-10 fs-md-9 fs-xl-8 mb-1 ff_secondary mb-3"><i class="fa-solid fa-location-dot me-2"></i>{{ $settings['company_address'] }}</p>@endif
                   </div>
                   <div class="contact">
-                    <p class="title fc_primary fs-10 fs-md-9 fs-xl-8 mb-1 ff_secondary mb-3"><i class="fa-solid fa-phone me-2"></i>{{ __('msg.phone_info') }}: {{ $settings['company_phone'] }}</p>
+                    @if(!empty($settings['company_phone']))<p class="title fc_primary fs-10 fs-md-9 fs-xl-8 mb-1 ff_secondary mb-3"><i class="fa-solid fa-phone me-2"></i>{{ __('msg.phone_info') }}: {{ $settings['company_phone'] }}</p>@endif
                   </div>
                   <div class="contact">
-                    <p class="title fc_primary fs-10 fs-md-9 fs-xl-8 mb-1 ff_secondary mb-3"><i class="fa-solid fa-envelope me-2"></i>{{ $settings['company_email'] }}</p>
+                    @if(!empty($settings['company_email']))<p class="title fc_primary fs-10 fs-md-9 fs-xl-8 mb-1 ff_secondary mb-3"><i class="fa-solid fa-envelope me-2"></i>{{ $settings['company_email'] }}</p>@endif
                   </div>
                 </div>
                 <div class="socials">
-                  <a href="{{ $socials['social_media_facebook'] }}" target="_blank">
+                  @if(!empty($socials['social_media_facebook']))<a href="{{ $socials['social_media_facebook'] }}" target="_blank" rel="noopener noreferrer">
                     <img class="socials" src="{{ asset('assets/img/homepage/svg/facebook-circle.svg') }}" alt="Facebook">
-                  </a>
-                  <a href="{{ $socials['social_media_instagram'] }}" target="_blank">
+                  </a>@endif
+                  @if(!empty($socials['social_media_instagram']))<a href="{{ $socials['social_media_instagram'] }}" target="_blank" rel="noopener noreferrer">
                     <img class="socials" src="{{ asset('assets/img/homepage/svg/instagram-circle.svg') }}" alt="Instagram">
-                  </a>
+                  </a>@endif
                 </div>
                 <div class="contact_list mt-2">
                   <div class="contact">
@@ -161,6 +139,12 @@
                     </p>
                   </div>
                 </div>
+                @if(!empty($settings['company_registration_number']) || !empty($settings['company_bank_account']))
+                  <div class="contact_list mt-2 ff_secondary fs-10 fs-md-9 fc_primary">
+                    @if(!empty($settings['company_registration_number']))<div>Reg. nr: {{ $settings['company_registration_number'] }}</div>@endif
+                    @if(!empty($settings['company_bank_account']))<div>IBAN: {{ $settings['company_bank_account'] }}</div>@endif
+                  </div>
+                @endif
             </div>
           </div>
         </div>
@@ -176,7 +160,7 @@
               </div>
             </div>
             <div class="col-12 col-md-6 ff_secondary fs-10 fs-md-9 fc_light text-center"> 
-              GoodFeet OÜ, {{ date('Y') }} © Kõik õigused kaitstud.
+              {{ $settings['company_name'] ?? config('app.name') }}, {{ date('Y') }} © Kõik õigused kaitstud.
             </div>
             <div class="col-12 col-md-6 text-center">
               <p class="mb-0 fc_light ff_secondary fs-10 fs-md-9">Powered with <i class="fa-solid fa-heart"></i> by <a class="fc_light" href="https://quickCode.ee/" target="_blank">QuickCode OÜ</a></p>

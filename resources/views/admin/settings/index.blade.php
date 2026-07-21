@@ -26,6 +26,14 @@
   .tab-content > .tab-pane.active {
     display: block;
   }
+  .booking-template-option { transition: .2s ease; }
+  .btn-check:checked + .booking-template-option {
+    border-color: var(--phoenix-primary) !important;
+    box-shadow: 0 0 0 3px rgba(56, 116, 255, .16);
+    background: rgba(56, 116, 255, .04);
+  }
+  .booking-template-option .template-selected { display:none; }
+  .btn-check:checked + .booking-template-option .template-selected { display:inline-flex; }
 </style>
 @endpush
 
@@ -106,7 +114,7 @@
         <div class="card">
           <div class="card-header"><h5 class="mb-0">Настройки сайта</h5></div>
           <div class="card-body">
-            <form id="updateSettingsTable">
+            <form id="updateSettingsTable" enctype="multipart/form-data">
               @csrf
               <h6 class="mb-3">Компания</h6>
               <div class="row g-3 mb-4">
@@ -130,6 +138,58 @@
                   <input class="form-control" id="company_address" type="text">
                   <div class="invalid-feedback" id="company_address-error"></div>
                 </div>
+                <div class="col-md-6">
+                  <label class="form-label">Регистрационный номер <span class="text-muted">(необязательно)</span></label>
+                  <input class="form-control" id="company_registration_number" name="company_registration_number" type="text">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Расчётный счёт <span class="text-muted">(необязательно)</span></label>
+                  <input class="form-control" id="company_bank_account" name="company_bank_account" type="text">
+                </div>
+              </div>
+
+              <h6 class="mb-3">Шаблон записи на услугу</h6>
+              <p class="text-muted fs-9">Выберите, как клиент будет проходить шаги услуги, мастера и времени.</p>
+              <div class="row g-3 mb-4">
+                @foreach([
+                  'classic' => ['На одном экране', 'Услуга, мастер, календарь и время без переходов между этапами.'],
+                  'wizard' => ['Сначала специалист', 'Сначала клиент выбирает мастера, затем видит только его услуги и время.'],
+                  'compact' => ['Компактный', 'Плотная сетка для быстрого выбора на одном экране.'],
+                ] as $template => [$title, $description])
+                  <div class="col-md-4">
+                    <input class="btn-check" type="radio" name="booking_template" id="booking_template_{{ $template }}" value="{{ $template }}" {{ $template === 'classic' ? 'checked' : '' }}>
+                    <label class="booking-template-option card h-100 border cursor-pointer" for="booking_template_{{ $template }}">
+                      <span class="card-body"><span class="d-flex justify-content-between fw-semibold mb-2">{{ $title }} <span class="template-selected badge badge-phoenix badge-phoenix-primary">Выбран</span></span><span class="text-muted fs-9">{{ $description }}</span></span>
+                    </label>
+                  </div>
+                @endforeach
+                <div class="invalid-feedback" id="booking_template-error"></div>
+              </div>
+              <div class="text-end mb-5">
+                <button class="btn btn-primary" type="submit"><span class="fas fa-check me-2"></span>Сохранить шаблон</button>
+              </div>
+
+              <h6 class="mb-3">Краткое описание компании</h6>
+              <p class="text-muted fs-9">Показывается в подвале сайта рядом с логотипом.</p>
+              <ul class="nav nav-tabs mb-3" role="tablist">
+                @foreach($supportedLocales as $locale => $language)
+                  <li class="nav-item" role="presentation"><button class="nav-link {{ $loop->first ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#description-{{ $locale }}" type="button">{{ $language }}</button></li>
+                @endforeach
+              </ul>
+              <div class="tab-content mb-4">
+                @foreach($supportedLocales as $locale => $language)
+                  <div class="tab-pane {{ $loop->first ? 'active' : '' }}" id="description-{{ $locale }}">
+                    <textarea class="tinyarea" id="company_short_description_{{ $locale }}" name="company_short_description[{{ $locale }}]" data-locale="{{ $locale }}" data-tinymce="{}"></textarea>
+                    <div class="invalid-feedback" id="company_short_description.{{ $locale }}-error"></div>
+                  </div>
+                @endforeach
+              </div>
+
+              <h6 class="mb-3">Логотипы и favicon</h6>
+              <div class="row g-3 mb-4">
+                <div class="col-md-4"><label class="form-label">Логотип в шапке</label><div class="border rounded p-2 mb-2 text-center"><img id="logo-preview" class="img-fluid" style="height:70px;display:none" alt="Установленный логотип"></div><input class="form-control" id="logo" name="logo" type="file" accept=".png,.jpg,.jpeg,.webp,.svg"><div class="invalid-feedback" id="logo-error"></div></div>
+                <div class="col-md-4"><label class="form-label">Логотип в подвале</label><div class="border rounded p-2 mb-2 text-center"><img id="footer_logo-preview" class="img-fluid" style="height:70px;display:none" alt="Установленный логотип подвала"></div><input class="form-control" id="footer_logo" name="footer_logo" type="file" accept=".png,.jpg,.jpeg,.webp,.svg"><div class="invalid-feedback" id="footer_logo-error"></div></div>
+                <div class="col-md-4"><label class="form-label">Favicon</label><div class="border rounded p-2 mb-2 text-center"><img id="favicon-preview" class="img-fluid" style="height:70px;display:none" alt="Установленный favicon"></div><input class="form-control" id="favicon" name="favicon" type="file" accept=".png,.ico,.svg"><div class="invalid-feedback" id="favicon-error"></div></div>
               </div>
 
               <h6 class="mb-3">Карта <small class="text-muted fw-normal">(вставьте iframe код)</small></h6>
@@ -231,6 +291,7 @@
   @push('scripts')
   <script src="{{ asset('vendors/flatpickr/flatpickr.min.js') }}"></script>
   <script src="vendors/sortablejs/Sortable.min.js"></script>
+  <script src="{{ asset('assets/js/tiny.js') }}"></script>
   <script>
     $(document).ready(function() {
 
@@ -245,7 +306,7 @@
 
       // Загрузка нерабочих дней
       $.ajax({
-        url: 'api/settings/getRedDays', type: "GET",
+        url: '{{ route('settings.red-days.index') }}', type: "GET",
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
         success: function(response) {
           var redDaysArray = response['fullRedDays'].map(item => item.date);
@@ -262,12 +323,29 @@
 
       // Загрузка настроек сайта
       $.ajax({
-        url: 'api/settings/mainSettings', type: "GET",
+        url: '{{ route('settings.main') }}', type: "GET",
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
         success: function(response) {
           response['mainSettings'].forEach(function(item) {
+            if (item.key === 'booking_template') {
+              $('input[name="booking_template"][value="' + item.payload + '"]').prop('checked', true);
+              return;
+            }
+            if (item.key === 'company_short_description' && item.payload) {
+              Object.entries(item.payload).forEach(function([locale, html]) {
+                const editorId = 'company_short_description_' + locale;
+                const editor = tinymce.get(editorId);
+                if (editor) editor.setContent(html || '');
+                else $('#' + editorId).val(html || '');
+              });
+              return;
+            }
+            if (item.public_url && ['logo', 'footer_logo', 'favicon'].includes(item.key)) {
+              $('#' + item.key + '-preview').attr('src', item.public_url).show();
+              return;
+            }
             let el = document.getElementById(item.key);
-            if (el) el.value = item.payload;
+            if (el && el.type !== 'file') el.value = item.payload ?? '';
           });
         }
       });
@@ -376,7 +454,7 @@
         }).then(result => {
           if (result.isConfirmed) {
             $.ajax({
-              url: `api/settings/deleteRedDay/${id}`, type: "DELETE",
+              url: `{{ url('settings/red-days') }}/${id}`, type: "DELETE",
               headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
               success: () => { row.remove(); showSuccess(); },
               error: () => Swal.fire("Ошибка!", "Не удалось удалить.", "error")
@@ -437,7 +515,7 @@
 
       // Загрузка фиксированного бронирования
       $.ajax({
-        url: 'api/settings/getFixedBooking', type: "GET",
+        url: '{{ route('settings.fixed-booking') }}', type: "GET",
         headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
         success: function(response) {
           let fixedHours = Array.isArray(response.fixedBooking) ? response.fixedBooking : [];
@@ -485,7 +563,7 @@
       $('#bookingLimitDays').submit(function(e) {
         e.preventDefault();
         $.ajax({
-          url: '/api/settings/updateLimitDays', type: "PUT",
+          url: '{{ route('settings.booking-limit.update') }}', type: "PUT",
           headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
           data: { days: $("#bookingLimit_days").val(), active: 0 },
           success: () => showSuccess(),
@@ -496,18 +574,20 @@
       // Настройки сайта
       $('#updateSettingsTable').submit(function(e) {
         e.preventDefault();
+        tinymce.triggerSave();
+        const formData = new FormData(this);
+        ['company_name', 'company_email', 'company_phone', 'company_address',
+         'company_registration_number', 'company_bank_account',
+         'google', 'waze', 'social_media_facebook', 'social_media_youtube',
+         'social_media_instagram', 'social_media_twitter'].forEach(function(key) {
+          formData.set(key, $('#' + key).val() || '');
+        });
         $.ajax({
-          url: '/settings/updateMainSettings', type: "POST",
+          url: '{{ route('settings.main.update') }}', type: "POST",
           headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-          data: {
-            company_name: $("#company_name").val(), company_email: $("#company_email").val(),
-            company_phone: $("#company_phone").val() || null, company_address: $("#company_address").val() || null,
-            google: $("#google").val() || null, waze: $("#waze").val() || null,
-            social_media_facebook: $("#social_media_facebook").val() || null,
-            social_media_youtube: $("#social_media_youtube").val() || null,
-            social_media_instagram: $("#social_media_instagram").val() || null,
-            social_media_twitter: $("#social_media_twitter").val() || null,
-          },
+          data: formData,
+          processData: false,
+          contentType: false,
           success: () => showSuccess(),
           error: (xhr) => showError(xhr)
         });
@@ -604,7 +684,7 @@
           const isFullDay = $('#edit_rd_fullday').is(':checked');
 
           $.ajax({
-              url: `/api/settings/updateRedDay/${id}`,
+              url: `{{ url('settings/red-days') }}/${id}`,
               type: 'PUT',
               headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
               data: {

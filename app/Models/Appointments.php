@@ -4,12 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Appointments extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'client_name', 'client_lastname', 'client_phone', 'client_email', 'service_id', 'user_id', 'room_id', 'appointment_start', 'appointment_end', 'description', 'price'];
+    protected $fillable = ['public_uuid', 'title', 'client_name', 'client_lastname', 'client_phone', 'client_email', 'service_id', 'user_id', 'room_id', 'appointment_start', 'appointment_end', 'description', 'price'];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Appointments $appointment) {
+            $appointment->public_uuid ??= (string) Str::uuid();
+        });
+    }
 
     public function service()
     {

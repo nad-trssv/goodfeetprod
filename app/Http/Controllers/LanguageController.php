@@ -9,6 +9,7 @@ class LanguageController extends Controller
 {
     public function change(Request $request) {
         $lang = $request->lang;
+        abort_unless(array_key_exists($lang, config('supported_locales')), 404);
         Session::put("locale", $lang);
         return redirect()->back();
     }
