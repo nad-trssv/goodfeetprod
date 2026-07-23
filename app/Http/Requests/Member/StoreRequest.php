@@ -31,7 +31,7 @@ class StoreRequest extends FormRequest
         $step = $this->route('step');
 
         if ($step == 1) {
-            $rules['profile_photo_path'] = 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120|dimensions:min_width=70,min_height=70';
+            $rules['photo'] = 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048|dimensions:min_width=400,min_height=400,max_width=4000,max_height=4000';
         }
 
         if ($step == 2) {

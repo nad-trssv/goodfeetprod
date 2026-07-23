@@ -20,14 +20,14 @@
                             <label class="fw-bold text-body-highlight mb-1 ff_secondary"
                                 for="client_name">{{ __('msg.name') }}</label>
                             <input class="form-control ff_secondary border_rounded" type="text" id="client_name"
-                                name="client_name" placeholder="{{ __('msg.name') }}" pattern=".{2,}" required>
+                                name="client_name" value="{{ old('client_name', Auth::guard('customer')->user()?->first_name) }}" placeholder="{{ __('msg.name') }}" pattern=".{2,}" required>
                             <div class="invalid-feedback ff_secondary">{{ __('msg.required_input') }}</div>
                         </div>
                         <div class="col-sm-6">
                             <label class="fw-bold text-body-highlight mb-1 ff_secondary"
                                 for="client_lastname">{{ __('msg.surname') }}</label>
                             <input class="form-control ff_secondary border_rounded" type="text" id="client_lastname"
-                                name="client_lastname" placeholder="{{ __('msg.surname') }}" pattern=".{3,}" required>
+                                name="client_lastname" value="{{ old('client_lastname', Auth::guard('customer')->user()?->last_name) }}" placeholder="{{ __('msg.surname') }}" pattern=".{3,}" required>
                             <div class="invalid-feedback ff_secondary">{{ __('msg.required_input') }}</div>
                         </div>
                     </div>
@@ -36,14 +36,14 @@
                             <label class="fw-bold text-body-highlight mb-1 ff_secondary"
                                 for="client_email">Email</label>
                             <input class="form-control ff_secondary border_rounded" type="email" id="client_email"
-                                name="client_email" placeholder="example@mail.ru" required="">
+                                name="client_email" value="{{ old('client_email', Auth::guard('customer')->user()?->email) }}" placeholder="example@mail.ru" required="">
                             <div class="invalid-feedback ff_secondary">{{ __('msg.required_input') }}</div>
                         </div>
                         <div class="col-sm-6">
                             <label class="fw-bold text-body-highlight mb-1 ff_secondary"
                                 for="client_phone">{{ __('msg.phone') }}</label>
                             <input class="form-control ff_secondary border_rounded" type="text" id="client_phone"
-                                name="client_phone" placeholder="+372 555 555 55" pattern="^\+[\d\s]+$" required>
+                                name="client_phone" value="{{ old('client_phone', Auth::guard('customer')->user()?->phone) }}" placeholder="+372 555 555 55" pattern="^\+[\d\s]+$" required>
                             <div class="invalid-feedback ff_secondary">{{ __('msg.required_input__tel') }}</div>
                         </div>
                     </div>

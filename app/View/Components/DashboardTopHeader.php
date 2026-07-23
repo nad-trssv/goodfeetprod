@@ -21,6 +21,11 @@ class DashboardTopHeader extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.dashboard-top-header');
+        $user = auth()->user();
+
+        return view('components.dashboard-top-header', [
+            'unreadNotificationCount' => $user?->unreadNotifications()->count() ?? 0,
+            'headerNotifications' => $user?->unreadNotifications()->latest()->limit(6)->get() ?? collect(),
+        ]);
     }
 }

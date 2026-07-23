@@ -13,6 +13,8 @@ $(function () {
   const minuteText = @json(__('msg.min'));
   const fromText = @json(__('msg.price_from'));
   const csrf = document.querySelector('meta[name="csrf-token"]').content;
+  const showServiceImages = @json((bool)($settings['show_service_images'] ?? true));
+  const showMasterImages = @json((bool)($settings['show_master_images'] ?? true));
   let selectedService = null;
   let selectedMaster = null;
   let busyDays = [];
@@ -42,18 +44,22 @@ $(function () {
 
   function unlock(id) { document.getElementById(id)?.classList.remove('is-locked'); }
   function lock(id) { document.getElementById(id)?.classList.add('is-locked'); }
-  function scrollToPanel(id) {
-    if (window.matchMedia('(max-width: 767px)').matches) {
-      window.requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({behavior: 'smooth', block: 'start'}));
-    }
+  function scrollToPanel(id, mobileOnly = false) {
+    if (mobileOnly && !window.matchMedia('(max-width: 767px)').matches) return;
+
+    window.requestAnimationFrame(() => {
+      document.getElementById(id)?.scrollIntoView({behavior: 'smooth', block: 'start'});
+    });
   }
 
   function masterButton(master) {
-    return `<button type="button" class="alt-master booking-option" data-master-id="${Number(master.id)}"><span><strong>${escapeHtml(master.name)}</strong><small>${escapeHtml(@json(__('msg.booking_view_services')))}</small></span><i class="fa-solid fa-chevron-right"></i></button>`;
+    const image = showMasterImages ? `<img src="${escapeHtml(master.profile_photo_url)}" alt="${escapeHtml(master.name)}" width="84" height="84" loading="lazy" decoding="async" class="master-directory__photo">` : '';
+    return `<button type="button" class="alt-master booking-option" data-master-id="${Number(master.id)}">${image}<span><strong>${escapeHtml(master.name)}</strong><small>${escapeHtml(master.professional_title || @json(__('msg.booking_view_services')))}</small></span><i class="fa-solid fa-chevron-right"></i></button>`;
   }
 
   function serviceButton(service) {
-    return `<button type="button" class="alt-service booking-option" data-service-id="${Number(service.id)}"><span><strong>${escapeHtml(serviceName(service))}</strong><small>${Number(service.effective_duration_minutes)} ${escapeHtml(minuteText)}</small></span><b>${service.price_can_change ? escapeHtml(fromText) + ' ' : ''}${escapeHtml(service.effective_price)} &euro;</b></button>`;
+    const image = showServiceImages ? `<img src="${escapeHtml(service.image_url)}" alt="${escapeHtml(serviceName(service))}" width="192" height="128" loading="lazy" decoding="async" class="booking-option__image">` : '';
+    return `<button type="button" class="alt-service booking-option" data-service-id="${Number(service.id)}">${image}<span><strong>${escapeHtml(serviceName(service))}</strong><small>${Number(service.effective_duration_minutes)} ${escapeHtml(minuteText)}</small></span><b>${service.price_can_change ? escapeHtml(fromText) + ' ' : ''}${escapeHtml(service.effective_price)} &euro;</b></button>`;
   }
 
   function chooseService(service, element) {
@@ -67,7 +73,7 @@ $(function () {
       $('#altMasters').html((service.users || []).map(masterButton).join(''));
       unlock('altMastersPanel');
       lock('altDatePanel');
-      scrollToPanel('altMastersPanel');
+      scrollToPanel('altMastersPanel', true);
     } else if (selectedMaster) {
       loadAvailability();
       scrollToPanel('altDatePanel');
@@ -86,7 +92,7 @@ $(function () {
       $('#altServices').html(offered.map(serviceButton).join(''));
       unlock('altServicesPanel');
       lock('altDatePanel');
-      scrollToPanel('altServicesPanel');
+      scrollToPanel('altServicesPanel', true);
     } else if (selectedService) {
       loadAvailability();
       scrollToPanel('altDatePanel');

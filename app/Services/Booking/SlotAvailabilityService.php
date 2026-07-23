@@ -3,6 +3,7 @@
 namespace App\Services\Booking;
 
 use App\Models\Appointments;
+use App\Models\AppointmentRescheduleRequest;
 use App\Models\Services;
 use App\Models\SiteSettings;
 use App\Models\UserSchedule;
@@ -16,8 +17,14 @@ class SlotAvailabilityService
     ) {
     }
 
-    public function slots(string $date, int $serviceId, int $userId): array
+    public function slots(string $date, int $serviceId, int $userId, ?int $excludedAppointmentId = null, ?int $excludedRescheduleRequestId = null): array
     {
+        $day = Carbon::parse($date)->startOfDay();
+        $limit = max(0, (int) ($this->calendar->bookingLimit()['days'] ?? 30));
+        if ($day->lt(today()) || $day->gt(today()->addDays($limit))) {
+            return [];
+        }
+
         $service = Services::query()
             ->where('status', true)
             ->where('is_deleted', false)
@@ -34,7 +41,6 @@ class SlotAvailabilityService
             return [];
         }
 
-        $day = Carbon::parse($date)->startOfDay();
         $workStart = $this->at($day, $workHours['start']);
         $workEnd = $this->at($day, $workHours['end']);
         $lunch = $this->calendar->lunchHours($userId);
@@ -45,10 +51,19 @@ class SlotAvailabilityService
             $this->at($day, $closure['end_time']),
         ]);
         $appointments = Appointments::where('user_id', $userId)
-            ->whereDate('appointment_start', $date)
+            ->whereIn('status', Appointments::BLOCKING_STATUSES)
+            ->when($excludedAppointmentId, fn ($query) => $query->whereKeyNot($excludedAppointmentId))
+            ->where('appointment_start', '<', $day->copy()->addDay())
+            ->where('appointment_end', '>', $day)
             ->get(['appointment_start', 'appointment_end']);
+        $reservations = AppointmentRescheduleRequest::where('user_id', $userId)
+            ->where('status', 'pending')
+            ->when($excludedRescheduleRequestId, fn ($query) => $query->whereKeyNot($excludedRescheduleRequestId))
+            ->where('requested_start', '<', $day->copy()->addDay())
+            ->where('requested_end', '>', $day)
+            ->get(['requested_start', 'requested_end']);
 
-        $starts = $this->candidateStarts($service, $userId, $day, $workStart, $workEnd);
+        $starts = $this->candidateStarts($service, $userId, $day, $workStart, $workEnd, $duration);
         $slots = [];
 
         foreach ($starts as $start) {
@@ -70,13 +85,31 @@ class SlotAvailabilityService
             ))) {
                 continue;
             }
+            if ($reservations->contains(fn (AppointmentRescheduleRequest $reservation) => $this->overlaps(
+                $start, $end, $reservation->requested_start, $reservation->requested_end,
+            ))) {
+                continue;
+            }
             $slots[] = ['start' => $start->format('H:i'), 'end' => $end->format('H:i')];
         }
 
-        return $this->rooms->filterAvailableSlots($userId, $date, $slots);
+        return $this->rooms->filterAvailableSlots($userId, $date, $slots, $excludedAppointmentId, $excludedRescheduleRequestId);
     }
 
-    private function candidateStarts(Services $service, int $userId, Carbon $day, Carbon $workStart, Carbon $workEnd): array
+    public function containsSlot(
+        string $date,
+        int $serviceId,
+        int $userId,
+        string $start,
+        string $end,
+        ?int $excludedAppointmentId = null,
+        ?int $excludedRescheduleRequestId = null,
+    ): bool {
+        return collect($this->slots($date, $serviceId, $userId, $excludedAppointmentId, $excludedRescheduleRequestId))
+            ->contains(fn (array $slot) => $slot['start'] === $start && $slot['end'] === $end);
+    }
+
+    private function candidateStarts(Services $service, int $userId, Carbon $day, Carbon $workStart, Carbon $workEnd, int $duration): array
     {
         $schedule = UserSchedule::where('user_id', $userId)->first();
         if ($schedule?->fixed_booking_enabled && ! empty($schedule->fixed_booking_slots)) {
@@ -89,14 +122,18 @@ class SlotAvailabilityService
             return collect($fixed['payload'])->map(fn ($time) => $this->at($day, $time))->all();
         }
 
-        $start = $service->has_fixed_time && $service->time_from
-            ? $this->at($day, $service->time_from)
+        $rule = $service->ruleForDate($day->toDateString());
+        $hasFixedTime = (bool) ($rule?->has_fixed_time ?? $service->has_fixed_time);
+        $timeFrom = $rule?->time_from ?? $service->time_from;
+        $timeTo = $rule?->time_to ?? $service->time_to;
+        $start = $hasFixedTime && $timeFrom
+            ? $this->at($day, $timeFrom)
             : $workStart->copy();
-        $limit = $service->has_fixed_time && $service->time_to
-            ? $this->at($day, $service->time_to)
+        $limit = $hasFixedTime && $timeTo
+            ? $this->at($day, $timeTo)
             : $workEnd->copy();
         $starts = [];
-        for ($time = $start; $time->lt($limit); $time->addMinutes(30)) {
+        for ($time = $start; $time->copy()->addMinutes($duration)->lte($limit); $time->addMinutes(30)) {
             $starts[] = $time->copy();
         }
 

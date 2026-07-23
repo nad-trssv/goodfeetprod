@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Services extends Model
 {
@@ -16,9 +17,19 @@ class Services extends Model
         'duration_minutes_min', 'duration_minutes', 
         'status', 
         'short_description', 'full_description', 
+        'image_path',
         'eventColor', 
         'time_from', 'time_to', 'has_fixed_time',
     ];
+
+    protected $appends = ['image_url'];
+
+    public function getImageUrlAttribute(): string
+    {
+        return $this->image_path
+            ? Storage::disk('public')->url($this->image_path)
+            : asset('assets/img/generic/default.png');
+    }
 
     public function users()
     {

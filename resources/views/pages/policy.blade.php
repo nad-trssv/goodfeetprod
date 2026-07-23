@@ -41,6 +41,9 @@
                 <h4 class="fw-light fc_secondary   ff_secondary">siis palun kontakteeruge allpool toodud kontaktandmetel
                     GoodFeet OÜ esindajaga.</h4>
                 <h4 class="fw-light fc_secondary   ff_secondary">E-posti aadress: nadjatarassova@gmail.com</h4>
+
+                <h2 class="fw-semibold fc_main mt-4 mb-1 ff_secondary">Kliendikonto ja andmete kustutamine</h2>
+                <h4 class="fw-light fc_secondary ff_secondary">Sisselogitud klient saab oma konto kustutada lehel „Minu broneeringud“. Kustutamine tuleb kinnitada kehtiva parooliga. Konto kontaktandmed, kliendi märkused ja üleslaaditud failid kustutatakse. Osutatud teenuse kirje võidakse säilitada anonüümitud kujul, kui see on vajalik raamatupidamise, õigusnõuete või muu seadusest tuleneva kohustuse täitmiseks. Kui klient ei saa kontole sisse logida või soovib esitada täiendava andmekaitsetaotluse, saab ta võtta ühendust käesolevas poliitikas toodud e-posti aadressil.</h4>
             </div>
         </div>
     </section>

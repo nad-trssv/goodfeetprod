@@ -45,7 +45,14 @@ class BookingCalendarService
 
     public function partialClosures(string $date, int|string|null $userId = null): array
     {
-        $query = RedDay::where('full_day', false)->where('date', $date);
+        $parsed = Carbon::parse($date);
+        $query = RedDay::where('full_day', false)->where(function ($query) use ($date, $parsed) {
+            $query->where('date', $date)->orWhere(function ($repeating) use ($parsed) {
+                $repeating->where('repeat', true)
+                    ->whereMonth('date', $parsed->month)
+                    ->whereDay('date', $parsed->day);
+            });
+        });
         $userId && $userId !== 'all' ? $query->visibleFor($userId) : $query->whereNull('user_id');
 
         return $query->get()->toArray();

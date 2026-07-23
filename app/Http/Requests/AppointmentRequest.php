@@ -25,14 +25,15 @@ class AppointmentRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'id' => ['nullable', 'integer', Rule::exists('appointments', 'id')],
             'title' => ['nullable', 'string', 'max:190'],
             'client_name' => ['required', 'string', 'max:190'],
             'client_lastname' => ['required', 'string', 'max:190'],
             'client_phone' => ['required', 'string', 'min:8'],
             'description' => ['nullable', 'string', 'min:8'],
-            'service_id' => ['required', 'string', Rule::exists('services', 'id')],
-            'user_id' => ['required', 'string', Rule::exists('users', 'id')],
-            'price' => ['required'],
+            'service_id' => ['required', 'integer', Rule::exists('services', 'id')],
+            'user_id' => ['required', 'integer', Rule::exists('users', 'id')],
+            'price' => ['required', 'numeric', 'min:0'],
             'appointment_start' => ['required', 'date'],
             'appointment_end' => ['required', 'date', 'after:appointment_start'],
         ];

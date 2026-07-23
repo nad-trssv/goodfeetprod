@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="canonical" href="{{ url()->current() }}">
-    @if(request()->routeIs('booking.create', 'booking.show', 'login*', 'dashboard', 'calendar*', 'service.*', 'member.*', 'profile.*', 'settings.*', 'admin.*', 'master.*'))
+    @if(request()->routeIs('booking.create', 'booking.show', 'customer.*', 'login*', 'dashboard', 'calendar*', 'service.*', 'member.*', 'profile.*', 'settings.*', 'admin.*', 'master.*'))
       <meta name="robots" content="noindex, nofollow">
     @endif
     <!-- Internal application build signature - do not remove -->
@@ -26,6 +26,7 @@
     @endphp
     <link rel="stylesheet" href="{{ asset('build/' . $manifest['resources/css/homepage.css']['file']) }}">
     <script type="module" src="{{ asset('build/' . $manifest['resources/js/app.js']['file']) }}"></script>
+    <x-brand-theme />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     @stack('styles')
   </head>
@@ -68,12 +69,25 @@
           <button class="navbar-toggler fs-8 ps-1 ps-sm-3 pe-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mt-3 mt-lg-0 d-flex justify-content-end w-100">
-              @can('is-admin', Auth::user())
+              @if(Auth::guard('web')->check() && in_array(Auth::guard('web')->user()->role_id, [1, 2], true))
                 <li class="nav-item border-bottom border-translucent border-bottom-lg-0 text-end"><a class="nav_link" href="{{ route('dashboard') }}">{{ __('msg.menu_adminpanel') }}</a></li>
-              @endcan
+              @endif
               <li class="nav-item border-bottom border-translucent border-bottom-lg-0 text-end"><a class="nav_link" href="{{ route('clientservice') }}">{{ __('msg.services') }}</a></li>
               <li class="nav-item border-bottom border-translucent border-bottom-lg-0 text-end"><a class="nav_link" href="{{ route('gallery.index') }}">{{ __('msg.menu_galery') }}</a></li>
               <li class="nav-item border-bottom border-translucent border-bottom-lg-0 text-end"><a class="nav_link" href="{{ route('contacts') }}">{{ __('msg.menu_contact') }}</a></li>
+              @if(Auth::guard('customer')->check())
+                <li class="nav-item dropdown border-bottom border-translucent border-bottom-lg-0 text-end">
+                  <button class="nav_link border-0 bg-transparent dropdown-toggle d-inline-flex align-items-center gap-1" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{{ __('customer.account') }}"><i class="uil uil-user-circle fs-6"></i><span class="d-lg-none">{{ __('customer.account') }}</span></button>
+                  <ul class="dropdown-menu dropdown-menu-end text-start shadow-sm">
+                    <li><a class="dropdown-item" href="{{ route('customer.profile') }}"><i class="uil uil-user me-2"></i>{{ __('customer.my_data') }}</a></li>
+                    <li><a class="dropdown-item" href="{{ route('customer.dashboard') }}"><i class="uil uil-calendar-alt me-2"></i>{{ __('customer.booking_history') }}</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><form method="POST" action="{{ route('customer.logout') }}">@csrf<button class="dropdown-item" type="submit"><i class="uil uil-signout me-2"></i>{{ __('customer.logout') }}</button></form></li>
+                  </ul>
+                </li>
+              @else
+                <li class="nav-item border-bottom border-translucent border-bottom-lg-0 text-end"><a class="nav_link d-inline-flex align-items-center gap-1" href="{{ route('customer.login') }}"><i class="uil uil-user-circle fs-6"></i><span>Войти</span></a></li>
+              @endif
               <li class="nav-item border-bottom border-translucent border-bottom-lg-0 text-center"><a class="btn_primary" href="{{ route('serviceBooking') }}" target="_blank">{{ __('msg.menu_booking') }}</a></li>
               
               <ul class="col-12 d-flex d-lg-none list-unstyled w-100 justify-content-center mt-4">

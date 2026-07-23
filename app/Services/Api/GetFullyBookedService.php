@@ -37,16 +37,8 @@ class GetFullyBookedService
                     'error' => 'Broneerimine selleks päevaks ei ole võimalik!'
                 ];
             }
-            $fixedTimeCheck = Services::where('id', $request->service_id)->first(['has_fixed_time', 'time_from', 'time_to']);
-
-            if ($fixedTimeCheck->has_fixed_time === 1) {
-                $availableSlots = $this->getAvailableSlotsForFixed($request->choose_date, $request->service_id, $request->user_id);
-            } else {
-                $availableSlots = $this->getAvailableSlots($request->choose_date, $request->service_id, $request->user_id);
-            }
-
             return [
-                'slots' => $availableSlots,
+                'slots' => $this->availability->slots($request->choose_date, (int) $request->service_id, (int) $request->user_id),
             ];
 
         } catch (Exception $exception) {

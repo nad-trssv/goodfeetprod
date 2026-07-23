@@ -126,10 +126,18 @@ class SettingService
             'social_media_facebook' => 'social_media', 'social_media_youtube' => 'social_media',
             'social_media_instagram' => 'social_media', 'social_media_twitter' => 'social_media',
             'logo' => 'branding', 'footer_logo' => 'branding', 'favicon' => 'branding',
+            'primary_accent_color' => 'branding',
             'booking_template' => 'booking',
+            'show_service_images' => 'booking', 'show_master_images' => 'booking',
+            'cancellation_notice_hours' => 'booking',
+            'allow_customer_cancellation' => 'booking',
         ];
 
         foreach ($request->safe()->except(['logo', 'footer_logo', 'favicon']) as $key => $value) {
+            if (in_array($key, ['show_service_images', 'show_master_images', 'allow_customer_cancellation'], true)) {
+                $value = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+            }
+
             if ($key === 'company_short_description') {
                 $value = collect($value ?? [])->mapWithKeys(function ($html, $locale) {
                     if (!array_key_exists($locale, config('supported_locales'))) {

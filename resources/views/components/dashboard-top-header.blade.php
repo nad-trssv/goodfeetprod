@@ -22,6 +22,22 @@
           </div>
         </li>
         <li class="nav-item dropdown">
+          <a class="nav-link px-2 position-relative d-flex align-items-center justify-content-center" id="navbarNotifications" href="#" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-label="{{ __('admin_notifications.title') }}" style="width:2.25rem;height:2.25rem">
+            <span data-feather="bell"></span>
+            <span id="header-notification-count" class="position-absolute badge rounded-pill bg-danger p-0 d-flex align-items-center justify-content-center {{ $unreadNotificationCount > 0 ? '' : 'd-none' }}" style="top:-.15rem;right:-.05rem;min-width:1rem;height:1rem;font-size:.62rem">{{ $unreadNotificationCount > 99 ? '99+' : $unreadNotificationCount }}<span class="visually-hidden">{{ __('admin_notifications.new') }}</span></span>
+          </a>
+          <div class="dropdown-menu dropdown-menu-end navbar-dropdown-caret shadow border p-0" aria-labelledby="navbarNotifications" style="width:min(24rem,calc(100vw - 1rem))">
+            <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom"><h6 class="mb-0">{{ __('admin_notifications.title') }}</h6><form id="header-notifications-read-all" class="{{ $unreadNotificationCount ? '' : 'd-none' }}" method="POST" action="{{ route('notifications.read-all') }}">@csrf<button class="btn btn-link btn-sm p-0" type="submit">{{ __('admin_notifications.mark_all_read') }}</button></form></div>
+            <div id="header-notification-items" class="overflow-auto" style="max-height:24rem">
+              @forelse($headerNotifications as $item)
+                @php($data = $item->data)
+                <form method="POST" action="{{ route('notifications.read', $item->id) }}">@csrf<button class="dropdown-item text-wrap border-bottom py-3" type="submit"><span class="d-block fw-semibold">{{ __('admin_notifications.events.'.($data['event'] ?? 'booking_created')) }}</span><small class="d-block text-body-secondary">{{ $data['client_name'] ?? '' }} · {{ $data['service_name'] ?? '' }}</small><small class="text-body-tertiary">{{ $item->created_at->diffForHumans() }}</small></button></form>
+              @empty<div class="p-4 text-center text-body-secondary">{{ __('admin_notifications.empty') }}</div>@endforelse
+            </div>
+            <a class="d-block text-center fw-semibold p-2" href="{{ route('notifications.index') }}">{{ __('admin_notifications.view_all') }}</a>
+          </div>
+        </li>
+        <li class="nav-item dropdown">
           <a class="nav-link lh-1 pe-0" id="navbarDropdownUser" href="#!" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-haspopup="true" aria-expanded="false">
             <div class="avatar avatar-l ">
               <img class="rounded-circle" src="{{ Auth::user()->profile_photo_path ? asset('public/storage/' . Auth::user()->profile_photo_path) : "https://ui-avatars.com/api/?name=".strtoupper(substr(Auth::user()->name, 0, 1))."&color=7F9CF5&background=EBF4FF" }}" alt="User Avatar" />
@@ -54,3 +70,42 @@
       </ul>
     </div>
   </nav>
+@push('scripts')
+<script>
+(() => {
+  const endpoint = @js(route('notifications.status'));
+  let loading = false;
+  const renderCount = (element, count) => {
+    if (!element) return;
+    const textNode = Array.from(element.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+    if (textNode) textNode.nodeValue = count > 99 ? '99+' : String(count);
+    element.classList.toggle('d-none', count < 1);
+  };
+  const refreshNotifications = async () => {
+    if (loading || document.hidden) return;
+    loading = true;
+    try {
+      const response = await fetch(endpoint, {
+        headers: {'Accept':'application/json', 'X-Requested-With':'XMLHttpRequest'},
+        credentials: 'same-origin',
+        cache: 'no-store'
+      });
+      if (!response.ok) return;
+      const data = await response.json();
+      renderCount(document.getElementById('header-notification-count'), data.count);
+      renderCount(document.getElementById('sidebar-notification-count'), data.count);
+      document.getElementById('header-notifications-read-all')?.classList.toggle('d-none', data.count < 1);
+      const items = document.getElementById('header-notification-items');
+      if (items) items.innerHTML = data.html;
+    } catch (_) {
+      // A temporary network failure must not interrupt work in the admin panel.
+    } finally {
+      loading = false;
+    }
+  };
+  window.setInterval(refreshNotifications, 4000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshNotifications(); });
+  window.addEventListener('focus', refreshNotifications);
+})();
+</script>
+@endpush

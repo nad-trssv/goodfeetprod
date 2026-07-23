@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class ServiceResource extends JsonResource
 {
@@ -27,13 +28,23 @@ class ServiceResource extends JsonResource
             'duration_minutes' => $this->duration_minutes,
             'short_description' => $this->short_description,
             'full_description' => $this->full_description,
+            'image_url' => $this->image_url,
+            'has_custom_image' => filled($this->image_path),
             'status' => $this->status,
             'time_from' => $this->time_from ? Carbon::parse($this->time_from)->format('H:i') : null,
             'time_to' => $this->time_to ? Carbon::parse($this->time_to)->format('H:i') : null,
             'has_fixed_time' => $this->has_fixed_time,
             'is_deleted' => $this->is_deleted,
             'translation' => $this->translation,
-            'users' => $this->users,
+            'users' => $this->users->map(fn ($user) => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'professional_title' => $user->professionalTitle(app()->getLocale()),
+                'profile_photo_url' => $user->profile_photo_path
+                    ? Storage::disk('public')->url($user->profile_photo_path)
+                    : asset('assets/img/team/avatar.webp'),
+                'has_profile_photo' => filled($user->profile_photo_path),
+            ])->values(),
             'created_at' => $this->created_at->toDateTimeString(),
             'updated_at' => $this->updated_at->toDateTimeString(),
 

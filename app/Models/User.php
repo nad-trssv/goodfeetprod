@@ -27,6 +27,7 @@ class User extends Authenticatable
     protected $fillable = [
         'username',
         'name',
+        'professional_titles',
         'phone',
         'email',
         'role_id',
@@ -65,7 +66,18 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'last_active' => 'datetime',
             'password' => 'hashed',
+            'professional_titles' => 'array',
         ];
+    }
+
+    public function professionalTitle(?string $locale = null): ?string
+    {
+        $titles = $this->professional_titles ?? [];
+        $locale ??= app()->getLocale();
+
+        return $titles[$locale]
+            ?? $titles[config('app.fallback_locale')]
+            ?? collect($titles)->first(fn ($title) => filled($title));
     }
 
     function SocialProviders() {

@@ -20,7 +20,7 @@
       <h2 class="mb-4">Создание новой услуги</h2>
       <div class="row">
         <div class="col-xl-9">
-          <form class="row g-3 mb-6 needs-validation" novalidate="" action="{{ route('service.store') }}" method="POST">
+          <form class="row g-3 mb-6 needs-validation" novalidate="" action="{{ route('service.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="col-12">
               <div class="form-floating">
@@ -73,6 +73,12 @@
                 </select>
                 <div class="invalid-feedback">Выберите минимум одного мастера</div>
               </div>
+            </div>
+            <div class="col-12 gy-6">
+              <label class="form-label fw-semibold" for="image">Изображение услуги</label>
+              <input class="form-control @error('image') is-invalid @enderror" id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp">
+              @error('image')<div class="invalid-feedback">{{ $message }}</div>@enderror
+              <div class="form-text">Рекомендуется WebP или JPG, 1200×800 px, до 300 КБ. Можно загрузить изображение любых пропорций и разрешения в JPG, PNG или WebP, максимум 10 МБ. Оно будет автоматически оптимизировано и обрезано по области показа.</div>
             </div>
             <div class="col-12 gy-6">
               <div class="form-floating">

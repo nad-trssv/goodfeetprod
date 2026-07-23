@@ -10,11 +10,17 @@ use App\Models\UserServices;
 use Illuminate\Support\Facades\Log;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use App\Services\Media\OptimizedImageStorage;
 use Carbon\Carbon;
 
 class ServiceService
 {
     public $service;
+
+    public function __construct(private readonly OptimizedImageStorage $images)
+    {
+    }
     
     function getMasters() {
         return User::where('role_id', '1')->orWhere('role_id', '2')->get();
@@ -71,8 +77,10 @@ class ServiceService
 
     public function store(ServiceRequest $request): Services
     {
+        $imagePath = $this->storeImage($request);
+
         try {
-            DB::transaction(function () use ($request) {
+            DB::transaction(function () use ($request, $imagePath) {
                 $price_can_change = $request->has('price_can_change') ? 1 : 0; 
                 $this->service = Services::create([
                     'name' => $request['name'],
@@ -81,6 +89,7 @@ class ServiceService
                     'duration_minutes' => $request['duration_minutes'],
                     'short_description' => $request['short_description'],
                     'full_description' => $request['full_description'],
+                    'image_path' => $imagePath,
                     'eventColor' => $request['eventColor'],
                     'status' => 1,
                 ]);
@@ -103,6 +112,9 @@ class ServiceService
             return $this->service;
 
         } catch (Exception $exception) {
+            if ($imagePath) {
+                Storage::disk('public')->delete($imagePath);
+            }
             Log::info($exception->getMessage());
             throw new Exception($exception->getMessage(), 422);
         }
@@ -125,8 +137,11 @@ class ServiceService
 
     public function update($request, $service): Services
     {
+        $newImagePath = $request->hasFile('image') ? $this->storeImage($request) : null;
+        $oldImagePath = $service->image_path;
+
         try {
-            DB::transaction(function () use ($request, $service) {
+            DB::transaction(function () use ($request, $service, $newImagePath) {
                 $status = $request->has('status') ? 1 : 0; 
                 $price_can_change = $request->has('price_can_change') ? 1 : 0; 
                 $hasTranslations = $request->has('translations') && !empty($request->translations);
@@ -158,6 +173,7 @@ class ServiceService
                         'name' => $name,
                         'short_description' => $shortDescription,
                         'full_description' => $fullDescription,
+                        'image_path' => $newImagePath ?? $service->image_path,
                     ]);
                 } else {
                     $service->update([
@@ -167,6 +183,7 @@ class ServiceService
                         'duration_minutes' => $request['duration_minutes'],
                         'short_description' => $shortDescription,
                         'full_description' => $fullDescription,
+                        'image_path' => $newImagePath ?? $service->image_path,
                         'eventColor' => $request['eventColor'],
                         'status' => $status,
                     ]);
@@ -185,9 +202,17 @@ class ServiceService
     
                 $this->service = $service;
             });
+
+            if ($newImagePath && $oldImagePath && $oldImagePath !== $newImagePath) {
+                Storage::disk('public')->delete($oldImagePath);
+            }
+
             return $this->service;
 
         } catch (Exception $exception) {
+            if ($newImagePath) {
+                Storage::disk('public')->delete($newImagePath);
+            }
             Log::info($exception->getMessage());
             throw new Exception($exception->getMessage(), 422);
         }
@@ -238,5 +263,20 @@ class ServiceService
             Log::info($exception->getMessage());
             throw new Exception($exception->getMessage(), 422);
         }
+    }
+
+    private function storeImage($request): ?string
+    {
+        if (!$request->hasFile('image')) {
+            return null;
+        }
+
+        return $this->images->store(
+            $request->file('image'),
+            'services',
+            (string) $request->input('name', 'service'),
+            1600,
+            1200,
+        );
     }
 }

@@ -25,10 +25,11 @@ class ServiceRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:190'],
-            'price' => ['required', 'integer'],
-            'duration_minutes' => ['required', 'integer'],
+            'price' => ['required', 'numeric', 'min:0', 'max:999999.99'],
+            'duration_minutes' => ['required', 'integer', 'min:5', 'max:1440'],
             'masters' => 'required|array',
             'masters.*' => 'integer|exists:users,id',
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
         ];
     }
 

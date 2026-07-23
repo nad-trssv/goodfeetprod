@@ -261,7 +261,7 @@ $redDaysTime = RedDay::where('full_day', 0)->whereNull('user_id')->get();
     }
     function getSettings()
     {
-        $siteSettings = SiteSettings::whereIn('group', ['company', 'branding'])->get();
+        $siteSettings = SiteSettings::whereIn('group', ['company', 'branding', 'booking'])->get();
         if ($siteSettings) {
             $formattedSettings = $siteSettings->pluck('payload', 'key')->map(function ($value) {
                 return json_decode($value, true);

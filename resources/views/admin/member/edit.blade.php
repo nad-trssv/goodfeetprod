@@ -25,7 +25,7 @@
       <div class="col-12 col-xl-4">
         <div class="card mb-4">
           <div class="card-body text-center">
-            <img src="{{ asset('storage/' . $member->profile_photo_path) }}"
+            <img src="{{ $member->profile_photo_path ? asset('storage/' . $member->profile_photo_path) : asset('assets/img/team/avatar.webp') }}"
                  class="rounded-circle mb-3"
                  style="width:120px;height:120px;object-fit:cover;"
                  id="photoPreview"
@@ -34,8 +34,9 @@
             <p class="text-muted fs-10 mb-3">{{ $member->username }}</p>
             <label class="btn btn-outline-primary btn-sm">
               <span class="fas fa-upload me-1"></span>Сменить фото
-              <input type="file" id="photoInput" accept="image/*" class="d-none">
+              <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp" class="d-none">
             </label>
+            <div class="text-muted fs-10 mt-2">Рекомендуется WebP, квадрат 800×800 px, до 250 КБ. Максимум 2 МБ.</div>
           </div>
         </div>
 
@@ -124,6 +125,22 @@
                     <label class="form-label">Дата рождения</label>
                     <input type="date" class="form-control" id="date_birthday"
                            value="{{ $member->date_birthday ? \Carbon\Carbon::parse($member->date_birthday)->format('Y-m-d') : '' }}">
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label mb-2">Специализация мастера</label>
+                    <ul class="nav nav-pills gap-1 mb-2" role="tablist">
+                      @foreach(config('supported_locales') as $locale => $label)
+                        <li class="nav-item"><button class="nav-link py-1 px-3 {{ $loop->first ? 'active' : '' }}" data-bs-toggle="pill" data-bs-target="#member-title-{{ $locale }}" type="button">{{ $label }}</button></li>
+                      @endforeach
+                    </ul>
+                    <div class="tab-content">
+                      @foreach(config('supported_locales') as $locale => $label)
+                        <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="member-title-{{ $locale }}">
+                          <input class="form-control professional-title" data-locale="{{ $locale }}" maxlength="120" value="{{ $member->professional_titles[$locale] ?? '' }}" placeholder="Например: мастер по маникюру PRO">
+                        </div>
+                      @endforeach
+                    </div>
+                    <div class="form-text">Показывается клиенту под именем мастера. Если перевода нет, используется первый заполненный вариант.</div>
                   </div>
                 </div>
               </div>
@@ -315,6 +332,9 @@
         formData.append('phone', $('#phone').val());
         formData.append('role_id', $('#role_id').val());
         formData.append('date_birthday', $('#date_birthday').val());
+        $('.professional-title').each(function () {
+          formData.append(`professional_titles[${$(this).data('locale')}]`, $(this).val());
+        });
 
         // Пароль
         if ($('#password').val()) {

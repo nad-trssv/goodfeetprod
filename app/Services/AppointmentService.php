@@ -85,8 +85,11 @@ class AppointmentService
                     'description' => $appint->description,
                     'price' => $appint->price,
                     'price_can_change' => $appint->service->price_can_change,
-                    'start' => $appint->appointment_start,
-                    'end' => $appint->appointment_end,
+                    // FullCalendar v3 must receive a timezone-less local value.
+                    // Serializing Carbon directly converts it to UTC and shifts
+                    // the displayed hour in the browser.
+                    'start' => $appint->appointment_start->format('Y-m-d\TH:i:s'),
+                    'end' => $appint->appointment_end->format('Y-m-d\TH:i:s'),
                     'master' => $appint->user->name,
                     'masterUsername' => $appint->user->username,
                     'media' => $appint->media,

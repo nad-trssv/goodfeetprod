@@ -32,7 +32,7 @@
                         <div class="p-4">
                           <div class="row">
                             <div class="col-12">
-                              <form class="row g-3 mb-6 needs-validation" novalidate="" action="{{ route('service.update', $service['id']) }}" method="POST">
+                              <form class="row g-3 mb-6 needs-validation" novalidate="" action="{{ route('service.update', $service['id']) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 @method('PUT')
                                 <div class="col-12">
@@ -118,6 +118,15 @@
                                     @endforeach
                                   </div>
                                   @endcan
+                                </div>
+                                <div class="col-12 gy-6">
+                                  <label class="form-label fw-semibold" for="image">Изображение услуги</label>
+                                  <div class="border rounded-3 p-2 mb-2 bg-body-tertiary" style="max-width:360px">
+                                    <img src="{{ $service->image_url }}" alt="{{ $service['name'] }}" width="1200" height="800" class="img-fluid rounded-2" style="width:100%;aspect-ratio:3/2;object-fit:cover" loading="lazy">
+                                  </div>
+                                  <input class="form-control @error('image') is-invalid @enderror" id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp">
+                                  @error('image')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                  <div class="form-text">Новый файл заменит текущий. Рекомендуется WebP или JPG, 1200×800 px, до 300 КБ. Можно загрузить изображение любых пропорций и разрешения в JPG, PNG или WebP, максимум 10 МБ. Оно будет автоматически оптимизировано и обрезано по области показа.</div>
                                 </div>
                                 <div class="col-12 gy-6">
                                   <div class="form-floating">

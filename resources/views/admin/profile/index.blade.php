@@ -62,6 +62,22 @@
                                 <div class="invalid-feedback" id="date_birthday-error"></div>
                               </div>
                             </div>
+                            <div class="col-12">
+                              <label class="form-label mb-2">Специализация мастера</label>
+                              <ul class="nav nav-pills gap-1 mb-2" role="tablist">
+                                @foreach(config('supported_locales') as $locale => $label)
+                                  <li class="nav-item"><button class="nav-link py-1 px-3 {{ $loop->first ? 'active' : '' }}" data-bs-toggle="pill" data-bs-target="#profile-title-{{ $locale }}" type="button">{{ $label }}</button></li>
+                                @endforeach
+                              </ul>
+                              <div class="tab-content">
+                                @foreach(config('supported_locales') as $locale => $label)
+                                  <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="profile-title-{{ $locale }}">
+                                    <input class="form-control profile-professional-title" data-locale="{{ $locale }}" maxlength="120" value="{{ $profile->professional_titles[$locale] ?? '' }}" placeholder="Например: мастер по педикюру">
+                                  </div>
+                                @endforeach
+                              </div>
+                              <div class="form-text">Эта подпись отображается клиенту под вашим именем при выборе мастера.</div>
+                            </div>
                         </div>
                     </div>
                     <div class="row gx-3 mb-6 gy-6 gy-sm-3">
@@ -168,6 +184,9 @@
                 formData.append("email", $("#emailSocial").val());
                 formData.append("phone", $("#phone").val());
                 formData.append("date_birthday", $("#date_birthday").val());
+                $('.profile-professional-title').each(function () {
+                    formData.append(`professional_titles[${$(this).data('locale')}]`, $(this).val());
+                });
                 formData.append("oldPassword", $("#oldPassword").val());
                 formData.append("password", $("#password").val());
                 formData.append("password_confirm", $("#password_confirm").val());

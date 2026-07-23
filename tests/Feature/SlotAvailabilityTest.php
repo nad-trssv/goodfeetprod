@@ -14,10 +14,23 @@ use App\Services\Booking\SlotAvailabilityService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
+use Carbon\Carbon;
 
 class SlotAvailabilityTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Carbon::setTestNow('2030-01-01 08:00:00');
+    }
+
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow();
+        parent::tearDown();
+    }
 
     public function test_slots_respect_schedule_lunch_closures_bookings_and_room_capacity(): void
     {

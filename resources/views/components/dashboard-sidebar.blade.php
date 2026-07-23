@@ -39,6 +39,16 @@
                             </div>
                         </a>
                     </div>
+                    <div class="nav-item-wrapper">
+                        <a class="nav-link {{ request()->routeIs('notifications.*') ? 'active' : '' }} label-1" href="{{ route('notifications.index') }}" role="button">
+                            <div class="d-flex align-items-center w-100"><span class="nav-link-icon"><span data-feather="bell"></span></span><span class="nav-link-text-wrapper flex-grow-1"><span class="nav-link-text">{{ __('admin_notifications.title') }}</span></span><span id="sidebar-notification-count" class="badge rounded-pill bg-danger ms-auto {{ $unreadNotificationCount > 0 ? '' : 'd-none' }}">{{ $unreadNotificationCount > 99 ? '99+' : $unreadNotificationCount }}</span></div>
+                        </a>
+                    </div>
+                    <div class="nav-item-wrapper">
+                        <a class="nav-link {{ request()->routeIs('reschedule.*') ? 'active' : '' }} label-1" href="{{ route('reschedule.index') }}" role="button">
+                            <div class="d-flex align-items-center"><span class="nav-link-icon"><span data-feather="repeat"></span></span><span class="nav-link-text-wrapper"><span class="nav-link-text">{{ __('customer.reschedule_requests') }}</span></span></div>
+                        </a>
+                    </div>
                 </li>
 
                 {{-- Управление --}}

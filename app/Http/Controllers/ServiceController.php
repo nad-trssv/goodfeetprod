@@ -91,11 +91,10 @@ class ServiceController extends Controller
         //
     }
     function getSettings(){
-        $siteSettings = SiteSettings::where('group', 'company')
-        ->get();
+        $siteSettings = SiteSettings::whereIn('group', ['company', 'booking'])->get();
         if ($siteSettings) {
             $formattedSettings = $siteSettings->pluck('payload', 'key')->map(function ($value) {
-                return trim($value, '"');
+                return json_decode($value, true);
             })->toArray();
     
             return $formattedSettings;

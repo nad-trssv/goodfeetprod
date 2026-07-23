@@ -7,6 +7,7 @@
         <div class="booking-board__scroll" id="altServices">
           @foreach($services as $item)
             <button type="button" class="alt-service booking-option" data-service-id="{{ $item['id'] }}">
+              @if(($settings['show_service_images'] ?? true))<img src="{{ $item['image_url'] }}" alt="{{ $item['translation']['name'] ?? $item['name'] }}" width="192" height="128" loading="lazy" decoding="async" class="booking-option__image">@endif
               <span><strong>{{ $item['translation']['name'] ?? $item['name'] }}</strong><small>{{ $item['effective_duration_minutes'] }} {{ __('msg.min') }}</small></span>
               <b>@if($item['price_can_change']){{ __('msg.price_from') }} @endif{{ $item['effective_price'] }} &euro;</b>
             </button>

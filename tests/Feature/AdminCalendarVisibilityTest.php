@@ -40,7 +40,11 @@ class AdminCalendarVisibilityTest extends TestCase
 
         $this->actingAs($admin)->get(route('calendar.index'))
             ->assertOk()
-            ->assertViewHas('appointments', fn (array $items) => collect($items)->pluck('id')->contains($appointment->id));
+            ->assertViewHas('appointments', function (array $items) use ($appointment) {
+                $event = collect($items)->firstWhere('id', $appointment->id);
+                return $event && $event['start'] === $appointment->appointment_start->format('Y-m-d\TH:i:s')
+                    && ! str_ends_with($event['start'], 'Z');
+            });
 
         $this->actingAs($admin)->get(route('calendarList'))
             ->assertOk()

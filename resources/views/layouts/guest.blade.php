@@ -1,0 +1,1 @@
+<!DOCTYPE html><html lang="{{ app()->getLocale() }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>{{ config('app.name') }}</title><x-brand-theme /></head><body>{{ $slot }}</body></html>

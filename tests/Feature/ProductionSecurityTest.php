@@ -41,12 +41,12 @@ class ProductionSecurityTest extends TestCase
         $this->get('/booking/confirmation/123')->assertNotFound();
     }
 
-    public function test_database_has_unique_master_start_constraint(): void
+    public function test_database_has_unique_active_slot_constraint(): void
     {
         $indexes = collect(Schema::getIndexes('appointments'));
 
         $this->assertTrue($indexes->contains(fn ($index) =>
-            $index['unique'] && $index['columns'] === ['user_id', 'appointment_start']
+            $index['unique'] && $index['columns'] === ['slot_lock_key']
         ));
     }
 }

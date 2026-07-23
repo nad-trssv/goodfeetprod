@@ -29,8 +29,8 @@
   .booking-template-option { transition: .2s ease; }
   .btn-check:checked + .booking-template-option {
     border-color: var(--phoenix-primary) !important;
-    box-shadow: 0 0 0 3px rgba(56, 116, 255, .16);
-    background: rgba(56, 116, 255, .04);
+    box-shadow: 0 0 0 3px rgba(var(--phoenix-primary-rgb), .16);
+    background: rgba(var(--phoenix-primary-rgb), .04);
   }
   .booking-template-option .template-selected { display:none; }
   .btn-check:checked + .booking-template-option .template-selected { display:inline-flex; }
@@ -148,6 +148,24 @@
                 </div>
               </div>
 
+              <div class="card border mb-5">
+                <div class="card-body">
+                  <h6 class="mb-2">Основной акцентный цвет</h6>
+                  <p class="text-muted fs-9">Используется для кнопок, ссылок, выбранных элементов, календарей и других активных состояний на клиентской и административной части сайта.</p>
+                  <div class="row g-3 align-items-end">
+                    <div class="col-auto">
+                      <label class="form-label" for="primary_accent_color_picker">Выбрать цвет</label>
+                      <input class="form-control form-control-color" id="primary_accent_color_picker" type="color" value="#3874FF" title="Выбрать основной цвет">
+                    </div>
+                    <div class="col-sm-5 col-lg-4">
+                      <label class="form-label" for="primary_accent_color">HEX-код</label>
+                      <input class="form-control text-uppercase" id="primary_accent_color" name="primary_accent_color" type="text" value="#3874FF" maxlength="7" pattern="^#[0-9A-Fa-f]{6}$" required>
+                      <div class="invalid-feedback" id="primary_accent_color-error"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <h6 class="mb-3">Шаблон записи на услугу</h6>
               <p class="text-muted fs-9">Выберите, как клиент будет проходить шаги услуги, мастера и времени.</p>
               <div class="row g-3 mb-4">
@@ -167,6 +185,45 @@
               </div>
               <div class="text-end mb-5">
                 <button class="btn btn-primary" type="submit"><span class="fas fa-check me-2"></span>Сохранить шаблон</button>
+              </div>
+
+              <div class="card border mb-5">
+                <div class="card-body">
+                  <h6 class="mb-2">Правила отмены и переноса</h6>
+                  <p class="text-muted fs-9">Единый срок применяется к отмене записи и отправке запроса на перенос.</p>
+                  <div class="form-check form-switch border rounded-3 p-3 ps-6 mb-3">
+                    <input type="hidden" name="allow_customer_cancellation" value="0">
+                    <input class="form-check-input" id="allow_customer_cancellation" name="allow_customer_cancellation" type="checkbox" value="1" checked>
+                    <label class="form-check-label fw-semibold" for="allow_customer_cancellation">Разрешить клиентам самостоятельно отменять записи</label>
+                    <div class="text-muted fs-9 mt-1">Если выключено, кнопка отмены исчезнет из аккаунта клиента, а сервер отклонит попытку отмены через прямой запрос.</div>
+                  </div>
+                  <div class="row g-3"><div class="col-md-6">
+                  <label class="form-label" for="cancellation_notice_hours">Минимальное время до отмены клиентом</label>
+                  <div class="input-group"><input class="form-control" id="cancellation_notice_hours" name="cancellation_notice_hours" type="number" min="0" max="8760" value="24" required><span class="input-group-text">часов</span></div>
+                  <div class="form-text">Например: 24 часа — одни сутки, 72 часа — трое суток. 0 разрешает отмену до начала записи.</div>
+                  <div class="invalid-feedback" id="cancellation_notice_hours-error"></div>
+                  </div></div>
+                </div>
+              </div>
+
+              <h6 class="mb-3">Изображения в каталоге и бронировании</h6>
+              <div class="row g-3 mb-5">
+                <div class="col-md-6">
+                  <div class="form-check form-switch border rounded-3 p-3 ps-6 h-100">
+                    <input type="hidden" name="show_service_images" value="0">
+                    <input class="form-check-input" id="show_service_images" name="show_service_images" type="checkbox" value="1" checked>
+                    <label class="form-check-label fw-semibold" for="show_service_images">Показывать изображения услуг</label>
+                    <div class="text-muted fs-9 mt-1">На главной странице и во всех вариантах клиентского бронирования.</div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-check form-switch border rounded-3 p-3 ps-6 h-100">
+                    <input type="hidden" name="show_master_images" value="0">
+                    <input class="form-check-input" id="show_master_images" name="show_master_images" type="checkbox" value="1" checked>
+                    <label class="form-check-label fw-semibold" for="show_master_images">Показывать фотографии мастеров</label>
+                    <div class="text-muted fs-9 mt-1">Если фото отсутствует, используется локальная заглушка без внешних запросов.</div>
+                  </div>
+                </div>
               </div>
 
               <h6 class="mb-3">Краткое описание компании</h6>
@@ -331,6 +388,10 @@
               $('input[name="booking_template"][value="' + item.payload + '"]').prop('checked', true);
               return;
             }
+            if (['show_service_images', 'show_master_images', 'allow_customer_cancellation'].includes(item.key)) {
+              $('#' + item.key).prop('checked', item.payload === true || item.payload === 1 || item.payload === '1');
+              return;
+            }
             if (item.key === 'company_short_description' && item.payload) {
               Object.entries(item.payload).forEach(function([locale, html]) {
                 const editorId = 'company_short_description_' + locale;
@@ -346,6 +407,9 @@
             }
             let el = document.getElementById(item.key);
             if (el && el.type !== 'file') el.value = item.payload ?? '';
+            if (item.key === 'primary_accent_color' && /^#[0-9A-Fa-f]{6}$/.test(item.payload || '')) {
+              $('#primary_accent_color_picker').val(item.payload);
+            }
           });
         }
       });
@@ -572,6 +636,14 @@
       });
 
       // Настройки сайта
+      $('#primary_accent_color_picker').on('input', function() {
+        $('#primary_accent_color').val(this.value.toUpperCase()).trigger('input');
+      });
+      $('#primary_accent_color').on('input', function() {
+        const value = this.value.trim();
+        if (/^#[0-9A-Fa-f]{6}$/.test(value)) $('#primary_accent_color_picker').val(value);
+      });
+
       $('#updateSettingsTable').submit(function(e) {
         e.preventDefault();
         tinymce.triggerSave();
@@ -588,7 +660,10 @@
           data: formData,
           processData: false,
           contentType: false,
-          success: () => showSuccess(),
+          success: () => {
+            showSuccess();
+            window.setTimeout(() => window.location.reload(), 500);
+          },
           error: (xhr) => showError(xhr)
         });
       });

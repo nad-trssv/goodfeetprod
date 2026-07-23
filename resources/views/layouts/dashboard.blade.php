@@ -50,6 +50,7 @@
 
     <link rel="stylesheet" href="{{ asset('build/' . $manifest['resources/css/app.css']['file']) }}">
     <script type="module" src="{{ asset('build/' . $manifest['resources/js/app.js']['file']) }}"></script>
+    <x-brand-theme />
     @stack('styles')
   </head>
 

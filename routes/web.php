@@ -19,6 +19,12 @@ use App\Http\Controllers\Api\ServiceController as AjaxServiceController;
 use App\Http\Controllers\Api\RedDayController as AjaxRedDayController;
 use App\Http\Controllers\Api\MainSettingController as AjaxMainSettingController;
 use App\Http\Controllers\Api\FixedBookingController as AjaxFixedBookingController;
+use App\Http\Controllers\CustomerAuthController;
+use App\Http\Controllers\CustomerDashboardController;
+use App\Http\Controllers\CustomerProfileController;
+use App\Http\Controllers\CustomerAppointmentController;
+use App\Http\Controllers\CustomerRescheduleController;
+use App\Http\Controllers\Admin\RescheduleRequestController;
 
 Route::get('/', [PageController::class, 'index'])->name('home');
 Route::get('/sitemap.xml', [PageController::class, 'sitemap'])->name('sitemap');
@@ -46,6 +52,25 @@ Route::post('/booking/busy-days', [AjaxBookingController::class, 'getBusyDays'])
 Route::post('/booking', [AjaxBookingController::class, 'storeBooking'])->name('booking.store');
 Route::post('/booking/effective-service', [AjaxServiceController::class, 'effective'])->name('booking.service.effective');
 
+Route::middleware('guest:customer')->group(function () {
+    Route::get('/account/login', [CustomerAuthController::class, 'showLogin'])->name('customer.login');
+    Route::post('/account/login', [CustomerAuthController::class, 'login'])->middleware('throttle:10,1')->name('customer.login.store');
+    Route::get('/account/register', [CustomerAuthController::class, 'showRegister'])->name('customer.register');
+    Route::post('/account/register', [CustomerAuthController::class, 'register'])->middleware('throttle:5,1')->name('customer.register.store');
+});
+Route::middleware('auth:customer')->prefix('account')->name('customer.')->group(function () {
+    Route::get('/', CustomerDashboardController::class)->name('dashboard');
+    Route::get('/profile', [CustomerProfileController::class, 'show'])->name('profile');
+    Route::put('/profile', [CustomerProfileController::class, 'update'])->middleware('throttle:10,1')->name('profile.update');
+    Route::delete('/appointments/{appointment:public_uuid}', [CustomerAppointmentController::class, 'destroy'])->middleware('throttle:5,1')->name('appointments.destroy');
+    Route::get('/appointments/{appointment:public_uuid}/reschedule', [CustomerRescheduleController::class, 'show'])->name('appointments.reschedule');
+    Route::get('/appointments/{appointment:public_uuid}/reschedule/days', [CustomerRescheduleController::class, 'days'])->middleware('throttle:20,1')->name('appointments.reschedule.days');
+    Route::post('/appointments/{appointment:public_uuid}/reschedule/slots', [CustomerRescheduleController::class, 'slots'])->middleware('throttle:30,1')->name('appointments.reschedule.slots');
+    Route::post('/appointments/{appointment:public_uuid}/reschedule', [CustomerRescheduleController::class, 'store'])->middleware('throttle:5,1')->name('appointments.reschedule.store');
+    Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('logout');
+    Route::delete('/', [CustomerAuthController::class, 'destroy'])->middleware('throttle:3,1')->name('destroy');
+});
+
 Route::middleware([
     'auth:sanctum',
     'admin',
@@ -56,6 +81,13 @@ Route::middleware([
 
     Route::resource('calendar', AppointmentController::class);
     Route::get('calendarList', [AppointmentController::class, 'calendarList'])->name('calendarList');
+    Route::get('reschedule-requests', [RescheduleRequestController::class, 'index'])->name('reschedule.index');
+    Route::get('notifications', [App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('notifications/status', [App\Http\Controllers\Admin\NotificationController::class, 'status'])->middleware('throttle:30,1')->name('notifications.status');
+    Route::post('notifications/read-all', [App\Http\Controllers\Admin\NotificationController::class, 'readAll'])->name('notifications.read-all');
+    Route::post('notifications/{notification}/read', [App\Http\Controllers\Admin\NotificationController::class, 'read'])->name('notifications.read');
+    Route::post('reschedule-requests/{request:public_uuid}/approve', [RescheduleRequestController::class, 'approve'])->name('reschedule.approve');
+    Route::post('reschedule-requests/{request:public_uuid}/reject', [RescheduleRequestController::class, 'reject'])->name('reschedule.reject');
     Route::get('calendar/create', [AppointmentController::class, 'createAppointment'])->name('calendar.create');
     Route::get('calendar/details/{appointment}', [AppointmentController::class, 'show'])->name('calendar.show');
 

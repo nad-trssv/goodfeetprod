@@ -76,7 +76,7 @@ class ServiceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Services $service)
+    public function update(ServiceRequest $request, Services $service)
     {
         try {
             $this->serviceService->update($request, $service);

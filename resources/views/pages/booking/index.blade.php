@@ -33,8 +33,8 @@
   .booking-template--compact #step1 > .row:last-child,
   .booking-template--compact #mastersContainer { display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.75rem; }
   .booking-template--compact .choose__item { width:100% !important; margin:0 !important; border:1px solid #e3e6ea; border-radius:10px; padding:.75rem; cursor:pointer; }
-  .booking-template--compact .choose__item:hover { border-color:var(--phoenix-primary); background:rgba(56,116,255,.04); }
-  .booking-template .choose__item.is-selected { border-color:var(--phoenix-primary); box-shadow:0 0 0 2px rgba(56,116,255,.12); }
+  .booking-template--compact .choose__item:hover { border-color:var(--phoenix-primary); background:rgba(var(--phoenix-primary-rgb),.04); }
+  .booking-template .choose__item.is-selected { border-color:var(--phoenix-primary); box-shadow:0 0 0 2px rgba(var(--phoenix-primary-rgb),.12); }
   .booking-template--compact #info .card { position:sticky; top:110px; border-radius:14px; }
   .booking-template--compact .booking_calendar { margin-top:0; }
   @media(max-width:767px) {
@@ -102,8 +102,10 @@
   .booking-board__heading small, .master-workspace__title p { color:#77808b; font-size:.75rem; margin:0; }
   .booking-board__scroll { max-height:520px; overflow:auto; padding-right:.25rem; }
   .booking-option, .master-directory__item { display:flex; width:100%; border:1px solid #e3e7eb; background:#fff; border-radius:12px; padding:.85rem; margin-bottom:.6rem; text-align:left; justify-content:space-between; align-items:center; gap:.75rem; transition:.18s ease; }
-  .booking-option:hover, .booking-option.is-selected, .master-directory__item:hover, .master-directory__item.is-selected { border-color:var(--phoenix-primary); background:rgba(56,116,255,.045); box-shadow:0 0 0 2px rgba(56,116,255,.1); }
+  .booking-option:hover, .booking-option.is-selected, .master-directory__item:hover, .master-directory__item.is-selected { border-color:var(--phoenix-primary); background:rgba(var(--phoenix-primary-rgb),.045); box-shadow:0 0 0 2px rgba(var(--phoenix-primary-rgb),.1); }
   .booking-option span, .master-directory__item span:nth-child(2) { min-width:0; }
+  .booking-option__image { width:64px; height:48px; flex:0 0 64px; border-radius:8px; object-fit:cover; }
+  .master-directory__photo { width:42px; height:42px; flex:0 0 42px; border-radius:50%; object-fit:cover; }
   .booking-option strong, .booking-option small, .master-directory__item strong, .master-directory__item small { display:block; }
   .booking-option small, .master-directory__item small { color:#77808b; font-size:.72rem; margin-top:.2rem; }
   .booking-placeholder { padding:2rem 1rem; text-align:center; color:#8a929b; border:1px dashed #ccd2d8; border-radius:12px; }
@@ -345,6 +347,7 @@
             var compactSelectedDate = null;
 
             var services = @json($services);
+            const showMasterImages = @json((bool)($settings['show_master_images'] ?? true));
             var redDays = @json($redDays); 
             var partiallyOpenDays = @json($redDaysTime);
             var bookLimit = @json($bookLimit);
@@ -385,7 +388,8 @@
                     masterBlock.innerHTML = `
                         <div class="col-11 m-0">
                             <div class="m-0">
-                                <h4 class="mb-0 fw-medium fs-8 m-0">${user.name}</h4>
+                                  <h4 class="mb-0 fw-medium fs-8 m-0">${user.name}</h4>
+                                  <small class="text-body-secondary">${user.professional_title || ''}</small>
                             </div>
                         </div>
                         <div class="col-1 d-flex align-items-center justify-content-end m-0">
@@ -421,7 +425,7 @@
               bookingStep++;
               updateBookingProgress();
               stepRules(bookingStep, 'inc');
-              scrollToTop();
+              scrollToCurrentStep();
             }
             function prevStep(){
               bookingStep--;
@@ -429,11 +433,20 @@
               stepRules(bookingStep, 'dec');
               scrollToTop();
             }
+            function scrollToCurrentStep() {
+                const isMobile = window.matchMedia('(max-width: 767px)').matches;
+                if (!isMobile && bookingStep !== 3) return;
+
+                window.setTimeout(function () {
+                    document.getElementById(`step${bookingStep}`)?.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }, 550);
+            }
+
             function scrollToTop() {
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
             function stepRules(step, operator){
               let $step1 = $("#step1");
@@ -534,9 +547,11 @@
                           masterBlock.dataset.userId = user.id;
                           masterBlock.dataset.userName = user.name;
                           masterBlock.innerHTML = `
+                              ${showMasterImages ? `<div class="col-auto m-0"><img src="${user.profile_photo_url}" alt="${user.name}" width="84" height="84" loading="lazy" decoding="async" class="master-directory__photo"></div>` : ''}
                               <div class="col-11 m-0">
                                   <div class="m-0">
                                       <h4 class="mb-0 fw-medium fs-8 m-0">${user.name}</h4>
+                                      <small class="text-body-secondary">${user.professional_title || ''}</small>
                                   </div>
                               </div>
                               <div class="col-1 d-flex align-items-center justify-content-end m-0">

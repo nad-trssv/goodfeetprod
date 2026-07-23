@@ -6,15 +6,20 @@ use App\Models\Events;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use App\Services\Media\OptimizedImageStorage;
+use Throwable;
 
 class ProfileService
 {
     public $profile;
+
+    public function __construct(private readonly OptimizedImageStorage $images)
+    {
+    }
     
     public function getProfile()
     {
@@ -42,8 +47,14 @@ class ProfileService
     
     public function setProfile($request)
     {
-        $this->profile = User::where('id', $request->user_id)->first();
-        DB::transaction(function () use ($request) {
+        $this->profile = User::findOrFail(auth()->id());
+        $oldPhotoPath = $this->profile->profile_photo_path;
+        $newPhotoPath = $request->hasFile('profile_photo_path')
+            ? $this->images->store($request->file('profile_photo_path'), 'users', $this->profile->name, 800, 800)
+            : null;
+
+        try {
+            DB::transaction(function () use ($request, $newPhotoPath) {
             if($request['oldPassword']){
                 if (!Hash::check($request['oldPassword'], $this->profile['password'])) {
                     throw new Exception('The provided old password does not match our records.', 422);
@@ -54,24 +65,14 @@ class ProfileService
                 }
             }
 
-            if ($request->hasFile('profile_photo_path')) {
-                $path = $request['profile_photo_path'];
-                $userphotoContent = file_get_contents($path);
-                $userphotoName = 'users/' . Str::random(10) . '.jpg';
-                Storage::disk('public')->put($userphotoName, $userphotoContent);
-                $this->profile->update([
-                    'profile_photo_path' => $userphotoName,
-                ]);
-            } 
-
-            $this->profile = User::where('id', $request->user_id)->first();
-
             $this->profile->update([
                 'username' => $request['username'],
                 'name' => $request['name'],
+                'professional_titles' => $this->validatedTitles($request->input('professional_titles', [])),
                 'phone' => $request['phone'],
                 'date_birthday' => $request['date_birthday'],
                 'email' => $request['email'],
+                'profile_photo_path' => $newPhotoPath ?? $this->profile->profile_photo_path,
             ]);
             if ($this->profile['date_birthday']) {
             Events::updateOrCreate(
@@ -83,7 +84,27 @@ class ProfileService
                 ]
             );
             }
-        });
-        return $this->profile;
+            });
+        } catch (Throwable $exception) {
+            if ($newPhotoPath) {
+                Storage::disk('public')->delete($newPhotoPath);
+            }
+            throw $exception;
+        }
+
+        if ($newPhotoPath && $oldPhotoPath && $oldPhotoPath !== $newPhotoPath) {
+            Storage::disk('public')->delete($oldPhotoPath);
+        }
+
+        return $this->profile->refresh();
+    }
+
+    private function validatedTitles(array $titles): array
+    {
+        return collect($titles)
+            ->only(array_keys(config('supported_locales')))
+            ->map(fn ($title) => trim(strip_tags((string) $title)))
+            ->filter()
+            ->all();
     }
 }

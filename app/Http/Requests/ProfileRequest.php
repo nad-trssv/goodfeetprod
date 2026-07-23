@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 
 class ProfileRequest extends FormRequest
 {
@@ -12,7 +13,7 @@ class ProfileRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return Auth::check();
     }
 
     /**
@@ -23,22 +24,27 @@ class ProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => ['required', 'string', Rule::exists('users', 'id')],
+            'user_id' => ['required', 'integer', Rule::in([Auth::id()])],
             'name' => 'required|string|max:255',
             'phone' => [
                 'required',
                 'string',
                 'max:20',
                 'regex:/^\+[\d\s]+$/',
+                Rule::unique('users', 'phone')->ignore(Auth::id()),
             ],
-            'email' => 'required|email|max:55',
+            'email' => ['required', 'email', 'max:55', Rule::unique('users', 'email')->ignore(Auth::id())],
             'username' => [
                 'required',
                 'string',
                 'min:3',
                 'max:30',
                 'regex:/^@(?!.*\.\.)(?!.*\.$)[a-zA-Z0-9._]+$/',
+                Rule::unique('users', 'username')->ignore(Auth::id()),
             ],
+            'profile_photo_path' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
+            'professional_titles' => ['nullable', 'array'],
+            'professional_titles.*' => ['nullable', 'string', 'max:120'],
             'password' => [
                 'required_with:oldPassword',
                 'nullable',

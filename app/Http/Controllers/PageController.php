@@ -76,7 +76,7 @@ class PageController extends Controller
     }
 
     function getSettings(){
-        $siteSettings = SiteSettings::whereIn('group', ['company', 'branding'])->get();
+        $siteSettings = SiteSettings::whereIn('group', ['company', 'branding', 'booking'])->get();
         if ($siteSettings) {
             $formattedSettings = $siteSettings->pluck('payload', 'key')->map(function ($value) {
                 return json_decode($value, true);

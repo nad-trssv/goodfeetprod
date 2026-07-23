@@ -13,12 +13,14 @@ use App\Models\UserSchedule;
 use App\Services\MemberService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use App\Services\Media\OptimizedImageStorage;
 
 class MemberController extends Controller
 {
     private MemberService $memberService;
 
-    public function __construct(MemberService $memberService)
+    public function __construct(MemberService $memberService, private readonly OptimizedImageStorage $images)
     {
         $this->memberService = $memberService;
     }
@@ -45,7 +47,7 @@ class MemberController extends Controller
     {
         if ($step == 1) {
             if ($request->hasFile('photo')) {
-                $path = $request['photo']->store('users', 'public');
+                $path = $this->images->store($request->file('photo'), 'users', $request->name, 1000, 1000);
             } else {
                 $path = null;
             }
@@ -109,6 +111,9 @@ class MemberController extends Controller
             'email' => 'required|email|unique:users,email,' . $id,
             'services' => 'nullable|array',
             'services.*' => 'exists:services,id',
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048|dimensions:min_width=400,min_height=400,max_width=4000,max_height=4000',
+            'professional_titles' => 'nullable|array',
+            'professional_titles.*' => 'nullable|string|max:120',
         ];
 
         if ($request->filled('password')) {
@@ -120,6 +125,11 @@ class MemberController extends Controller
         // Обновляем данные пользователя
         $member->update([
             'name' => $request->name,
+            'professional_titles' => collect($request->input('professional_titles', []))
+                ->only(array_keys(config('supported_locales')))
+                ->map(fn ($title) => trim(strip_tags((string) $title)))
+                ->filter()
+                ->all(),
             'username' => $request->username,
             'phone' => $request->phone,
             'email' => $request->email,
@@ -132,8 +142,12 @@ class MemberController extends Controller
         }
 
         if ($request->hasFile('photo')) {
-            $path = $request->file('photo')->store('users', 'public');
+            $oldPhotoPath = $member->profile_photo_path;
+            $path = $this->images->store($request->file('photo'), 'users', $member->name, 1000, 1000);
             $member->update(['profile_photo_path' => $path]);
+            if ($oldPhotoPath && $oldPhotoPath !== $path) {
+                Storage::disk('public')->delete($oldPhotoPath);
+            }
         }
 
         // Обновляем услуги

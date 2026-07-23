@@ -21,6 +21,8 @@ class DashboardSidebar extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.dashboard-sidebar');
+        return view('components.dashboard-sidebar', [
+            'unreadNotificationCount' => auth()->user()?->unreadNotifications()->count() ?? 0,
+        ]);
     }
 }

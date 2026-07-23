@@ -65,10 +65,6 @@ class ProfileController extends Controller
      */
     public function update(ProfileRequest $request)
     {
-        if (User::where('username', '@'.$request->username)->exists()) {
-            return redirect()->back()->withErrors(['username' => 'Такой никнейм уже существует.'])->withInput();
-        }
-
         $data = $this->profileService->setProfile($request);
          
         return response()->json([

@@ -4,12 +4,18 @@ namespace Tests\Feature;
 
 use App\Http\Requests\BookingRequest;
 use App\Models\Appointments;
+use App\Models\Customer;
 use App\Models\Roles;
 use App\Models\Services;
 use App\Models\User;
 use App\Services\Booking\BookingCreator;
 use App\Services\Booking\RoomAllocationService;
+use App\Services\Booking\SlotAvailabilityService;
+use App\Models\UserSchedule;
+use Carbon\Carbon;
+use App\Services\Customer\CustomerIdentityService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
 
@@ -17,10 +23,22 @@ class BookingCreatorTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Carbon::setTestNow('2030-01-01 08:00:00');
+    }
+
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow();
+        parent::tearDown();
+    }
+
     public function test_it_uses_server_price_and_generates_public_uuid(): void
     {
         [$user, $service] = $this->bookingEntities('75.50');
-        $creator = new BookingCreator($this->roomServiceWithoutAssignment());
+        $creator = new BookingCreator($this->roomServiceWithoutAssignment(), app(SlotAvailabilityService::class), app(CustomerIdentityService::class));
 
         $appointment = $creator->create(
             $this->request($user, $service),
@@ -36,7 +54,7 @@ class BookingCreatorTest extends TestCase
     public function test_it_rejects_an_overlapping_booking_for_the_same_master(): void
     {
         [$user, $service] = $this->bookingEntities('50.00');
-        $creator = new BookingCreator($this->roomServiceWithoutAssignment());
+        $creator = new BookingCreator($this->roomServiceWithoutAssignment(), app(SlotAvailabilityService::class), app(CustomerIdentityService::class));
         $request = $this->request($user, $service);
 
         Appointments::create([
@@ -59,6 +77,23 @@ class BookingCreatorTest extends TestCase
         $this->assertSame(1, Appointments::count());
     }
 
+    public function test_authenticated_customer_cannot_book_with_another_identity(): void
+    {
+        [$user, $service] = $this->bookingEntities('50.00');
+        $customer = Customer::create([
+            'first_name' => 'Account',
+            'email' => 'account@example.com',
+            'phone' => '+37250000010',
+            'password' => 'secret-pass',
+        ]);
+        $this->actingAs($customer, 'customer');
+
+        $creator = new BookingCreator($this->roomServiceWithoutAssignment(), app(SlotAvailabilityService::class), app(CustomerIdentityService::class));
+
+        $this->expectException(ValidationException::class);
+        $creator->create($this->request($user, $service), ['start' => '10:00', 'end' => '11:00'], $service);
+    }
+
     private function bookingEntities(string $price): array
     {
         $role = Roles::create(['name' => 'master']);
@@ -71,6 +106,11 @@ class BookingCreatorTest extends TestCase
             'status' => true,
         ]);
         $service->users()->attach($user);
+        UserSchedule::create([
+            'user_id' => $user->id,
+            'tuesday_start' => '09:00',
+            'tuesday_end' => '18:00',
+        ]);
 
         return [$user, $service];
     }
