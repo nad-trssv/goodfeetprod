@@ -33,9 +33,42 @@ class Services extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class, 'user_services', 'service_id', 'user_id');
+        return $this->belongsToMany(
+            User::class,
+            'user_services',
+            'service_id',
+            'user_id'
+        )
+            ->wherePivot('is_active', true)
+            ->withPivot([
+                'is_active',
+                'price_override',
+                'duration_minutes_override',
+                'duration_minutes_min_override',
+                'buffer_before_minutes',
+                'buffer_after_minutes',
+            ])
+            ->withTimestamps();
     }
 
+    public function allUsers()
+    {
+        return $this->belongsToMany(
+            User::class,
+            'user_services',
+            'service_id',
+            'user_id'
+        )
+            ->withPivot([
+                'is_active',
+                'price_override',
+                'duration_minutes_override',
+                'duration_minutes_min_override',
+                'buffer_before_minutes',
+                'buffer_after_minutes',
+            ])
+            ->withTimestamps();
+    }
     public function appointments()
     {
         return $this->hasMany(Appointments::class, 'service_id');

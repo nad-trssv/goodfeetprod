@@ -91,9 +91,41 @@ class User extends Authenticatable
 
     public function services()
     {
-        return $this->belongsToMany(Services::class, 'user_services', 'user_id', 'service_id');
+        return $this->belongsToMany(
+            Services::class,
+            'user_services',
+            'user_id',
+            'service_id'
+        )
+            ->wherePivot('is_active', true)
+            ->withPivot([
+                'is_active',
+                'price_override',
+                'duration_minutes_override',
+                'duration_minutes_min_override',
+                'buffer_before_minutes',
+                'buffer_after_minutes',
+            ])
+            ->withTimestamps();
     }
-
+    public function allServices()
+    {
+        return $this->belongsToMany(
+            Services::class,
+            'user_services',
+            'user_id',
+            'service_id'
+        )
+            ->withPivot([
+                'is_active',
+                'price_override',
+                'duration_minutes_override',
+                'duration_minutes_min_override',
+                'buffer_before_minutes',
+                'buffer_after_minutes',
+            ])
+            ->withTimestamps();
+    }
     public function appointments()
     {
         return $this->hasMany(Appointments::class);

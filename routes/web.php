@@ -25,13 +25,14 @@ use App\Http\Controllers\CustomerProfileController;
 use App\Http\Controllers\CustomerAppointmentController;
 use App\Http\Controllers\CustomerRescheduleController;
 use App\Http\Controllers\Admin\RescheduleRequestController;
+use App\Http\Controllers\Admin\ActivityLogController;
 
 Route::get('/', [PageController::class, 'index'])->name('home');
 Route::get('/sitemap.xml', [PageController::class, 'sitemap'])->name('sitemap');
 Route::get('/localization/{lang}', [LanguageController::class, 'change'])->name('lang.change');
 
-Route::get('/gf-administraator', [AuthenticatedSessionController::class, 'create'])->name('login');
-Route::post('/gf-administraator', [AuthenticatedSessionController::class, 'store'])->name('login.store');
+Route::get('/admin7f4k2qbackoffice', [AuthenticatedSessionController::class, 'create'])->name('login');
+Route::post('/admin7f4k2qbackoffice', [AuthenticatedSessionController::class, 'store'])->name('login.store');
 
 Route::get('/login', function () {
     abort(404);
@@ -114,14 +115,29 @@ Route::middleware([
     Route::delete('master/schedule/redDay/{id}', [App\Http\Controllers\Admin\MasterScheduleController::class, 'destroyRedDay'])->name('master.schedule.destroyRedDay');
     Route::put('master/schedule/redDay/{id}', [App\Http\Controllers\Admin\MasterScheduleController::class, 'updateRedDay'])->name('master.schedule.updateRedDay');
 
-    Route::post('master/services/{service}/toggle', [App\Http\Controllers\Admin\MasterServiceController::class, 'toggle'])->name('master.service.toggle');
-    Route::get('master/services', [App\Http\Controllers\Admin\MasterServiceController::class, 'index'])->name('master.services.index');
+    Route::get(
+        'master/services',
+        [App\Http\Controllers\Admin\MasterServiceController::class, 'index']
+    )->name('master.services.index');
 
+    Route::post(
+        'master/services/{service}/toggle',
+        [App\Http\Controllers\Admin\MasterServiceController::class, 'toggle']
+    )->name('master.service.toggle');
+
+    Route::put(
+        'master/services/{service}',
+        [App\Http\Controllers\Admin\MasterServiceController::class, 'update']
+    )->name('master.service.update');
+    
     Route::get('master/time-off', [App\Http\Controllers\Admin\MasterScheduleController::class, 'timeOff'])->name('master.time-off.index');
     Route::post('master/time-off/store', [App\Http\Controllers\Admin\MasterScheduleController::class, 'storeTimeOff'])->name('master.time-off.store');
     Route::post('master/time-off/{id}/update', [App\Http\Controllers\Admin\MasterScheduleController::class, 'updateTimeOff'])->name('master.time-off.update');
     Route::post('master/time-off/{id}/destroy', [App\Http\Controllers\Admin\MasterScheduleController::class, 'destroyTimeOff'])->name('master.time-off.destroy');
-
+    Route::get(
+        'activity-logs',
+        [ActivityLogController::class, 'index']
+    )->name('admin.activity-logs.index');
     // Только для администратора (super-admin)
     Route::middleware('super-admin')->group(function () {
         Route::resource('calendarAllMasters', AppointmentControllerAllMasters::class);
