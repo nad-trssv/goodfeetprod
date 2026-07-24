@@ -20,7 +20,6 @@
   --phoenix-link-color: var(--brand-accent);
   --phoenix-link-color-rgb: var(--brand-accent-rgb);
   --phoenix-focus-ring-color: rgba(var(--brand-accent-rgb), .25);
-  --phoenix-navbar-vertical-link-active-color: var(--brand-accent);
   --phoenix-theme-wizard-complete-color: var(--brand-accent);
   --phoenix-theme-wizard-active-color: var(--brand-accent);
   --phoenix-flatpickr-calendar-day-selected-bg: rgba(var(--brand-accent-rgb), .2);

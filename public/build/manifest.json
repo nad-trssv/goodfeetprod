@@ -32,16 +32,16 @@
     "src": "public/assets/img/icons/plane_dark.png"
   },
   "public/assets/img/icons/star.svg": {
-    "file": "star-DF7Ow4iE.svg",
+    "file": "star-CiNZ351U.svg",
     "src": "public/assets/img/icons/star.svg"
   },
   "resources/css/app.css": {
-    "file": "app-B19l4QZL.css",
+    "file": "app-D0lNWTL9.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/css/homepage.css": {
-    "file": "homepage-Bh8OoPwm.css",
+    "file": "homepage-BX9hibsf.css",
     "src": "resources/css/homepage.css",
     "isEntry": true
   },
@@ -52,7 +52,7 @@
     "isEntry": true
   },
   "resources/js/homepage.js": {
-    "file": "homepage-B0sfyq4j.js",
+    "file": "homepage-BtpDLtag.js",
     "name": "homepage",
     "src": "resources/js/homepage.js",
     "isEntry": true

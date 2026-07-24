@@ -20,12 +20,12 @@
     --calendar-btn-hover-bg: #393f4d;
     --calendar-btn-hover-color: #fff;
     --calendar-btn-border-color: #e3e6ed00;
-    --calendar-arrow-color: #222;
+    --calendar-arrow-color: #1a1f26;
     --calendar-currentDay-circle-bg: #424b8f;
     --calendar-currentDay-circle-color: #fff;
     --icon-bg: #1c2231;
     --link-color: #2f4f99;
-    --main-text-color: #222;
+    --main-text-color: #1a1f26;
     --highlight-text-color: #767c8d;
     --main-text-color-rgb: 40 40 40;
     --main-text-secondary-color: #d6630a;
@@ -58,6 +58,153 @@
     --main-text-color-rgb: 255 255 255;
     --main-text-secondary-color: #ffcc85;
     --calendar-dayoff: #e43351;
-    --calendar-bg: #141824;
+    --calendar-bg: #1a1f26;
     --btn-border-color: #aaaaac;
 } 
+:root,
+[data-bs-theme=light] {
+    --master-service-page-bg: transparent;
+
+    --master-service-panel-bg: #ffffff;
+    --master-service-panel-border: #e3e6ed;
+    --master-service-panel-shadow: 0 3px 12px rgba(24, 34, 48, 0.05);
+
+    --master-service-card-bg: #ffffff;
+    --master-service-card-border: #e3e6ed;
+    --master-service-card-border-hover: #cbd0dd;
+    --master-service-card-active-border: #25a244;
+    --master-service-card-inactive-border: #cbd0dd;
+
+    --master-service-settings-bg: #f8fafc;
+    --master-service-setting-block-bg: #ffffff;
+    --master-service-setting-block-border: #e3e6ed;
+
+    --master-service-title-color: #222834;
+    --master-service-text-color: #3e465b;
+    --master-service-muted-color: #6e7891;
+    --master-service-light-muted-color: #8a94a6;
+
+    --master-service-meta-bg: #f5f7fa;
+    --master-service-meta-border: #e3e6ed;
+    --master-service-meta-color: #4d566b;
+    --master-service-meta-icon-color: #6e7891;
+
+    --master-service-enabled-bg: #e7f8ed;
+    --master-service-enabled-color: #16733a;
+    --master-service-enabled-border: #b9e7c7;
+
+    --master-service-disabled-bg: #f1f3f5;
+    --master-service-disabled-color: #697386;
+    --master-service-disabled-border: #dfe3e8;
+
+    --master-service-custom-bg: #fff3df;
+    --master-service-custom-color: #925600;
+    --master-service-custom-border: #f4d49e;
+
+    --master-service-default-bg: transparent;
+    --master-service-default-color: #6e7891;
+    --master-service-default-border: transparent;
+
+    --master-service-toggle-bg: #ffffff;
+    --master-service-toggle-bg-hover: #f5f7fa;
+    --master-service-toggle-border: #d8dde6;
+    --master-service-toggle-border-hover: #b8c0cc;
+    --master-service-toggle-color: #344054;
+
+    --master-service-icon-bg: #eef1f6;
+    --master-service-icon-color: #566176;
+
+    --master-service-input-bg: #ffffff;
+    --master-service-input-color: #222834;
+    --master-service-input-border: #cbd0dd;
+    --master-service-input-focus-border: #3874ff;
+    --master-service-input-focus-shadow: 0 0 0 0.2rem rgba(56, 116, 255, 0.15);
+    --master-service-input-disabled-bg: #eef1f5;
+    --master-service-input-disabled-color: #8a94a6;
+
+    --master-service-divider: #e3e6ed;
+    --master-service-focus-ring: rgba(56, 116, 255, 0.2);
+    --activity-log-info-bg: #c4d6eb;
+
+    --activity-log-warning-bg: #fff3df;
+
+    --activity-log-error-bg: #ffe8ed;
+
+    --activity-log-unknown-bg: #f1f3f5;
+}
+
+
+/* =========================================================
+   Мои услуги — переменные тёмной темы
+   ========================================================= */
+
+[data-bs-theme=dark] {
+    --master-service-page-bg: transparent;
+
+    --master-service-panel-bg: #1a1f26;
+    --master-service-panel-border: #31374a;
+    --master-service-panel-shadow: 0 3px 14px rgba(0, 0, 0, 0.22);
+
+    --master-service-card-bg: #1a1f26;
+    --master-service-card-border: #31374a;
+    --master-service-card-border-hover: #4a536b;
+    --master-service-card-active-border: #3fb763;
+    --master-service-card-inactive-border: #4a536b;
+
+    --master-service-settings-bg: #0f111a;
+    --master-service-setting-block-bg: #171a26;
+    --master-service-setting-block-border: #31374a;
+
+    --master-service-title-color: #ffffff;
+    --master-service-text-color: #d8deeb;
+    --master-service-muted-color: #9fa6bc;
+    --master-service-light-muted-color: #7f879c;
+
+    --master-service-meta-bg: #171a26;
+    --master-service-meta-border: #31374a;
+    --master-service-meta-color: #cbd0dd;
+    --master-service-meta-icon-color: #9fa6bc;
+
+    --master-service-enabled-bg: rgba(63, 183, 99, 0.14);
+    --master-service-enabled-color: #7ee09a;
+    --master-service-enabled-border: rgba(63, 183, 99, 0.35);
+
+    --master-service-disabled-bg: #222834;
+    --master-service-disabled-color: #9fa6bc;
+    --master-service-disabled-border: #3b4254;
+
+    --master-service-custom-bg: rgba(255, 177, 77, 0.13);
+    --master-service-custom-color: #ffcc85;
+    --master-service-custom-border: rgba(255, 177, 77, 0.3);
+
+    --master-service-default-bg: transparent;
+    --master-service-default-color: #9fa6bc;
+    --master-service-default-border: transparent;
+
+    --master-service-toggle-bg: #171a26;
+    --master-service-toggle-bg-hover: #222834;
+    --master-service-toggle-border: #3b4254;
+    --master-service-toggle-border-hover: #59647e;
+    --master-service-toggle-color: #d8deeb;
+
+    --master-service-icon-bg: #222834;
+    --master-service-icon-color: #c8d7ff;
+
+    --master-service-input-bg: #171a26;
+    --master-service-input-color: #ffffff;
+    --master-service-input-border: #3b4254;
+    --master-service-input-focus-border: #85a9ff;
+    --master-service-input-focus-shadow: 0 0 0 0.2rem rgba(133, 169, 255, 0.16);
+    --master-service-input-disabled-bg: #222834;
+    --master-service-input-disabled-color: #767c8d;
+
+    --master-service-divider: #31374a;
+    --master-service-focus-ring: rgba(133, 169, 255, 0.22);
+    --activity-log-info-bg: rgba(133, 169, 255, 0.14);
+
+    --activity-log-warning-bg: rgba(255, 204, 133, 0.13);
+
+    --activity-log-error-bg: rgba(255, 123, 142, 0.13);
+
+    --activity-log-unknown-bg: #222834;
+}

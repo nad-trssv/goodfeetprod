@@ -463,3 +463,708 @@ span.uil.uil-calendar-alt.flatpickr-icon.text-body-tertiary{
 .fc-day {
     pointer-events: auto; /* Убедитесь, что элемент кликабелен */
 }
+.service-filter-panel {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--master-service-panel-border);
+    border-radius: 12px;
+    background: var(--master-service-panel-bg);
+    box-shadow: var(--master-service-panel-shadow);
+}
+
+.service-search-form {
+    display: flex;
+    align-items: center;
+    flex: 1 1 520px;
+    gap: 10px;
+    min-width: 0;
+}
+
+.service-search {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 220px;
+}
+
+.service-search__icon {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    z-index: 2;
+    color: var(--master-service-muted-color);
+    font-size: 13px;
+    pointer-events: none;
+    transform: translateY(-50%);
+}
+
+.service-search .form-control {
+    min-height: 40px;
+    padding-left: 39px;
+    color: var(--master-service-input-color);
+    border-color: var(--master-service-input-border);
+    border-radius: 9px;
+    background: var(--master-service-input-bg);
+}
+
+.service-search .form-control::placeholder {
+    color: var(--master-service-light-muted-color);
+    opacity: 1;
+}
+
+.service-search .form-control:focus {
+    color: var(--master-service-input-color);
+    border-color: var(--master-service-input-focus-border);
+    background: var(--master-service-input-bg);
+    box-shadow: var(--master-service-input-focus-shadow);
+}
+
+.service-filter-buttons {
+    flex: 0 0 auto;
+}
+
+.service-filter-buttons .btn {
+    min-height: 36px;
+    white-space: nowrap;
+}
+
+.service-filter-counter {
+    margin-left: auto;
+    color: var(--master-service-muted-color) !important;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.service-filter-counter strong {
+    color: var(--master-service-text-color);
+}
+
+
+/* =========================================================
+   Список услуг
+   ========================================================= */
+
+.service-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.service-card {
+    overflow: hidden;
+    color: var(--master-service-text-color);
+    border: 1px solid var(--master-service-card-border);
+    border-left: 4px solid var(--master-service-card-inactive-border);
+    border-radius: 12px;
+    background: var(--master-service-card-bg);
+    box-shadow: none;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background-color 0.2s ease;
+}
+
+.service-card:hover {
+    border-color: var(--master-service-card-border-hover);
+    border-left-color: var(--master-service-card-inactive-border);
+    box-shadow: var(--master-service-panel-shadow);
+}
+
+.service-card.is-active {
+    border-left-color: var(--master-service-card-active-border);
+}
+
+.service-card.is-active:hover {
+    border-left-color: var(--master-service-card-active-border);
+}
+
+
+/* =========================================================
+   Свёрнутая строка услуги
+   ========================================================= */
+
+.service-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 15px 18px;
+    background: var(--master-service-card-bg);
+}
+
+.service-summary__main {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.service-title-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-bottom: 8px;
+}
+
+.service-title {
+    overflow-wrap: anywhere;
+    margin: 0;
+    color: var(--master-service-title-color);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.service-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.service-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 28px;
+    padding: 5px 9px;
+    color: var(--master-service-meta-color);
+    border: 1px solid var(--master-service-meta-border);
+    border-radius: 7px;
+    background: var(--master-service-meta-bg);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.service-meta-item .fas {
+    color: var(--master-service-meta-icon-color);
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   Статус услуги
+   ========================================================= */
+
+.service-status-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 3px 8px;
+    border: 1px solid transparent;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.35;
+    white-space: nowrap;
+}
+
+.service-status-badge.is-enabled {
+    color: var(--master-service-enabled-color);
+    border-color: var(--master-service-enabled-border);
+    background: var(--master-service-enabled-bg);
+}
+
+.service-status-badge.is-disabled {
+    color: var(--master-service-disabled-color);
+    border-color: var(--master-service-disabled-border);
+    background: var(--master-service-disabled-bg);
+}
+
+
+/* =========================================================
+   Общие или индивидуальные настройки
+   ========================================================= */
+
+.service-settings-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 28px;
+    padding: 5px 9px;
+    color: var(--master-service-default-color);
+    border: 1px solid var(--master-service-default-border);
+    border-radius: 7px;
+    background: var(--master-service-default-bg);
+    font-size: 11px;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.service-settings-state.has-custom-settings {
+    color: var(--master-service-custom-color);
+    border-color: var(--master-service-custom-border);
+    background: var(--master-service-custom-bg);
+}
+
+.service-settings-state .fas {
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   Действия в строке услуги
+   ========================================================= */
+
+.service-summary__actions {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    gap: 12px;
+}
+
+.service-summary__actions form {
+    margin: 0;
+}
+
+.service-summary__actions .btn {
+    min-height: 36px;
+    white-space: nowrap;
+}
+
+.service-settings-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 36px;
+    padding: 7px 11px;
+    color: var(--master-service-toggle-color);
+    border: 1px solid var(--master-service-toggle-border);
+    border-radius: 8px;
+    background: var(--master-service-toggle-bg);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.2;
+    cursor: pointer;
+    transition:
+        color 0.2s ease,
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.service-settings-toggle:hover {
+    color: var(--master-service-toggle-color);
+    border-color: var(--master-service-toggle-border-hover);
+    background: var(--master-service-toggle-bg-hover);
+}
+
+.service-settings-toggle:focus-visible {
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem var(--master-service-focus-ring);
+}
+
+.service-chevron {
+    display: inline-block;
+    flex: 0 0 auto;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    transform-origin: center;
+    transition: transform 0.2s ease;
+}
+
+.service-settings-toggle[aria-expanded=true] .service-chevron {
+    transform: rotate(225deg);
+}
+
+
+/* =========================================================
+   Раскрываемая область настроек
+   ========================================================= */
+
+.service-settings {
+    padding: 20px;
+    color: var(--master-service-text-color);
+    border-top: 1px solid var(--master-service-divider);
+    background: var(--master-service-settings-bg);
+}
+
+.service-description {
+    margin-bottom: 18px;
+    padding: 11px 13px;
+    color: var(--master-service-muted-color);
+    border: 1px solid var(--master-service-setting-block-border);
+    border-radius: 8px;
+    background: var(--master-service-setting-block-bg);
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.setting-block {
+    min-width: 0;
+    padding: 16px;
+    color: var(--master-service-text-color);
+    border: 1px solid var(--master-service-setting-block-border);
+    border-radius: 10px;
+    background: var(--master-service-setting-block-bg);
+}
+
+.setting-block__header {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin-bottom: 16px;
+}
+
+.setting-block__header h6 {
+    color: var(--master-service-title-color);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.setting-block__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    color: var(--master-service-icon-color);
+    border-radius: 8px;
+    background: var(--master-service-icon-bg);
+}
+
+.setting-block__icon .fas {
+    font-size: 13px;
+}
+
+.setting-block__hint {
+    display: block;
+    margin-top: 2px;
+    color: var(--master-service-light-muted-color);
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+.setting-block__note {
+    margin: 12px 0 0;
+    color: var(--master-service-light-muted-color);
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+
+/* =========================================================
+   Формы внутри настроек
+   ========================================================= */
+
+.service-settings .form-label,
+.service-settings .form-check-label {
+    color: var(--master-service-text-color);
+}
+
+.service-settings .form-label {
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.service-settings .form-check-label {
+    font-size: 12px;
+    line-height: 1.4;
+    cursor: pointer;
+}
+
+.service-settings .form-control {
+    color: var(--master-service-input-color);
+    border-color: var(--master-service-input-border);
+    background: var(--master-service-input-bg);
+}
+
+.service-settings .form-control:focus {
+    color: var(--master-service-input-color);
+    border-color: var(--master-service-input-focus-border);
+    background: var(--master-service-input-bg);
+    box-shadow: var(--master-service-input-focus-shadow);
+}
+
+.service-settings .form-control:disabled {
+    color: var(--master-service-input-disabled-color);
+    border-color: var(--master-service-input-border);
+    background: var(--master-service-input-disabled-bg);
+    opacity: 1;
+    cursor: not-allowed;
+}
+
+.service-settings .input-group-text {
+    color: var(--master-service-muted-color);
+    border-color: var(--master-service-input-border);
+    background: var(--master-service-icon-bg);
+}
+
+.service-settings .form-check-input {
+    border-color: var(--master-service-input-border);
+    background-color: var(--master-service-input-bg);
+    cursor: pointer;
+}
+
+.service-settings .form-check-input:focus {
+    border-color: var(--master-service-input-focus-border);
+    box-shadow: var(--master-service-input-focus-shadow);
+}
+
+.service-settings .form-check-input:checked {
+    border-color: var(--calendar-btn-color);
+    background-color: var(--calendar-btn-color);
+}
+
+.service-settings .form-check-input:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+
+/* =========================================================
+   Ошибки и нижняя панель
+   ========================================================= */
+
+.service-error {
+    margin-bottom: 16px;
+}
+
+.service-settings-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 18px;
+}
+
+.service-settings-footer .btn {
+    min-width: 210px;
+}
+
+
+/* =========================================================
+   Пустой результат
+   ========================================================= */
+
+.service-list > .alert-light {
+    color: var(--master-service-muted-color);
+    border-color: var(--master-service-panel-border) !important;
+    background: var(--master-service-panel-bg);
+}
+
+
+/* =========================================================
+   Адаптация для планшета
+   ========================================================= */
+
+@media (max-width: 991.98px) {
+    .service-filter-panel {
+        align-items: stretch;
+    }
+
+    .service-search-form {
+        flex: 1 1 100%;
+    }
+
+    .service-filter-counter {
+        margin-left: 0;
+    }
+
+    .settings-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* =========================================================
+   Адаптация для телефона
+   ========================================================= */
+
+@media (max-width: 767.98px) {
+    .service-filter-panel {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 12px;
+    }
+
+    .service-search-form {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+    }
+
+    .service-search {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .service-search-form > .btn {
+        width: 100%;
+    }
+
+    .service-filter-buttons {
+        display: flex;
+        width: 100%;
+    }
+
+    .service-filter-buttons .btn {
+        flex: 1 1 50%;
+        white-space: normal;
+    }
+
+    .service-filter-counter {
+        width: 100%;
+        margin-left: 0;
+        text-align: center;
+    }
+
+    .service-summary {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 13px;
+        padding: 14px;
+    }
+
+    .service-summary__actions {
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .service-summary__actions form {
+        flex: 1 1 auto;
+    }
+
+    .service-summary__actions form .btn {
+        width: 100%;
+    }
+
+    .service-settings-toggle {
+        flex: 0 0 auto;
+    }
+
+    .service-settings {
+        padding: 14px;
+    }
+
+    .settings-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .setting-block {
+        padding: 14px;
+    }
+
+    .service-settings-footer {
+        display: block;
+    }
+
+    .service-settings-footer .btn {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+
+/* =========================================================
+   Очень узкие экраны
+   ========================================================= */
+
+@media (max-width: 479.98px) {
+    .service-title-row {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .service-meta {
+        align-items: stretch;
+    }
+
+    .service-meta-item {
+        justify-content: center;
+        flex: 1 1 auto;
+    }
+
+    .service-settings-state {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .service-summary__actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .service-settings-toggle {
+        width: 100%;
+    }
+
+    .setting-block__header {
+        align-items: flex-start;
+    }
+}
+
+.activity-log-table th:first-child,
+.activity-log-table td:first-child {
+    padding-left: 1rem !important;
+}
+
+.activity-log-id-column {
+    width: 65px;
+}
+
+.activity-log-type-column {
+    width: 165px;
+    white-space: nowrap;
+}
+
+.activity-log-type {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 26px;
+    padding: 3px 8px 3px 3px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.activity-log-type__number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 19px;
+    height: 19px;
+    border-radius: 50%;
+    color: inherit;
+    background: currentColor;
+    font-size: 0;
+}
+
+.activity-log-type__number::after {
+    content: attr(data-type);
+}
+
+.activity-log-type--info {
+    background: var(--activity-log-info-bg);
+}
+
+.activity-log-type--warning {
+    background: var(--activity-log-warning-bg);
+}
+
+.activity-log-type--error {
+    background: var(--activity-log-error-bg);
+}
+
+.activity-log-type--unknown {
+    background: var(--activity-log-unknown-bg);
+}
