@@ -220,8 +220,8 @@
                     {{ $log->module }}
                 </td>
 
-                <td>
-                    {{ $log->subject_id ?? '—' }}
+                <td class="text-nowrap">
+                    {{ $log->objectLabel() }}
                 </td>
 
                 <td class="text-nowrap">

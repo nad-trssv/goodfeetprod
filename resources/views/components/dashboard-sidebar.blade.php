@@ -119,6 +119,21 @@
                                                     class="nav-link-text">Расписание</span></div>
                                         </a>
                                     </li>
+                                    <li class="nav-item">
+                                        <a
+                                            class="nav-link
+                                                {{ request()->routeIs('admin.master-services.*')
+                                                    ? 'active'
+                                                    : '' }}"
+                                            href="{{ route('admin.master-services.index') }}"
+                                        >
+                                            <div class="d-flex align-items-center">
+                                                <span class="nav-link-text">
+                                                    Услуги мастеров
+                                                </span>
+                                            </div>
+                                        </a>
+                                    </li>
                                 </ul>
                             </div>
                         </div>

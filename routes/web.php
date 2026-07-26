@@ -26,6 +26,7 @@ use App\Http\Controllers\CustomerAppointmentController;
 use App\Http\Controllers\CustomerRescheduleController;
 use App\Http\Controllers\Admin\RescheduleRequestController;
 use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\AdminMasterServiceController;
 
 Route::get('/', [PageController::class, 'index'])->name('home');
 Route::get('/sitemap.xml', [PageController::class, 'sitemap'])->name('sitemap');
@@ -183,5 +184,19 @@ Route::middleware([
         Route::post('admin/rooms/{id}/toggle', [App\Http\Controllers\Admin\RoomController::class, 'toggleActive'])->name('admin.rooms.toggle');
         Route::get('admin/rooms/today', [App\Http\Controllers\Admin\RoomController::class, 'today'])->name('admin.rooms.today');
         Route::get('admin/rooms/day/{date}', [App\Http\Controllers\Admin\RoomController::class, 'today'])->name('admin.rooms.day');
+        Route::get(
+            'admin/master-services',
+            [AdminMasterServiceController::class, 'index']
+        )->name('admin.master-services.index');
+
+        Route::post(
+            'admin/master-services/{masterId}/services/{serviceId}/toggle',
+            [AdminMasterServiceController::class, 'toggle']
+        )->name('admin.master-services.toggle');
+
+        Route::put(
+            'admin/master-services/{masterId}/services/{serviceId}',
+            [AdminMasterServiceController::class, 'update']
+        )->name('admin.master-services.update');
     });
 });

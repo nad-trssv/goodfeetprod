@@ -35,7 +35,7 @@
       </div>
     @endif
 
-    <div class="row mb-4 align-items-center">
+    <div class="row mb-4 align-items-center justify-content-between">
       <div class="col">
         <h2 class="mb-1">
           Мои услуги
@@ -46,6 +46,17 @@
           индивидуальную цену и продолжительность.
         </p>
       </div>
+      @can('is-superadmin')
+        <div class="col-auto">
+            <a
+                href="{{ route('admin.master-services.index') }}"
+                class="btn btn-outline-primary"
+            >
+                <span class="fas fa-users-cog me-2"></span>
+                Администрирование услуг других мастеров
+            </a>
+        </div>
+      @endcan
     </div>
 
     @php

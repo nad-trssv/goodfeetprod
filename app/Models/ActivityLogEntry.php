@@ -83,4 +83,27 @@ class ActivityLogEntry extends Model
             default => 'activity-log-type--unknown',
         };
     }
+    public function objectLabel(): string
+    {
+        if ($this->module === 'employees/services') {
+            $targetMasterId = $this->properties[
+                'target_master_id'
+            ] ?? null;
+
+            if (
+                $targetMasterId !== null
+                && $this->subject_id !== null
+            ) {
+                return (int) $targetMasterId
+                    . '/'
+                    . (int) $this->subject_id;
+            }
+        }
+
+        if ($this->subject_id !== null) {
+            return (string) $this->subject_id;
+        }
+
+        return '—';
+    }
 }
