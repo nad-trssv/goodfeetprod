@@ -37,6 +37,7 @@ class BookingRequest extends FormRequest
             'files' => ['nullable', 'array'],
             'files.*' => ['file', 'mimes:jpg,jpeg,png'],
             'policy' => ['required', 'accepted'],
+            'promo_code' => ['nullable', 'string', 'max:50', 'regex:/^[\pL\pN_-]+$/u'],
         ];
     }
     

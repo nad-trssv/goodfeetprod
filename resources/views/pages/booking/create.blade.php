@@ -47,6 +47,12 @@
                             <div class="invalid-feedback ff_secondary">{{ __('msg.required_input__tel') }}</div>
                         </div>
                     </div>
+                    <div class="mt-4">
+                        <label class="fw-bold text-body-highlight mb-1 ff_secondary" for="promo_code">{{ __('promo.label') }}</label>
+                        <div class="input-group"><input class="form-control text-uppercase" id="promo_code" name="promo_code" maxlength="50" autocomplete="off"><button class="btn btn-outline-primary" id="applyPromoCode" type="button">{{ __('promo.apply') }}</button></div>
+                        <div id="promoCodeFeedback" class="form-text"></div>
+                        <div class="form-text">{{ __('promo.preview_note') }}</div>
+                    </div>
                     <h5 class="mb-3 mt-6">{{ __('msg.booking_policy') }}</h5>
                     <div class="form-check mb-4">
                         <input class="form-check-input" id="policy" name="policy" type="checkbox" required="">
@@ -152,8 +158,8 @@
                         <div class="px-4 py-3 bg-body-highlight rounded-2">
                             <hr>
                             <div class="d-flex flex-between-center">
-                                <h4 class="text-body">{{ __('msg.summa') }}</h4>
-                                <h4 class="text-body">
+                                <h4 class="text-body">{{ __('promo.original_price') }}</h4>
+                                <h4 class="text-body" id="bookingOriginalPrice">
                                     @if ($service['price_can_change'])
                                         <span>{{ __('msg.price_from') }} </span>
                                     @endif
@@ -161,6 +167,8 @@
                                     <span>&euro;</span>
                                 </h4>
                             </div>
+                            <div class="d-none flex-between-center text-success" id="bookingDiscountRow"><span>{{ __('promo.discount_amount') }}</span><strong id="bookingDiscountAmount"></strong></div>
+                            <div class="d-none flex-between-center mt-2" id="bookingFinalRow"><h4 class="text-body mb-0">{{ __('promo.final_price') }}</h4><h4 class="text-body mb-0" id="bookingFinalPrice"></h4></div>
                             @if ($service['price_can_change'])
                                 <p class="mb-0 text-body-tertiary">{{ __('msg.price_note') }}</p>
                             @endif
@@ -184,6 +192,31 @@
     @push('scripts')
         <script>
             $(document).ready(function() {
+                $('#applyPromoCode').on('click', function() {
+                    const code = $('#promo_code').val().trim();
+                    const feedback = $('#promoCodeFeedback');
+                    if (!code) return;
+                    feedback.removeClass('text-danger text-success').text('{{ __('customer.loading') }}');
+                    $.ajax({
+                        url: @json(route('booking.promo.preview')),
+                        type: 'POST',
+                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                        data: {promo_code: code, service_id: @json($service['id']), choose_date: @json($bookingData['choose_date']), client_email: $('#client_email').val()},
+                        success: function(data) {
+                            $('#promo_code').val(data.code);
+                            $('#bookingOriginalPrice').text(Number(data.original_price).toFixed(2) + ' €');
+                            $('#bookingDiscountAmount').text('−' + Number(data.discount_amount).toFixed(2) + ' €');
+                            $('#bookingFinalPrice').text(Number(data.final_price).toFixed(2) + ' €');
+                            $('#bookingDiscountRow, #bookingFinalRow').removeClass('d-none').addClass('d-flex');
+                            feedback.addClass('text-success').text('{{ __('promo.applied') }}');
+                        },
+                        error: function(xhr) {
+                            $('#bookingDiscountRow, #bookingFinalRow').addClass('d-none').removeClass('d-flex');
+                            const errors = xhr.responseJSON?.errors || {};
+                            feedback.addClass('text-danger').text(errors.promo_code?.[0] || Object.values(errors)[0]?.[0] || '{{ __('promo.invalid') }}');
+                        }
+                    });
+                });
                 $('#storeBooking').on('submit', function(e) {
                     e.preventDefault();
 

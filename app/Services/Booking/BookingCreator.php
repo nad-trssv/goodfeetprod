@@ -20,6 +20,7 @@ class BookingCreator
         private readonly SlotAvailabilityService $availability,
         private readonly CustomerIdentityService $customers,
         private readonly ?AppointmentNotificationService $notifications = null,
+        private readonly ?PromoCodePricingService $promoPricing = null,
     ) {
     }
 
@@ -58,13 +59,26 @@ class BookingCreator
                 );
             }
 
+            $pricing = ($this->promoPricing ?? app(PromoCodePricingService::class))->quote(
+                $service,
+                $request->choose_date,
+                $request->input('promo_code'),
+                $customer,
+                $request->client_email,
+                true,
+            );
+
             $appointment = Appointments::create([
                 'customer_id' => $customer->id,
                 'status' => 'confirmed',
                 'user_id' => $request->user_id,
                 'room_id' => $roomId,
                 'service_id' => $service->id,
-                'price' => $service->effectivePriceForDate($request->choose_date),
+                'promo_code_id' => $pricing['promo']?->id,
+                'promo_code' => $pricing['promo']?->code,
+                'original_price' => $pricing['original_price'],
+                'discount_amount' => $pricing['discount_amount'],
+                'price' => $pricing['final_price'],
                 'appointment_start' => $start,
                 'appointment_end' => $end,
                 'client_email' => $request->client_email,
@@ -73,6 +87,13 @@ class BookingCreator
                 'client_lastname' => $request->client_lastname,
                 'description' => $request->description,
             ]);
+
+            if ($pricing['promo']) {
+                ($this->promoPricing ?? app(PromoCodePricingService::class))->redeem(
+                    $pricing['promo'], $appointment, $customer, $request->client_email,
+                    $pricing['original_price'], $pricing['discount_amount'],
+                );
+            }
 
             foreach ($request->file('files', []) as $file) {
                 AppointmentMedia::create([

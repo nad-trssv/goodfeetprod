@@ -32,6 +32,8 @@ class AppointmentScheduler
             return Appointments::create(array_merge($request->validated(), [
                 'room_id' => $roomId,
                 'price' => $service->effectivePriceForDate($date),
+                'original_price' => $service->effectivePriceForDate($date),
+                'discount_amount' => 0,
             ]));
         });
 
@@ -51,10 +53,19 @@ class AppointmentScheduler
             $this->assertRoomAvailable((int) $request->user_id, $roomId);
             $service = Services::findOrFail($request->service_id);
 
+            $pricingChanged = (int) $appointment->service_id !== (int) $request->service_id
+                || ! $appointment->appointment_start->isSameDay(Carbon::parse($request->appointment_start));
+            $pricing = $pricingChanged ? [
+                'promo_code_id' => null,
+                'promo_code' => null,
+                'original_price' => $service->effectivePriceForDate($date),
+                'discount_amount' => 0,
+                'price' => $service->effectivePriceForDate($date),
+            ] : [];
+
             $appointment->update(array_merge($request->validated(), [
                 'room_id' => $roomId,
-                'price' => $service->effectivePriceForDate($date),
-            ]));
+            ], $pricing));
 
             return $appointment->refresh();
         });

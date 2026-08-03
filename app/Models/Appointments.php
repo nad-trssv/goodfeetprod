@@ -14,7 +14,7 @@ class Appointments extends Model
     public const STATUSES = ['pending', 'confirmed', 'checked_in', 'in_progress', 'completed', 'cancelled_by_client', 'cancelled_by_business', 'no_show', 'rescheduled'];
     public const BLOCKING_STATUSES = ['pending', 'confirmed', 'checked_in', 'in_progress'];
 
-    protected $fillable = ['public_uuid', 'customer_id', 'status', 'status_changed_at', 'title', 'client_name', 'client_lastname', 'client_phone', 'client_email', 'service_id', 'user_id', 'room_id', 'appointment_start', 'appointment_end', 'description', 'price'];
+    protected $fillable = ['public_uuid', 'customer_id', 'status', 'status_changed_at', 'title', 'client_name', 'client_lastname', 'client_phone', 'client_email', 'service_id', 'promo_code_id', 'promo_code', 'user_id', 'room_id', 'appointment_start', 'appointment_end', 'description', 'price', 'original_price', 'discount_amount'];
 
     protected function casts(): array
     {
@@ -23,6 +23,8 @@ class Appointments extends Model
             'appointment_end' => 'datetime',
             'status_changed_at' => 'datetime',
             'price' => 'decimal:2',
+            'original_price' => 'decimal:2',
+            'discount_amount' => 'decimal:2',
         ];
     }
 
@@ -72,6 +74,16 @@ class Appointments extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function promoCode()
+    {
+        return $this->belongsTo(PromoCode::class);
+    }
+
+    public function promoCodeRedemption()
+    {
+        return $this->hasOne(PromoCodeRedemption::class, 'appointment_id');
     }
 
     public function statusHistory()

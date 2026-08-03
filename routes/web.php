@@ -53,6 +53,7 @@ Route::post('/booking/slots', [AjaxBookingController::class, 'getFullyBooked'])-
 Route::post('/booking/busy-days', [AjaxBookingController::class, 'getBusyDays'])->name('booking.busy-days');
 Route::post('/booking', [AjaxBookingController::class, 'storeBooking'])->name('booking.store');
 Route::post('/booking/effective-service', [AjaxServiceController::class, 'effective'])->name('booking.service.effective');
+Route::post('/booking/promo-code/preview', [AjaxBookingController::class, 'previewPromo'])->middleware('throttle:20,1')->name('booking.promo.preview');
 
 Route::middleware('guest:customer')->group(function () {
     Route::get('/account/login', [CustomerAuthController::class, 'showLogin'])->name('customer.login');
@@ -154,6 +155,7 @@ Route::middleware([
         Route::post('admin/red-days/store', [App\Http\Controllers\Admin\MasterScheduleController::class, 'storeRedDayForMaster'])->name('admin.red-days.store');
 
         Route::resource('settings', SettingsController::class)->only(['index']);
+        Route::resource('promo-codes', App\Http\Controllers\Admin\PromoCodeController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::post('settings/updateWorkHours', [SettingsController::class, 'updateWorkHours']);
         Route::post('settings/updateLunchHours', [SettingsController::class, 'updateLunchHours']);
         Route::post('settings/storeRedDay', [SettingsController::class, 'storeRedDay']);

@@ -14,7 +14,9 @@ use App\Mail\BookingMail;
 use App\Models\Appointments;
 use App\Models\Services;
 use App\Models\SiteSettings;
-use GuzzleHttp\Psr7\Request;
+use App\Services\Booking\PromoCodePricingService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class BookingController extends Controller
 {
@@ -35,6 +37,20 @@ class BookingController extends Controller
     {
         $data = $this->bookedService->getBusyDays($request);
         return $data;
+    }
+
+    public function previewPromo(Request $request, PromoCodePricingService $pricing)
+    {
+        $data = $request->validate([
+            'promo_code' => ['required', 'string', 'max:50'],
+            'service_id' => ['required', 'integer', 'exists:services,id'],
+            'choose_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
+            'client_email' => ['required', 'email', 'max:190'],
+        ]);
+        $service = Services::whereKey($data['service_id'])->where('status', 1)->where('is_deleted', 0)->firstOrFail();
+        $quote = $pricing->quote($service, $data['choose_date'], $data['promo_code'], Auth::guard('customer')->user(), $data['client_email'] ?? null);
+
+        return response()->json(collect($quote)->except('promo')->all() + ['code' => $quote['promo']->code]);
     }
 
     public function sendEmail($email, $service_name, $client_name, $client_email, $client_phone, $mastername, $booking_date, $booking_start, $booking_end, $company_address, $price_can_change, $master_phone, $master_email, $price)
@@ -94,7 +110,7 @@ class BookingController extends Controller
             $service->translation = $service->translations()->where('locale', $locale)->first();
 
             $booking_date = $request->choose_date;
-            $effectivePrice = $service->effectivePriceForDate($booking_date);
+            $appointment = Appointments::findOrFail($appointmentId);
 
             $email = $request->client_email;
             $mastername = Appointments::find($appointmentId)->user->name;
@@ -105,7 +121,7 @@ class BookingController extends Controller
             $booking_end = $request->appointment_end;
             $company_address = $settings['company_address'];
             $price_can_change = $service['price_can_change'];
-            $price = $effectivePrice;
+            $price = $appointment->price;
             $service_name = $service->translation ? $service->translation['name'] : $service->name;
             $masterEmail = Appointments::find($appointmentId)->user->email;
             $masterPhone = Appointments::find($appointmentId)->user->phone;
@@ -127,7 +143,6 @@ class BookingController extends Controller
                 $price
             );
 
-            $appointment = Appointments::findOrFail($data['appointmentId']);
             $redirectUrl = route('booking.show', ['appointment' => $appointment->public_uuid]);
 
             return response()->json([

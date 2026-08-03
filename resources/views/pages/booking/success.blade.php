@@ -58,7 +58,7 @@
                                 </div>
                                 <hr class="mt-7 mb-5">
                                 <div class="row col-12">
-                                    <div class="col-6 text-start fw-semibold">{{ __('msg.service_price') }}: </div>
+                                    <div class="col-6 text-start fw-semibold">{{ $appointment->discount_amount > 0 ? __('promo.final_price') : __('msg.service_price') }}: </div>
                                     <div class="col-6 text-end fw-semibold">
                                         @if ($appointment->service['price_can_change'])
                                             <span>{{ __('msg.price_from') }} </span>
@@ -67,6 +67,10 @@
                                         <span>&euro;</span>
                                     </div>
                                 </div>
+                                @if ($appointment->discount_amount > 0)
+                                    <div class="row col-12 mt-2"><div class="col-6 text-start">{{ __('promo.original_price') }}:</div><div class="col-6 text-end">{{ $appointment->original_price }} €</div></div>
+                                    <div class="row col-12 mt-1 text-success"><div class="col-6 text-start">{{ __('promo.discount_amount') }} ({{ $appointment->promo_code }}):</div><div class="col-6 text-end">−{{ $appointment->discount_amount }} €</div></div>
+                                @endif
                                 @if ($appointment->service['price_can_change'])
                                     <div class="row col-12 mt-4">
                                         <h4 class="text-start">{{ __('msg.service_price_2') }}</h4>
