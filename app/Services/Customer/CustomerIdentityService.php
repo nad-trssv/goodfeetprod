@@ -3,6 +3,8 @@
 namespace App\Services\Customer;
 
 use App\Models\Appointments;
+use App\Models\AppointmentAudit;
+use App\Models\AppointmentStatusHistory;
 use App\Models\Customer;
 use Illuminate\Validation\ValidationException;
 
@@ -36,6 +38,12 @@ class CustomerIdentityService
 
         if ($byEmail && $byPhone && ! $byEmail->is($byPhone)) {
             Appointments::where('customer_id', $byPhone->id)->update(['customer_id' => $byEmail->id]);
+            AppointmentAudit::where('actor_type', $byPhone->getMorphClass())
+                ->where('actor_id', $byPhone->id)
+                ->update(['actor_id' => $byEmail->id]);
+            AppointmentStatusHistory::where('changed_by_type', $byPhone->getMorphClass())
+                ->where('changed_by_id', $byPhone->id)
+                ->update(['changed_by_id' => $byEmail->id]);
             $byPhone->delete();
             $customer = $byEmail;
         }

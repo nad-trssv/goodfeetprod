@@ -91,6 +91,11 @@ class Appointments extends Model
         return $this->hasMany(AppointmentStatusHistory::class, 'appointment_id');
     }
 
+    public function auditTrail()
+    {
+        return $this->hasMany(AppointmentAudit::class, 'appointment_id');
+    }
+
     public function media()
     {
         return $this->hasMany(AppointmentMedia::class, 'appointment_id');

@@ -56,7 +56,7 @@ class ProfilePhotoTest extends TestCase
             ->assertSee('Специализация мастера');
         $this->actingAs($user)->get(route('member.edit', $user))
             ->assertOk()
-            ->assertSee('Специализация мастера');
+            ->assertSee('Должности на языках');
         $this->get(route('serviceBooking'))
             ->assertOk()
             ->assertSee(basename($user->profile_photo_path))

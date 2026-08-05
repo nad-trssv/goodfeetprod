@@ -17,17 +17,20 @@ class AppointmentService
     /**
      * Create a new class instance.
      */
-    public function list($adminRole, $masterId = null)
+    public function list($adminRole, $masterId = null, bool $includeInactive = false)
     {
         $userId = Auth::user()->id;
         try {
-            if ($adminRole == 'superAdmin') {
-                $appointments = Appointments::with('media')->whereNotIn('status', ['cancelled_by_client', 'cancelled_by_business', 'rescheduled'])->orderByDesc('appointment_start')->get();
-            } elseif ($adminRole == 'byMaster' && $masterId) {
-                $appointments = Appointments::with('media')->where('user_id', $masterId)->whereNotIn('status', ['cancelled_by_client', 'cancelled_by_business', 'rescheduled'])->orderByDesc('appointment_start')->get();
-            } else {
-                $appointments = Appointments::with('media')->where('user_id', $userId)->whereNotIn('status', ['cancelled_by_client', 'cancelled_by_business', 'rescheduled'])->orderByDesc('appointment_start')->get();
+            $appointmentsQuery = Appointments::with(['media', 'service', 'user']);
+            if ($adminRole === 'byMaster' && $masterId) {
+                $appointmentsQuery->where('user_id', $masterId);
+            } elseif ($adminRole !== 'superAdmin') {
+                $appointmentsQuery->where('user_id', $userId);
             }
+            if (!$includeInactive) {
+                $appointmentsQuery->whereNotIn('status', ['cancelled_by_client', 'cancelled_by_business', 'rescheduled']);
+            }
+            $appointments = $appointmentsQuery->orderByDesc('appointment_start')->get();
 
             $users = User::all();
             if ($adminRole == 'byMaster' && $masterId) {
@@ -84,6 +87,7 @@ class AppointmentService
                     'masterThumb' => $appint->user->profile_photo_url,
                     'description' => $appint->description,
                     'price' => $appint->price,
+                    'status' => $appint->status,
                     'price_can_change' => $appint->service->price_can_change,
                     // FullCalendar v3 must receive a timezone-less local value.
                     // Serializing Carbon directly converts it to UTC and shifts

@@ -54,7 +54,8 @@ $(function () {
 
   function masterButton(master) {
     const image = showMasterImages ? `<img src="${escapeHtml(master.profile_photo_url)}" alt="${escapeHtml(master.name)}" width="84" height="84" loading="lazy" decoding="async" class="master-directory__photo">` : '';
-    return `<button type="button" class="alt-master booking-option" data-master-id="${Number(master.id)}">${image}<span><strong>${escapeHtml(master.name)}</strong><small>${escapeHtml(master.professional_title || @json(__('msg.booking_view_services')))}</small></span><i class="fa-solid fa-chevron-right"></i></button>`;
+    const vacation = master.vacation ? `<small>🌴 В отпуске ${escapeHtml(master.vacation.from)}–${escapeHtml(master.vacation.to)}</small>` : '';
+    return `<button type="button" class="alt-master booking-option" data-master-id="${Number(master.id)}">${image}<span><strong>${escapeHtml(master.name)} ${master.vacation ? '🌴' : ''}</strong><small>${escapeHtml(master.professional_title || @json(__('msg.booking_view_services')))}</small>${vacation}</span><i class="fa-solid fa-chevron-right"></i></button>`;
   }
 
   function serviceButton(service) {

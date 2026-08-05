@@ -7,14 +7,14 @@ use App\Http\Requests\Member\StoreRequest;
 use App\Http\Resources\MemberResource;
 use App\Models\Events;
 use App\Models\Roles;
-use App\Models\Services;
 use App\Models\User;
-use App\Models\UserSchedule;
 use App\Services\MemberService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use App\Services\Media\OptimizedImageStorage;
+use App\Services\EmployeeCardService;
+use App\Services\MasterServiceCatalog;
 
 class MemberController extends Controller
 {
@@ -28,9 +28,10 @@ class MemberController extends Controller
     public function index()
     {
         $data = $this->memberService->list();
-        $members = MemberResource::collection($data['members']);
+        $members = MemberResource::collection($data['members'])->resolve(request());
         return view('admin.member.index', [
             'members' => $members,
+            'summary' => $data['summary'],
         ]);
     }
 
@@ -84,18 +85,24 @@ class MemberController extends Controller
         }
     }
 
-    public function edit(string $id): \Illuminate\View\View
+    public function edit(Request $request, string $id, EmployeeCardService $card, MasterServiceCatalog $catalog): \Illuminate\View\View
     {
-        $member = User::with(['services', 'schedule', 'notificationRecipientsUsers'])->findOrFail($id);
+        $member = User::with(['services', 'schedule', 'notificationRecipientsUsers', 'vacationClosures'])->findOrFail($id);
         $roles = Roles::all();
-        $services = Services::where('status', 1)->where('is_deleted', 0)->orderBy('name')->get();
         $admins = User::whereIn('role_id', [1, 2])->orderBy('name')->get();
+        $search = trim((string) $request->query('search', ''));
+        $catalogData = $catalog->get($member, $search, (string) $request->query('filter', 'all'));
 
         return view('admin.member.edit', [
             'member' => $member,
             'roles' => $roles,
-            'services' => $services,
             'admins' => $admins,
+            'statistics' => $card->statistics($member),
+            'workCalendar' => $card->calendar($member),
+            'allServices' => $catalogData['services'],
+            'masterServices' => $catalogData['settings'],
+            'filter' => $catalogData['filter'],
+            'search' => $search,
         ]);
     }
 
@@ -109,11 +116,11 @@ class MemberController extends Controller
             'role_id' => 'required|exists:roles,id',
             'username' => 'required|string|min:3|max:30|unique:users,username,' . $id,
             'email' => 'required|email|unique:users,email,' . $id,
-            'services' => 'nullable|array',
-            'services.*' => 'exists:services,id',
             'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048|dimensions:min_width=400,min_height=400,max_width=4000,max_height=4000',
             'professional_titles' => 'nullable|array',
             'professional_titles.*' => 'nullable|string|max:120',
+            'employment_started_at' => 'nullable|date|before_or_equal:today',
+            'date_birthday' => 'nullable|date|before:today',
         ];
 
         if ($request->filled('password')) {
@@ -135,6 +142,7 @@ class MemberController extends Controller
             'email' => $request->email,
             'role_id' => $request->role_id,
             'date_birthday' => $request->date_birthday,
+            'employment_started_at' => $request->employment_started_at,
         ]);
 
         if ($request->filled('password')) {
@@ -151,31 +159,7 @@ class MemberController extends Controller
         }
 
         // Обновляем услуги
-        $member->services()->sync($request->services ?? []);
-
         // Обновляем расписание
-        UserSchedule::updateOrCreate(
-            ['user_id' => $member->id],
-            [
-                'monday_start' => $request->monday_start,
-                'monday_end' => $request->monday_end,
-                'tuesday_start' => $request->tuesday_start,
-                'tuesday_end' => $request->tuesday_end,
-                'wednesday_start' => $request->wednesday_start,
-                'wednesday_end' => $request->wednesday_end,
-                'thursday_start' => $request->thursday_start,
-                'thursday_end' => $request->thursday_end,
-                'friday_start' => $request->friday_start,
-                'friday_end' => $request->friday_end,
-                'saturday_start' => $request->saturday_start,
-                'saturday_end' => $request->saturday_end,
-                'sunday_start' => $request->sunday_start,
-                'sunday_end' => $request->sunday_end,
-                'lunch_start' => $request->lunch_start,
-                'lunch_end' => $request->lunch_end,
-            ]
-        );
-
         return response()->json(['message' => 'Данные мастера обновлены'], 200);
     }
 
@@ -200,8 +184,8 @@ class MemberController extends Controller
     public function updateNotificationRecipients(Request $request, string $id)
     {
         $master = User::findOrFail($id);
-        
-        $recipients = $request->recipients ?? [];
+        $validated = $request->validate(['recipients' => ['nullable', 'array'], 'recipients.*' => ['integer', 'exists:users,id']]);
+        $recipients = User::whereIn('id', $validated['recipients'] ?? [])->whereIn('role_id', [1, 2])->pluck('id')->all();
         
         // Всегда включаем самого мастера
         if (!in_array($id, $recipients)) {

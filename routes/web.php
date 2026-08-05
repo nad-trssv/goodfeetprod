@@ -84,6 +84,7 @@ Route::middleware([
 
     Route::resource('calendar', AppointmentController::class);
     Route::get('calendarList', [AppointmentController::class, 'calendarList'])->name('calendarList');
+    Route::get('appointments/today', [AppointmentController::class, 'today'])->name('appointments.today');
     Route::get('reschedule-requests', [RescheduleRequestController::class, 'index'])->name('reschedule.index');
     Route::get('notifications', [App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications.index');
     Route::get('notifications/status', [App\Http\Controllers\Admin\NotificationController::class, 'status'])->middleware('throttle:30,1')->name('notifications.status');
@@ -93,6 +94,8 @@ Route::middleware([
     Route::post('reschedule-requests/{request:public_uuid}/reject', [RescheduleRequestController::class, 'reject'])->name('reschedule.reject');
     Route::get('calendar/create', [AppointmentController::class, 'createAppointment'])->name('calendar.create');
     Route::get('calendar/details/{appointment}', [AppointmentController::class, 'show'])->name('calendar.show');
+    Route::patch('appointments/{appointment}/status', [AppointmentController::class, 'updateStatus'])->name('appointments.status.update');
+    Route::post('appointments/{appointment}/message', [AppointmentController::class, 'sendCustomerMessage'])->middleware('throttle:10,1')->name('appointments.message.store');
 
     Route::resource('service', AdminServiceController::class);
     Route::get('service/{service}/languages', [AdminServiceController::class, 'editLanguages'])->name('languages.edit');
@@ -151,6 +154,12 @@ Route::middleware([
         Route::post('member/store/{step}', [MemberController::class, 'store'])->name('member.store');
         Route::get('member/{id}/edit', [MemberController::class, 'edit'])->name('member.edit');
         Route::put('member/{id}', [MemberController::class, 'update'])->name('member.update');
+        Route::put('member/{member}/schedule', [App\Http\Controllers\Admin\EmployeeScheduleController::class, 'updateSchedule'])->name('member.schedule.update');
+        Route::get('member/{member}/closures', [App\Http\Controllers\Admin\EmployeeScheduleController::class, 'index'])->name('member.closures.index');
+        Route::get('member/{member}/closures/events', [App\Http\Controllers\Admin\EmployeeScheduleController::class, 'events'])->name('member.closures.events');
+        Route::post('member/{member}/closures', [App\Http\Controllers\Admin\EmployeeScheduleController::class, 'store'])->name('member.closures.store');
+        Route::put('member/{member}/closures/{closure}', [App\Http\Controllers\Admin\EmployeeScheduleController::class, 'update'])->name('member.closures.update');
+        Route::delete('member/{member}/closures/{closure}', [App\Http\Controllers\Admin\EmployeeScheduleController::class, 'destroy'])->name('member.closures.destroy');
         Route::delete('member/{id}', [MemberController::class, 'destroy'])->name('member.destroy');
         Route::post('admin/red-days/store', [App\Http\Controllers\Admin\MasterScheduleController::class, 'storeRedDayForMaster'])->name('admin.red-days.store');
 

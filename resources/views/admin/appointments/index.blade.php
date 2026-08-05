@@ -47,6 +47,14 @@
                         </select>
                     </div>
                     <div class="col-md-2">
+                        <select class="form-select form-select-sm" name="status">
+                            <option value="">{{ __('appointment_statuses.all') }}</option>
+                            @foreach(\App\Models\Appointments::STATUSES as $status)
+                                <option value="{{ $status }}" @selected(request('status') === $status)>{{ __('appointment_statuses.'.$status) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
                         <input type="date" class="form-control form-control-sm" name="date_from"
                             value="{{ request('date_from') }}" placeholder="От">
                     </div>
@@ -78,6 +86,7 @@
                                 <th>Мастер</th>
                                 <th>Дата и время</th>
                                 <th>Цена</th>
+                                <th>{{ __('appointment_statuses.status') }}</th>
                                 <th>Заметки</th>
                                 <th class="text-end pe-3">Действие</th>
                             </tr>
@@ -121,6 +130,7 @@
                                         @endif
                                         <span class="fw-semibold">{{ $apt->price }} €</span>
                                     </td>
+                                    <td>@include('admin.calendar._status-actions',['appointment'=>$apt])</td>
                                     <td>
                                         @if ($apt->description)
                                             <span class="text-muted fs-10"
@@ -163,4 +173,5 @@
 
         <x-dashboard-footer />
     </div>
+    @push('scripts')@include('admin.calendar._status-script')@endpush
 </x-dashboard-layout>

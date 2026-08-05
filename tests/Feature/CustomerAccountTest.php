@@ -299,6 +299,7 @@ class CustomerAccountTest extends TestCase
                 ->assertOk()->assertJsonStructure(['days','limit_date'])->assertJsonPath('days.2030-01-22', 17);
 
             $request = $reschedules->request($appointment,$customer,'2030-01-22','11:00','12:00','Need another day');
+            $this->assertSame('reschedule_requested', $appointment->auditTrail()->latest('id')->value('event'));
             $this->assertFalse($availability->containsSlot('2030-01-15',$service->id,$master->id,'10:00','11:00'));
             $this->assertFalse($availability->containsSlot('2030-01-22',$service->id,$master->id,'11:00','12:00'));
 
@@ -307,10 +308,12 @@ class CustomerAccountTest extends TestCase
             $this->assertSame('2030-01-22 11:00:00',$appointment->appointment_start->format('Y-m-d H:i:s'));
             $this->assertTrue($availability->containsSlot('2030-01-15',$service->id,$master->id,'10:00','11:00'));
             $this->assertFalse($availability->containsSlot('2030-01-22',$service->id,$master->id,'11:00','12:00'));
+            $this->assertSame('reschedule_approved', $appointment->auditTrail()->latest('id')->value('event'));
 
             $second = Appointments::create(['customer_id'=>$customer->id,'user_id'=>$master->id,'service_id'=>$service->id,'client_name'=>'Move','client_lastname'=>'Client','client_email'=>$customer->email,'client_phone'=>$customer->phone,'price'=>50,'appointment_start'=>'2030-01-15 12:00','appointment_end'=>'2030-01-15 13:00']);
             $rejected = $reschedules->request($second,$customer,'2030-01-22','13:00','14:00',null);
             $reschedules->review($rejected,$master,false);
+            $this->assertSame('reschedule_rejected', $second->auditTrail()->latest('id')->value('event'));
             $this->assertSame('2030-01-15 12:00:00',$second->refresh()->appointment_start->format('Y-m-d H:i:s'));
             $this->assertTrue($availability->containsSlot('2030-01-22',$service->id,$master->id,'13:00','14:00'));
         } finally {

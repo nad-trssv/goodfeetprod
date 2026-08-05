@@ -34,6 +34,7 @@ class User extends Authenticatable
         'last_active',
         'profile_photo_path',
         'date_birthday',
+        'employment_started_at',
         'password'
     ];
 
@@ -67,6 +68,8 @@ class User extends Authenticatable
             'last_active' => 'datetime',
             'password' => 'hashed',
             'professional_titles' => 'array',
+            'date_birthday' => 'date',
+            'employment_started_at' => 'date',
         ];
     }
 
@@ -131,9 +134,37 @@ class User extends Authenticatable
         return $this->hasMany(Appointments::class);
     }
 
+    public function currentAppointment()
+    {
+        return $this->hasOne(Appointments::class)
+            ->whereIn('status', Appointments::BLOCKING_STATUSES)
+            ->where('appointment_start', '<=', now())
+            ->where('appointment_end', '>', now())
+            ->orderBy('appointment_start');
+    }
+
+    public function nextAppointment()
+    {
+        return $this->hasOne(Appointments::class)
+            ->whereIn('status', Appointments::BLOCKING_STATUSES)
+            ->where('appointment_start', '>', now())
+            ->orderBy('appointment_start');
+    }
+
+    public function actionRequiredAppointment()
+    {
+        return $this->hasOne(Appointments::class)
+            ->whereIn('status', ['confirmed', 'checked_in', 'in_progress'])
+            ->whereDate('appointment_start', today())
+            ->where('appointment_end', '<=', now())
+            ->orderByDesc('appointment_end');
+    }
+
     public function isOnline():bool
     {
-        return $this->last_active && $this->last_active->diffInMinutes(now()) < 5;
+        return $this->last_active
+            && ! $this->last_active->isFuture()
+            && abs((int) $this->last_active->diffInMinutes(now())) < 5;
     }
 
     public function lastSeen(): string
@@ -183,5 +214,17 @@ class User extends Authenticatable
     public function notificationRecipientsUsers()
     {
         return $this->belongsToMany(User::class, 'user_notification_recipients', 'master_id', 'recipient_id');
+    }
+
+    public function vacationClosures()
+    {
+        return $this->hasMany(RedDay::class)->where('type', 'paid_vacation');
+    }
+
+    public function currentVacation(?\Carbon\Carbon $date = null): ?RedDay
+    {
+        $date ??= today();
+        $vacations = $this->relationLoaded('vacationClosures') ? $this->vacationClosures : $this->vacationClosures()->get();
+        return $vacations->first(fn (RedDay $vacation) => $date->betweenIncluded(\Carbon\Carbon::parse($vacation->date), $vacation->endDate()));
     }
 }

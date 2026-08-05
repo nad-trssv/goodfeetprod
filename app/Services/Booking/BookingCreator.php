@@ -19,6 +19,7 @@ class BookingCreator
         private readonly RoomAllocationService $rooms,
         private readonly SlotAvailabilityService $availability,
         private readonly CustomerIdentityService $customers,
+        private readonly ?AppointmentAuditService $audit = null,
         private readonly ?AppointmentNotificationService $notifications = null,
         private readonly ?PromoCodePricingService $promoPricing = null,
     ) {
@@ -87,6 +88,7 @@ class BookingCreator
                 'client_lastname' => $request->client_lastname,
                 'description' => $request->description,
             ]);
+            ($this->audit ?? app(AppointmentAuditService::class))->created($appointment, $customer);
 
             if ($pricing['promo']) {
                 ($this->promoPricing ?? app(PromoCodePricingService::class))->redeem(

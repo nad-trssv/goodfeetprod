@@ -153,6 +153,18 @@
                                 <input type="date" class="form-control" id="edit_rd_date">
                             </div>
                             <div class="col-12">
+                                <label class="form-label">Дата до</label>
+                                <input type="date" class="form-control" id="edit_rd_date_to">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Причина</label>
+                                <select class="form-select" id="edit_rd_type">
+                                    @foreach (\App\Models\RedDay::TYPES as $value => $label)
+                                        <option value="{{ $value }}">{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-12">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="edit_rd_fullday">
                                     <label class="form-check-label" for="edit_rd_fullday">Весь день</label>
@@ -353,6 +365,8 @@
                         data: {
                             name: $('#rd_name').val(),
                             date: $('#rd_date').val(),
+                            date_to: $('#rd_date_to').val() || $('#rd_date').val(),
+                            type: $('#rd_type').val() || 'other',
                             start_time: isFullDay ? '' : $('#rd_start_time').val(),
                             end_time: isFullDay ? '' : $('#rd_end_time').val(),
                             repeat: repeat,
@@ -572,6 +586,8 @@
                     $('#edit_rd_id').val($(this).data('id'));
                     $('#edit_rd_name').val($(this).data('name'));
                     $('#edit_rd_date').val($(this).data('date'));
+                    $('#edit_rd_date_to').val($(this).data('date-to') || $(this).data('date'));
+                    $('#edit_rd_type').val($(this).data('type') || 'other');
                     $('#edit_rd_start').val($(this).data('start'));
                     $('#edit_rd_end').val($(this).data('end'));
                     $('#edit_rd_repeat').prop('checked', $(this).data('repeat') == 1);
@@ -598,6 +614,8 @@
                         data: {
                             name: $('#edit_rd_name').val(),
                             date: $('#edit_rd_date').val(),
+                            date_to: $('#edit_rd_date_to').val() || $('#edit_rd_date').val(),
+                            type: $('#edit_rd_type').val() || 'other',
                             start_time: isFullDay ? '' : $('#edit_rd_start').val(),
                             end_time: isFullDay ? '' : $('#edit_rd_end').val(),
                             repeat: $('#edit_rd_repeat').is(':checked') ? 1 : 0,

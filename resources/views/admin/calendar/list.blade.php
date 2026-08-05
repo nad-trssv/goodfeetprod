@@ -100,7 +100,7 @@
                     </div>
                   </div>
                 </td>
-                <td></td>
+                <td class="text-end">@include('admin.calendar._status-actions',['appointment'=>$appint])</td>
               </tr>
               @endforeach
             </tbody>
@@ -124,4 +124,5 @@
 
     <x-dashboard-footer />
   </div>
+  @push('scripts')@include('admin.calendar._status-script')@endpush
 </x-dashboard-layout>

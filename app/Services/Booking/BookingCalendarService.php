@@ -46,29 +46,26 @@ class BookingCalendarService
     public function partialClosures(string $date, int|string|null $userId = null): array
     {
         $parsed = Carbon::parse($date);
-        $query = RedDay::where('full_day', false)->where(function ($query) use ($date, $parsed) {
-            $query->where('date', $date)->orWhere(function ($repeating) use ($parsed) {
-                $repeating->where('repeat', true)
-                    ->whereMonth('date', $parsed->month)
-                    ->whereDay('date', $parsed->day);
-            });
-        });
+        $query = RedDay::where('full_day', false)->where(fn($query)=>$query->where(function($range)use($date){$range->where('repeat',false)->whereDate('date','<=',$date)->where(fn($until)=>$until->whereNull('date_to')->orWhereDate('date_to','>=',$date));})->orWhere('repeat',true));
         $userId && $userId !== 'all' ? $query->visibleFor($userId) : $query->whereNull('user_id');
-
-        return $query->get()->toArray();
+        return $query->get()->filter(fn(RedDay $closure)=>$this->coversDate($closure,$parsed))->values()->toArray();
     }
 
     public function isClosed(string $date, int|string|null $userId = null): bool
     {
-        $query = RedDay::where('full_day', true)->where(function ($query) use ($date) {
-            $query->where('date', $date)->orWhere(function ($repeating) use ($date) {
-                $parsed = Carbon::parse($date);
-                $repeating->where('repeat', true)->whereMonth('date', $parsed->month)->whereDay('date', $parsed->day);
-            });
-        });
+        $parsed=Carbon::parse($date);
+        $query = RedDay::where('full_day', true)->where(fn($query)=>$query->where(function($range)use($date){$range->where('repeat',false)->whereDate('date','<=',$date)->where(fn($until)=>$until->whereNull('date_to')->orWhereDate('date_to','>=',$date));})->orWhere('repeat',true));
         $userId && $userId !== 'all' ? $query->visibleFor($userId) : $query->whereNull('user_id');
+        return $query->get()->contains(fn(RedDay $closure)=>$this->coversDate($closure,$parsed));
+    }
 
-        return $query->exists();
+    public function coversDate(RedDay $closure, Carbon $target): bool
+    {
+        $from=Carbon::parse($closure->date);$to=Carbon::parse($closure->date_to?:$closure->date);
+        if(!$closure->repeat)return $target->betweenIncluded($from,$to);
+        $length=$from->diffInDays($to);
+        foreach([$target->year-1,$target->year] as $year){try{$occurrence=$from->copy()->year($year);if($target->betweenIncluded($occurrence,$occurrence->copy()->addDays($length)))return true;}catch(\Throwable){}}
+        return false;
     }
 
     public function serviceDuration(int $serviceId, string $date): ?int

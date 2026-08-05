@@ -91,6 +91,8 @@ class SettingService
             'name' => $request['name'],
             'description' => $request['description'],
             'date' => $request['date'],
+            'date_to' => $request['date_to'] ?: $request['date'],
+            'type' => array_key_exists((string) $request['type'], RedDay::TYPES) ? $request['type'] : ($request['user_id'] ? 'other' : 'company_closure'),
             'start_time' => $request['start_time'],
             'end_time' => $request['end_time'],
             'full_day' => $full_day,

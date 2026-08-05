@@ -11,23 +11,19 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use App\Services\Booking\TodayAppointments;
 
 class DashboardService
 {
+    public function __construct(private readonly TodayAppointments $todayAppointments) {}
+
     /**
      * Create a new class instance.
      */
     public function index()
     {
         try {
-            function getAppointments(){
-                $userId = Auth::user()->id;
-                $query = Appointments::with(['service', 'user', 'room'])
-                    ->whereDate('appointment_start', Carbon::now()->toDateString());
-                if (Auth::user()->role_id !== 1) {
-                    $query->where('user_id', $userId);
-                }
-                $appointments = $query->orderBy('appointment_start')->get();
+            function getAppointments($appointments){
                 $events = array();
                 foreach($appointments as $appint)
                 {
@@ -280,7 +276,7 @@ class DashboardService
                 $currentDay = strtolower(Carbon::now()->englishDayOfWeek);
 
                 $hoursSetting = SiteSettings::where('group', 'hours')->first();
-                $workHours = json_decode($hoursSetting->payload, true);
+                $workHours = $hoursSetting ? json_decode($hoursSetting->payload, true) : [];
 
                 if (isset($workHours[$currentDay]) && $workHours[$currentDay]['start'] && $workHours[$currentDay]['end']) {
                     $workStart = Carbon::parse($workHours[$currentDay]['start']);
@@ -323,7 +319,7 @@ class DashboardService
             }
 
             return [
-                'appointments' => getAppointments(),
+                'appointments' => getAppointments($this->todayAppointments->forUser(Auth::user())),
                 'services' => getServices(),
                 'chartDataByDay' => getChartDataByDay(),
                 'chartDataByMonth' => getChartDataByMonth(),

@@ -35,8 +35,19 @@ class BusinessAppointmentCancellationTest extends TestCase
             'changed_by_id' => $master->id,
             'reason' => 'Master became unavailable',
         ]);
+        $this->assertDatabaseHas('appointment_audits', [
+            'appointment_id' => $appointment->id,
+            'event' => 'status_changed',
+            'actor_id' => $master->id,
+            'reason' => 'Master became unavailable',
+        ]);
         $this->assertNotNull($appointment->fresh());
         $this->assertCount(1, $admin->notifications);
+        $this->actingAs($admin)->get(route('calendar.show', $appointment))
+            ->assertOk()
+            ->assertSee(__('admin_appointments.history'))
+            ->assertSee(__('admin_appointments.events.status_changed'))
+            ->assertSee('Master became unavailable');
     }
 
     public function test_cancellation_requires_a_meaningful_reason(): void

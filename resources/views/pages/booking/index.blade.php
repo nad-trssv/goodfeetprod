@@ -550,8 +550,9 @@
                               ${showMasterImages ? `<div class="col-auto m-0"><img src="${user.profile_photo_url}" alt="${user.name}" width="84" height="84" loading="lazy" decoding="async" class="master-directory__photo"></div>` : ''}
                               <div class="col-11 m-0">
                                   <div class="m-0">
-                                      <h4 class="mb-0 fw-medium fs-8 m-0">${user.name}</h4>
+                                      <h4 class="mb-0 fw-medium fs-8 m-0">${user.name} ${user.vacation ? '🌴' : ''}</h4>
                                       <small class="text-body-secondary">${user.professional_title || ''}</small>
+                                      ${user.vacation ? `<small class="d-block text-body-secondary">🌴 В отпуске ${user.vacation.from}–${user.vacation.to}</small>` : ''}
                                   </div>
                               </div>
                               <div class="col-1 d-flex align-items-center justify-content-end m-0">

@@ -3,6 +3,7 @@
 namespace App\Services\Customer;
 
 use App\Models\AppointmentMedia;
+use App\Models\AppointmentAudit;
 use App\Models\AppointmentStatusHistory;
 use App\Models\Customer;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +22,9 @@ class DeleteCustomerAccount
             AppointmentStatusHistory::where('changed_by_type', $actorType)
                 ->where('changed_by_id', $customer->id)
                 ->update(['changed_by_type' => null, 'changed_by_id' => null]);
+            AppointmentAudit::where('actor_type', $actorType)
+                ->where('actor_id', $customer->id)
+                ->update(['actor_type' => null, 'actor_id' => null]);
 
             $customer->appointments()->update([
                 'customer_id' => null,

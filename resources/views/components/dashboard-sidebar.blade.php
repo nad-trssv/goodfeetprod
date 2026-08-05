@@ -22,6 +22,11 @@
                     <p class="navbar-vertical-label">Мои записи</p>
                     <hr class="navbar-vertical-line" />
                     <div class="nav-item-wrapper">
+                        <a class="nav-link {{ request()->routeIs('appointments.today') ? 'active' : '' }} label-1" href="{{ route('appointments.today') }}" role="button">
+                            <div class="d-flex align-items-center"><span class="nav-link-icon"><span data-feather="clock"></span></span><span class="nav-link-text-wrapper"><span class="nav-link-text">Мои записи сегодня</span></span></div>
+                        </a>
+                    </div>
+                    <div class="nav-item-wrapper">
                         <a class="nav-link {{ request()->routeIs('calendar.index') ? 'active' : '' }} label-1"
                             href="{{ route('calendar.index') }}" role="button">
                             <div class="d-flex align-items-center">

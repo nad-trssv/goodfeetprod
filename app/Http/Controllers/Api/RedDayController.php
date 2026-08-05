@@ -24,6 +24,8 @@ class RedDayController extends Controller
         $request->validate([
             'name' => 'required|string',
             'date' => 'required|date_format:Y-m-d',
+            'date_to' => 'nullable|date_format:Y-m-d|after_or_equal:date',
+            'type' => ['nullable', \Illuminate\Validation\Rule::in(array_keys(RedDay::TYPES))],
             'start_time' => 'nullable|date_format:H:i',
             'end_time' => 'nullable|date_format:H:i|after:start_time',
             'repeat' => 'required|boolean',
@@ -34,6 +36,8 @@ class RedDayController extends Controller
         $id->update([
             'name' => $request->name,
             'date' => $request->date,
+            'date_to' => $request->date_to ?: $request->date,
+            'type' => array_key_exists((string) $request->type, RedDay::TYPES) ? $request->type : 'other',
             'start_time' => $fullDay ? null : $request->start_time,
             'end_time' => $fullDay ? null : $request->end_time,
             'full_day' => $fullDay,

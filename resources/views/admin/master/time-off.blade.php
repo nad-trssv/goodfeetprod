@@ -48,6 +48,18 @@
                             <label class="form-label">Дата*</label>
                             <input type="date" class="form-control form-control-sm" name="date" required>
                         </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Дата до</label>
+                            <input type="date" class="form-control form-control-sm" name="date_to">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Причина</label>
+                            <select class="form-select form-select-sm" name="type">
+                                @foreach (\App\Models\RedDay::TYPES as $value => $label)
+                                    <option value="{{ $value }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="col-md-2 d-flex align-items-end">
                             <div class="form-check mb-1">
                                 <input class="form-check-input" type="checkbox" name="full_day" id="new_full_day"
@@ -178,7 +190,7 @@
                             @forelse($filtered as $day)
                                 <tr>
                                     <td>{{ $day->name }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($day->date)->format('d.m.Y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($day->date)->format('d.m.Y') }}@if($day->endDate()->format('Y-m-d') !== \Carbon\Carbon::parse($day->date)->format('Y-m-d')) – {{ $day->endDate()->format('d.m.Y') }}@endif<br><small class="text-muted">{{ $day->typeLabel() }}</small></td>
                                     <td>
                                         @if ($day->full_day)
                                             <span class="badge bg-secondary fs-10">Весь день</span>
@@ -202,6 +214,7 @@
                                                 data-bs-toggle="modal" data-bs-target="#editModal"
                                                 data-id="{{ $day->id }}" data-name="{{ $day->name }}"
                                                 data-date="{{ \Carbon\Carbon::parse($day->date)->format('Y-m-d') }}"
+                                                data-date-to="{{ $day->endDate() }}" data-type="{{ $day->type ?: 'other' }}"
                                                 data-start="{{ $day->start_time ? substr($day->start_time, 0, 5) : '' }}"
                                                 data-end="{{ $day->end_time ? substr($day->end_time, 0, 5) : '' }}"
                                                 data-repeat="{{ $day->repeat ? 1 : 0 }}"
@@ -256,6 +269,18 @@
                                     <label class="form-label">Дата*</label>
                                     <input type="date" class="form-control" name="date" id="edit_date"
                                         required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Дата до</label>
+                                    <input type="date" class="form-control" name="date_to" id="edit_date_to">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Причина</label>
+                                    <select class="form-select" name="type" id="edit_type">
+                                        @foreach (\App\Models\RedDay::TYPES as $value => $label)
+                                            <option value="{{ $value }}">{{ $label }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                                 <div class="col-12">
                                     <div class="form-check">
@@ -314,6 +339,8 @@
 
                 document.getElementById('edit_name').value = name;
                 document.getElementById('edit_date').value = date;
+                document.getElementById('edit_date_to').value = btn.getAttribute('data-date-to');
+                document.getElementById('edit_type').value = btn.getAttribute('data-type');
                 document.getElementById('edit_start').value = start;
                 document.getElementById('edit_end').value = end;
                 document.getElementById('edit_repeat').checked = repeat;

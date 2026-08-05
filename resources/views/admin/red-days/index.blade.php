@@ -57,6 +57,18 @@
                             <label class="form-label">Дата*</label>
                             <input type="date" class="form-control form-control-sm" name="date" required>
                         </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Дата до</label>
+                            <input type="date" class="form-control form-control-sm" name="date_to">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Причина</label>
+                            <select class="form-select form-select-sm" name="type">
+                                @foreach (\App\Models\RedDay::TYPES as $value => $label)
+                                    <option value="{{ $value }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="col-md-2 d-flex align-items-end">
                             <div class="form-check mb-1">
                                 <input class="form-check-input" type="checkbox" name="full_day" id="new_full_day"
@@ -180,7 +192,7 @@
                             @forelse($filtered as $day)
                                 <tr>
                                     <td>{{ $day['name'] }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($day['date'])->format('d.m.Y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($day['date'])->format('d.m.Y') }}@if($day['date_to'] !== $day['date']) – {{ \Carbon\Carbon::parse($day['date_to'])->format('d.m.Y') }}@endif</td>
                                     <td>
                                         @if ($day['full_day'])
                                             <span class="badge bg-secondary fs-10">Весь день</span>
@@ -204,6 +216,7 @@
                                             data-bs-toggle="modal" data-bs-target="#editModal"
                                             data-id="{{ $day['id'] }}" data-name="{{ $day['name'] }}"
                                             data-date="{{ $day['date'] }}"
+                                            data-date-to="{{ $day['date_to'] }}" data-type="{{ $day['type'] }}"
                                             data-start="{{ $day['start_time'] ? substr($day['start_time'], 0, 5) : '' }}"
                                             data-end="{{ $day['end_time'] ? substr($day['end_time'], 0, 5) : '' }}"
                                             data-repeat="{{ $day['repeat'] ? 1 : 0 }}"
@@ -257,6 +270,18 @@
                                         required>
                                 </div>
                                 <div class="col-12">
+                                    <label class="form-label">Дата до</label>
+                                    <input type="date" class="form-control" name="date_to" id="edit_date_to">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Причина</label>
+                                    <select class="form-select" name="type" id="edit_type">
+                                        @foreach (\App\Models\RedDay::TYPES as $value => $label)
+                                            <option value="{{ $value }}">{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-12">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="full_day"
                                             id="edit_fullday" value="1">
@@ -308,6 +333,8 @@
 
                 document.getElementById('edit_name').value = btn.getAttribute('data-name');
                 document.getElementById('edit_date').value = btn.getAttribute('data-date');
+                document.getElementById('edit_date_to').value = btn.getAttribute('data-date-to');
+                document.getElementById('edit_type').value = btn.getAttribute('data-type');
                 document.getElementById('edit_start').value = btn.getAttribute('data-start');
                 document.getElementById('edit_end').value = btn.getAttribute('data-end');
                 document.getElementById('edit_repeat').checked = btn.getAttribute('data-repeat') == '1';

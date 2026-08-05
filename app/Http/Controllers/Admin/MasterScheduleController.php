@@ -10,9 +10,11 @@ use App\Models\User;
 use App\Models\UserSchedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\EmployeeScheduleManager;
 
 class MasterScheduleController extends Controller
 {
+    public function __construct(private readonly EmployeeScheduleManager $scheduleManager) {}
     public function index()
     {
         $user = Auth::user();
@@ -44,20 +46,11 @@ class MasterScheduleController extends Controller
     public function updateWorkHours(Request $request)
     {
         $user = Auth::user();
-
-        $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-        $data = ['user_id' => $user->id];
-
-        foreach ($days as $day) {
-            $isOff = $request->input($day . '_off') == '1';
-            $data[$day . '_start'] = $isOff ? null : $request->input($day . '_start');
-            $data[$day . '_end'] = $isOff ? null : $request->input($day . '_end');
-        }
-
-        UserSchedule::updateOrCreate(
-            ['user_id' => $user->id],
-            $data
-        );
+        $data = $request->all();
+        $existing = $user->schedule;
+        $data['lunch_start'] = $existing?->lunch_start;
+        $data['lunch_end'] = $existing?->lunch_end;
+        $this->scheduleManager->updateSchedule($user, $data);
 
         return response()->json(['status' => 'success']);
     }
@@ -65,14 +58,14 @@ class MasterScheduleController extends Controller
     public function updateLunchHours(Request $request)
     {
         $user = Auth::user();
-
-        UserSchedule::updateOrCreate(
-            ['user_id' => $user->id],
-            [
-                'lunch_start' => $request->lunch_start ?: null,
-                'lunch_end' => $request->lunch_end ?: null,
-            ]
-        );
+        $schedule = $user->schedule;
+        $data = ['lunch_start' => $request->lunch_start ?: null, 'lunch_end' => $request->lunch_end ?: null];
+        foreach (EmployeeScheduleManager::DAYS as $day) {
+            $data[$day.'_off'] = !($schedule?->{$day.'_start'} && $schedule?->{$day.'_end'});
+            $data[$day.'_start'] = $schedule?->{$day.'_start'};
+            $data[$day.'_end'] = $schedule?->{$day.'_end'};
+        }
+        $this->scheduleManager->updateSchedule($user, $data);
 
         return response()->json(['status' => 'success']);
     }
@@ -84,6 +77,8 @@ class MasterScheduleController extends Controller
         $request->validate([
             'name' => 'required|string',
             'date' => 'required|date_format:Y-m-d',
+            'date_to' => 'nullable|date_format:Y-m-d|after_or_equal:date',
+            'type' => ['nullable', \Illuminate\Validation\Rule::in(array_keys(RedDay::TYPES))],
             'start_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
             'end_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
             'repeat' => 'required|boolean',
@@ -106,6 +101,8 @@ class MasterScheduleController extends Controller
         $redDay = RedDay::create([
             'name' => $request->name,
             'date' => $request->date,
+            'date_to' => $request->date_to ?: $request->date,
+            'type' => array_key_exists((string) $request->type, RedDay::TYPES) ? $request->type : 'other',
             'description' => $request->description,
             'start_time' => $fullDay ? null : $startTime,
             'end_time' => $fullDay ? null : $endTime,
@@ -158,6 +155,8 @@ class MasterScheduleController extends Controller
         $request->validate([
             'name' => 'required|string',
             'date' => 'required|date_format:Y-m-d',
+            'date_to' => 'nullable|date_format:Y-m-d|after_or_equal:date',
+            'type' => ['nullable', \Illuminate\Validation\Rule::in(array_keys(RedDay::TYPES))],
             'start_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
             'end_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
             'repeat' => 'required|boolean',
@@ -180,6 +179,8 @@ class MasterScheduleController extends Controller
         $redDay->update([
             'name' => $request->name,
             'date' => $request->date,
+            'date_to' => $request->date_to ?: $request->date,
+            'type' => array_key_exists((string) $request->type, RedDay::TYPES) ? $request->type : 'other',
             'start_time' => $fullDay ? null : $startTime,
             'end_time' => $fullDay ? null : $endTime,
             'full_day' => $fullDay,
@@ -199,6 +200,9 @@ class MasterScheduleController extends Controller
                     'id' => $day->id,
                     'name' => $day->name,
                     'date' => \Carbon\Carbon::parse($day->date)->format('Y-m-d'),
+                    'date_to' => $day->date_to ? \Carbon\Carbon::parse($day->date_to)->format('Y-m-d') : \Carbon\Carbon::parse($day->date)->format('Y-m-d'),
+                    'type' => $day->type ?: 'other',
+                    'type_label' => $day->typeLabel(),
                     'start_time' => $day->start_time ? substr($day->start_time, 0, 5) : null,
                     'end_time' => $day->end_time ? substr($day->end_time, 0, 5) : null,
                     'full_day' => $day->full_day,
@@ -217,6 +221,8 @@ class MasterScheduleController extends Controller
         $request->validate([
             'name' => 'required|string',
             'date' => 'required|date',
+            'date_to' => 'nullable|date|after_or_equal:date',
+            'type' => ['nullable', \Illuminate\Validation\Rule::in(array_keys(RedDay::TYPES))],
             'user_id' => 'nullable|exists:users,id',
             'full_day' => 'nullable|boolean',
             'start_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
@@ -246,6 +252,8 @@ class MasterScheduleController extends Controller
             'name' => $request->name,
             'date' => $request->date,
             'user_id' => $request->user_id ?: null,
+            'date_to' => $request->date_to ?: $request->date,
+            'type' => array_key_exists((string) $request->type, RedDay::TYPES) ? $request->type : ($request->user_id ? 'other' : 'company_closure'),
             'full_day' => $fullDay,
             'start_time' => $fullDay ? null : $startTime,
             'end_time' => $fullDay ? null : $endTime,
@@ -284,6 +292,8 @@ class MasterScheduleController extends Controller
         $request->validate([
             'name' => 'required|string',
             'date' => 'required|date',
+            'date_to' => 'nullable|date|after_or_equal:date',
+            'type' => ['nullable', \Illuminate\Validation\Rule::in(array_keys(RedDay::TYPES))],
             'full_day' => 'nullable|boolean',
             'start_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
             'end_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
@@ -312,6 +322,8 @@ class MasterScheduleController extends Controller
             'name' => $request->name,
             'date' => $request->date,
             'user_id' => $user->id,
+            'date_to' => $request->date_to ?: $request->date,
+            'type' => array_key_exists((string) $request->type, RedDay::TYPES) ? $request->type : 'other',
             'full_day' => $fullDay,
             'start_time' => $fullDay ? null : $startTime,
             'end_time' => $fullDay ? null : $endTime,
@@ -334,6 +346,8 @@ class MasterScheduleController extends Controller
         $request->validate([
             'name' => 'required|string',
             'date' => 'required|date',
+            'date_to' => 'nullable|date|after_or_equal:date',
+            'type' => ['nullable', \Illuminate\Validation\Rule::in(array_keys(RedDay::TYPES))],
             'full_day' => 'nullable|boolean',
             'start_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
             'end_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
@@ -361,6 +375,8 @@ class MasterScheduleController extends Controller
         $redDay->update([
             'name' => $request->name,
             'date' => $request->date,
+            'date_to' => $request->date_to ?: $request->date,
+            'type' => array_key_exists((string) $request->type, RedDay::TYPES) ? $request->type : 'other',
             'full_day' => $fullDay,
             'start_time' => $fullDay ? null : $startTime,
             'end_time' => $fullDay ? null : $endTime,
@@ -391,6 +407,8 @@ class MasterScheduleController extends Controller
         $request->validate([
             'name' => 'required|string',
             'date' => 'required|date',
+            'date_to' => 'nullable|date|after_or_equal:date',
+            'type' => ['nullable', \Illuminate\Validation\Rule::in(array_keys(RedDay::TYPES))],
             'full_day' => 'nullable|boolean',
             'start_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
             'end_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
@@ -418,6 +436,8 @@ class MasterScheduleController extends Controller
         $redDay->update([
             'name' => $request->name,
             'date' => $request->date,
+            'date_to' => $request->date_to ?: $request->date,
+            'type' => array_key_exists((string) $request->type, RedDay::TYPES) ? $request->type : 'other',
             'full_day' => $fullDay,
             'start_time' => $fullDay ? null : $startTime,
             'end_time' => $fullDay ? null : $endTime,

@@ -6,9 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateMasterServiceSettingsRequest;
 use App\Models\Services;
 use App\Models\User;
-use App\Models\UserServices;
 use App\Services\MasterServiceManager;
-use Illuminate\Database\Eloquent\Builder;
+use App\Services\MasterServiceCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -19,7 +18,8 @@ class AdminMasterServiceController extends Controller
     private const MASTER_ROLE_ID = 2;
 
     public function __construct(
-        private readonly MasterServiceManager $manager
+        private readonly MasterServiceManager $manager,
+        private readonly MasterServiceCatalog $catalog,
     ) {
     }
 
@@ -71,16 +71,10 @@ class AdminMasterServiceController extends Controller
                 'Мастер не найден.'
             );
 
-            $allServices = $this->servicesQuery(
-                master: $master,
-                search: $search,
-                filter: $filter
-            )->get();
-
-            $masterServices = UserServices::query()
-                ->where('user_id', $master->id)
-                ->get()
-                ->keyBy('service_id');
+            $catalog = $this->catalog->get($master, $search, $filter);
+            $allServices = $catalog['services'];
+            $masterServices = $catalog['settings'];
+            $filter = $catalog['filter'];
         }
 
         return view('admin.master-services.index', [
@@ -178,60 +172,6 @@ class AdminMasterServiceController extends Controller
                 . $master->name
                 . '» сохранены.'
         );
-    }
-
-    private function servicesQuery(
-        User $master,
-        string $search,
-        string $filter
-    ): Builder {
-        return Services::query()
-            ->where('status', true)
-            ->where('is_deleted', false)
-
-            ->when(
-                $search !== '',
-                function (
-                    Builder $query
-                ) use ($search): void {
-                    $query->where(
-                        'name',
-                        'like',
-                        '%' . $search . '%'
-                    );
-                }
-            )
-
-            ->when(
-                $filter === 'active',
-                function (
-                    Builder $query
-                ) use ($master): void {
-                    $query->whereExists(
-                        function (
-                            $subQuery
-                        ) use ($master): void {
-                            $subQuery
-                                ->selectRaw('1')
-                                ->from('user_services')
-                                ->whereColumn(
-                                    'user_services.service_id',
-                                    'services.id'
-                                )
-                                ->where(
-                                    'user_services.user_id',
-                                    $master->id
-                                )
-                                ->where(
-                                    'user_services.is_active',
-                                    true
-                                );
-                        }
-                    );
-                }
-            )
-
-            ->orderBy('name');
     }
 
     private function masterOrFail(

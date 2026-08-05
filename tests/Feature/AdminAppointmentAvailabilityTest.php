@@ -51,6 +51,11 @@ class AdminAppointmentAvailabilityTest extends TestCase
             ->assertOk();
         $appointment = Appointments::firstOrFail();
         $this->assertEquals(75, $appointment->price, 'A submitted price must not override the server price.');
+        $this->assertDatabaseHas('appointment_audits', [
+            'appointment_id' => $appointment->id,
+            'event' => 'created',
+            'actor_id' => $admin->id,
+        ]);
 
         $this->actingAs($admin)->postJson(route('calendar.store'), $this->payload($master, $service, '2030-01-15 10:30:00', '2030-01-15 11:30:00'))
             ->assertUnprocessable()

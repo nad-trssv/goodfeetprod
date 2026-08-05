@@ -26,7 +26,7 @@ $redDaysTime = RedDay::where('full_day', 0)->whereNull('user_id')->get();
         $locale = app()->getLocale();
         $today = Carbon::now()->toDateString();
 
-        $services = Services::with(['users', 'rules', 'futureRules', 'translations'])
+        $services = Services::with(['users.vacationClosures', 'rules', 'futureRules', 'translations'])
             ->where('status', 1)
             ->where('is_deleted', 0)
             ->get()
@@ -97,7 +97,7 @@ $redDaysTime = RedDay::where('full_day', 0)->whereNull('user_id')->get();
 
         $chooseService = null;
         if ($chooseServiceId) {
-            $chooseService = Services::with(['users', 'rules', 'futureRules', 'translations'])
+            $chooseService = Services::with(['users.vacationClosures', 'rules', 'futureRules', 'translations'])
                 ->find($chooseServiceId);
 
             if ($chooseService) {
@@ -115,7 +115,7 @@ $redDaysTime = RedDay::where('full_day', 0)->whereNull('user_id')->get();
         $redDays = RedDay::where('full_day', 1)->whereNull('user_id')->get();
 $redDaysTime = RedDay::where('full_day', 0)->whereNull('user_id')->get();
 
-        $services = Services::with(['users', 'rules', 'futureRules', 'translations'])
+        $services = Services::with(['users.vacationClosures', 'rules', 'futureRules', 'translations'])
             ->where('status', 1)
             ->where('is_deleted', 0)
             ->get()

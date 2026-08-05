@@ -9,9 +9,24 @@ class RedDay extends Model
 {
     use HasFactory;
 
+    public const TYPES = [
+        'personal_unpaid' => 'Личное время / за свой счёт',
+        'paid_vacation' => 'Оплачиваемый отпуск',
+        'sick_leave' => 'Больничный',
+        'training' => 'Обучение',
+        'business_trip' => 'Командировка',
+        'company_closure' => 'Компания закрыта',
+        'other' => 'Другая причина',
+    ];
+
+    public function typeLabel(): string { return self::TYPES[$this->type] ?? self::TYPES['other']; }
+    public function endDate(): \Carbon\Carbon { return \Carbon\Carbon::parse($this->date_to ?: $this->date); }
+
     protected $fillable = [
         'name',
+        'type',
         'date',
+        'date_to',
         'start_time',
         'end_time',
         'full_day',

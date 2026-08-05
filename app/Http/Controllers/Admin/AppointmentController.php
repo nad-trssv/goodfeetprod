@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AppointmentRequest;
 use App\Http\Requests\BusinessCancellationRequest;
+use App\Http\Requests\AppointmentStatusRequest;
 use App\Models\Appointments;
 use App\Services\AppointmentService;
 use App\Services\Booking\AppointmentScheduler;
@@ -13,6 +14,13 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Services\Booking\AppointmentStatusService;
+use App\Http\Requests\AppointmentCustomerMessageRequest;
+use App\Mail\AppointmentCustomerMessage;
+use App\Models\AppointmentAudit;
+use App\Services\Booking\AppointmentAuditService;
+use Illuminate\Support\Facades\Mail;
+use App\Services\Booking\TodayAppointments;
 
 class AppointmentController extends Controller
 {
@@ -28,7 +36,7 @@ class AppointmentController extends Controller
      */
     public function index()
     {
-        $data = $this->appointmentService->list($this->calendarScope());
+        $data = $this->appointmentService->list($this->calendarScope(), null, true);
 
         return view('admin.calendar.index', [
             'appointments' => $data['appointments'],
@@ -42,7 +50,7 @@ class AppointmentController extends Controller
 
     public function calendarList()
     {
-        $data = $this->appointmentService->list($this->calendarScope());
+        $data = $this->appointmentService->list($this->calendarScope(), null, true);
         return view('admin.calendar.list', [
             'appointments' => $data['appointments'],
             'title' => 'Мои записи',
@@ -54,10 +62,23 @@ class AppointmentController extends Controller
         return auth()->user()?->role_id === 1 ? 'superAdmin' : 'admin';
     }
 
+    public function today(Request $request, TodayAppointments $todayAppointments)
+    {
+        $appointments = $todayAppointments->forUser($request->user());
+
+        return view('admin.calendar.today', [
+            'appointments' => $appointments,
+            'unresolvedCount' => $appointments->filter(fn (Appointments $appointment) =>
+                $appointment->appointment_end->isPast()
+                && in_array($appointment->status, ['pending', 'confirmed', 'checked_in', 'in_progress'], true)
+            )->count(),
+        ]);
+    }
+
     public function masterCalendar(string $id)
     {
         $master = \App\Models\User::findOrFail($id);
-        $data = $this->appointmentService->list('byMaster', $id);
+        $data = $this->appointmentService->list('byMaster', $id, true);
 
         return view('admin.calendar.index', [
             'appointments' => $data['appointments'],
@@ -73,7 +94,7 @@ class AppointmentController extends Controller
     public function masterCalendarList(string $id)
     {
         $master = \App\Models\User::findOrFail($id);
-        $data = $this->appointmentService->list('byMaster', $id);
+        $data = $this->appointmentService->list('byMaster', $id, true);
 
         return view('admin.calendar.list', [
             'appointments' => $data['appointments'],
@@ -127,13 +148,75 @@ class AppointmentController extends Controller
      */
     public function show(Appointments $appointment)
     {
+        abort_unless(auth()->user()->role_id === 1 || $appointment->user_id === auth()->id(), 403);
         $event = $this->appointmentService->show($appointment);
+        $event->load(['service', 'user', 'room', 'customer', 'media', 'auditTrail' => fn ($query) => $query->with('actor')->latest('id')]);
+
+        $customerAppointments = Appointments::query()
+            ->with(['service', 'user'])
+            ->when(
+                $event->customer_id,
+                fn ($query) => $query->where('customer_id', $event->customer_id),
+                fn ($query) => $query->where(function ($identity) use ($event) {
+                    if ($event->client_email) {
+                        $identity->where('client_email', $event->client_email);
+                    } elseif ($event->client_phone) {
+                        $identity->where('client_phone', $event->client_phone);
+                    } else {
+                        $identity->whereRaw('1 = 0');
+                    }
+                })
+            )
+            ->latest('appointment_start')
+            ->limit(10)
+            ->get();
+
+        $customerActivity = AppointmentAudit::query()
+            ->with(['appointment.service', 'actor'])
+            ->whereIn('appointment_id', $customerAppointments->pluck('id'))
+            ->latest('id')
+            ->limit(15)
+            ->get();
 
         return view('admin.calendar.details', [
             'appointment' => $event,
             'title' => $event['title'],
             'client' => $event['client_name'] . ' ' . $event['client_lastname'],
+            'auditLookups' => [
+                'service_id' => \App\Models\Services::pluck('name', 'id'),
+                'user_id' => \App\Models\User::pluck('name', 'id'),
+                'room_id' => \App\Models\Room::pluck('name', 'id'),
+            ],
+            'customerAppointments' => $customerAppointments,
+            'customerActivity' => $customerActivity,
         ]);
+    }
+
+    public function sendCustomerMessage(
+        AppointmentCustomerMessageRequest $request,
+        Appointments $appointment,
+        AppointmentAuditService $audit
+    ): RedirectResponse {
+        abort_unless($request->user()->role_id === 1 || $appointment->user_id === $request->user()->id, 403);
+
+        if (!$appointment->client_email) {
+            return back()->withErrors(['message' => 'У записи не указан email клиента.']);
+        }
+
+        $data = $request->validated();
+        Mail::to($appointment->client_email)->send(new AppointmentCustomerMessage(
+            $appointment->loadMissing(['service', 'user']),
+            $data['subject'],
+            $data['message'],
+            $request->user()->name
+        ));
+
+        $audit->event($appointment, 'customer_message_sent', $request->user(), null, [], [
+            'subject' => $data['subject'],
+            'recipient' => $appointment->client_email,
+        ]);
+
+        return back()->with('success', 'Сообщение клиенту отправлено.');
     }
 
     /**
@@ -181,6 +264,38 @@ class AppointmentController extends Controller
         return response()->json(['message' => __('admin_appointments.cancelled')]);
     }
 
+    public function updateStatus(AppointmentStatusRequest $request, Appointments $appointment, AppointmentStatusService $statuses)
+    {
+        abort_unless($request->user()->role_id === 1 || $appointment->user_id === $request->user()->id, 403);
+
+        if ($appointment->appointment_end->isFuture() && in_array($request->validated('status'), ['completed', 'no_show'], true)) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'status' => 'Результат можно отметить после окончания записи.',
+            ]);
+        }
+
+        $isCorrection = in_array($appointment->status, ['completed', 'no_show', 'cancelled_by_client', 'cancelled_by_business', 'rescheduled'], true)
+            && $request->validated('status') !== $appointment->status;
+        if ($isCorrection && mb_strlen(trim((string) $request->validated('reason'))) < 3) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'reason' => 'При исправлении результата укажите причину (минимум 3 символа).',
+            ]);
+        }
+
+        $appointment = $statuses->transition(
+            $appointment,
+            $request->validated('status'),
+            $request->user(),
+            $request->validated('reason'),
+            true
+        );
+
+        return response()->json([
+            'status' => $appointment->status,
+            'message' => 'Статус записи обновлён.',
+        ]);
+    }
+
     public function allAppointments(Request $request)
     {
         $query = \App\Models\Appointments::with(['service', 'user'])
@@ -202,6 +317,10 @@ class AppointmentController extends Controller
 
         if ($request->service_id) {
             $query->where('service_id', $request->service_id);
+        }
+
+        if ($request->status && in_array($request->status, Appointments::STATUSES, true)) {
+            $query->where('status', $request->status);
         }
 
         if ($request->date_from) {

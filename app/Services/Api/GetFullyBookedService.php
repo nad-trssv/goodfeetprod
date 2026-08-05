@@ -224,21 +224,7 @@ function getBusyDays($request)
     }
 
     function getRedDays($date, $userId = null) {
-        $query = RedDay::where('full_day', 0)->where('date', $date);
-
-        if ($userId && $userId !== 'all') {
-            $query->visibleFor($userId);
-        } else {
-            $query->whereNull('user_id');
-        }
-
-        $reddays = $query->get();
-
-        if ($reddays && $reddays instanceof \Illuminate\Database\Eloquent\Collection) {
-            return $reddays->toArray();
-        }
-
-        return [];
+        return $this->calendar->partialClosures($date, $userId);
     }
 
     function getServiceDuration($serviceId, $date)
@@ -283,27 +269,7 @@ function getBusyDays($request)
     }
 
 function isDayFree($userId, $serviceId, $date){
-    $query = RedDay::where('full_day', 1)->where(function($q) use ($date) {
-        $q->where('date', $date)
-          ->orWhere(function($q2) use ($date) {
-              $q2->where('repeat', 1)
-                 ->whereMonth('date', \Carbon\Carbon::parse($date)->month)
-                 ->whereDay('date', \Carbon\Carbon::parse($date)->day);
-          });
-    });
-
-    if ($userId && $userId !== 'all') {
-        $query->visibleFor($userId);
-    } else {
-        $query->whereNull('user_id');
-    }
-
-    $result = $query->get();
-
-    if ($result->isNotEmpty()) {
-        return true;
-    }
-    return false;
+    return $this->calendar->isClosed($date, $userId);
 }
 
     function getAvailableSlots($date, $serviceId, $userId)

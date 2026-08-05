@@ -8,6 +8,7 @@ use App\Http\Requests\BusinessCancellationRequest;
 use App\Models\Appointments;
 use App\Services\AppointmentService;
 use App\Services\Booking\BusinessCancellationService;
+use App\Services\Booking\AppointmentScheduler;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -16,7 +17,7 @@ class AppointmentControllerAllMasters extends Controller
 {
     private AppointmentService $appointmentService;
 
-    public function __construct(AppointmentService $appointmentService)
+    public function __construct(AppointmentService $appointmentService, private readonly AppointmentScheduler $scheduler)
     {
         $this->appointmentService = $appointmentService;
     }
@@ -59,7 +60,7 @@ class AppointmentControllerAllMasters extends Controller
     public function store(AppointmentRequest $request): JsonResponse|RedirectResponse
     {
         try {
-            $event = $this->appointmentService->store($request);
+            $event = $this->scheduler->create($request);
             
                 return response()->json([
                     'id' => $event->id,
@@ -106,7 +107,7 @@ class AppointmentControllerAllMasters extends Controller
     public function update(AppointmentRequest $request)
     {   
         try {
-            $event = $this->appointmentService->update($request);
+            $event = $this->scheduler->update($request);
             
             return response()->json([
                 'appointment' => $event,

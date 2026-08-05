@@ -49,6 +49,11 @@ class BookingCreatorTest extends TestCase
         $this->assertEquals(75.50, $appointment->price);
         $this->assertNotNull($appointment->public_uuid);
         $this->assertMatchesRegularExpression('/^[0-9a-f-]{36}$/', $appointment->public_uuid);
+        $this->assertDatabaseHas('appointment_audits', [
+            'appointment_id' => $appointment->id,
+            'event' => 'created',
+            'actor_id' => $appointment->customer_id,
+        ]);
     }
 
     public function test_it_rejects_an_overlapping_booking_for_the_same_master(): void

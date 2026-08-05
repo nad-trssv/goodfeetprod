@@ -36,7 +36,9 @@ class ServiceResource extends JsonResource
             'has_fixed_time' => $this->has_fixed_time,
             'is_deleted' => $this->is_deleted,
             'translation' => $this->translation,
-            'users' => $this->users->map(fn ($user) => [
+            'users' => $this->users->map(function ($user) {
+                $vacation = $user->currentVacation();
+                return [
                 'id' => $user->id,
                 'name' => $user->name,
                 'professional_title' => $user->professionalTitle(app()->getLocale()),
@@ -44,7 +46,9 @@ class ServiceResource extends JsonResource
                     ? Storage::disk('public')->url($user->profile_photo_path)
                     : asset('assets/img/team/avatar.webp'),
                 'has_profile_photo' => filled($user->profile_photo_path),
-            ])->values(),
+                'vacation' => $vacation ? ['from' => \Carbon\Carbon::parse($vacation->date)->format('d.m.Y'), 'to' => $vacation->endDate()->format('d.m.Y')] : null,
+                ];
+            })->values(),
             'created_at' => $this->created_at->toDateTimeString(),
             'updated_at' => $this->updated_at->toDateTimeString(),
 

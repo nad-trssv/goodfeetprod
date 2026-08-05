@@ -8,6 +8,7 @@ use App\Models\Services;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use RuntimeException;
 
 class AppointmentScheduler
@@ -16,6 +17,7 @@ class AppointmentScheduler
         private readonly SlotAvailabilityService $availability,
         private readonly RoomAllocationService $rooms,
         private readonly AppointmentNotificationService $notifications,
+        private readonly AppointmentAuditService $audit,
     ) {
     }
 
@@ -29,12 +31,15 @@ class AppointmentScheduler
             $this->assertRoomAvailable((int) $request->user_id, $roomId);
             $service = Services::findOrFail($request->service_id);
 
-            return Appointments::create(array_merge($request->validated(), [
+            $appointment = Appointments::create(array_merge($request->validated(), [
                 'room_id' => $roomId,
                 'price' => $service->effectivePriceForDate($date),
                 'original_price' => $service->effectivePriceForDate($date),
                 'discount_amount' => 0,
             ]));
+            $this->audit->created($appointment, Auth::user());
+
+            return $appointment;
         });
 
         $this->notifications->send($appointment, 'booking_created');
@@ -46,6 +51,7 @@ class AppointmentScheduler
     {
         return DB::transaction(function () use ($request) {
             $appointment = Appointments::whereKey($request->id)->lockForUpdate()->firstOrFail();
+            $before = $this->audit->snapshot($appointment);
             User::whereKey($request->user_id)->lockForUpdate()->firstOrFail();
             [$date, $start, $end] = $this->interval($request);
             $this->assertAvailable($date, $start, $end, (int) $request->service_id, (int) $request->user_id, $appointment->id);
@@ -66,6 +72,7 @@ class AppointmentScheduler
             $appointment->update(array_merge($request->validated(), [
                 'room_id' => $roomId,
             ], $pricing));
+            $this->audit->updated($appointment, $before, Auth::user());
 
             return $appointment->refresh();
         });
