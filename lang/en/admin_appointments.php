@@ -1,0 +1,2 @@
+<?php
+return ['cancel' => 'Cancel appointment', 'cancel_reason' => 'Cancellation reason', 'cancel_reason_help' => 'The reason will be stored in the appointment history.', 'cancel_confirm' => 'Cancel this appointment on behalf of the business?', 'cancelled' => 'The appointment was cancelled. Its data and history were preserved.', 'reason_required' => 'Enter a cancellation reason (at least 3 characters).'];

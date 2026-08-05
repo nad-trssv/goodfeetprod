@@ -12,7 +12,9 @@
                 <h2 class="text-body-emphasis fw-bolder mb-2">{{  $title  }} - {{  $client  }}</h2>
               </div>
               <div class="d-flex justify-content-end">
-                <button id="destroyEvent" data-event="{{ $appointment['id'] }}" class="btn btn-warning fw-regular fs-8">Удалить запись</button>
+                @unless(in_array($appointment['status'], ['cancelled_by_client', 'cancelled_by_business', 'rescheduled'], true))
+                  <button id="destroyEvent" data-event="{{ $appointment['id'] }}" class="btn btn-warning fw-regular fs-8">{{ __('admin_appointments.cancel') }}</button>
+                @endunless
               </div>
             </div>
           </div>
@@ -143,15 +145,23 @@
                 });
                 $('#destroyEvent').on('click', function() {
                   var eventId = $(this).data('event');
+                  var reason = window.prompt(@json(__('admin_appointments.cancel_reason')));
+                  if (reason === null) return;
+                  reason = reason.trim();
+                  if (reason.length < 3) {
+                    Swal.fire({ icon: 'error', text: @json(__('admin_appointments.reason_required')) });
+                    return;
+                  }
                     $.ajax({
                       url: "{{ route('calendar.destroy', '') }}"+'/'+eventId,
                       type: "DELETE",
+                      data: { reason: reason },
                       dataType: "json",
                       success: function(response) {
                           Swal.fire({
                             position: "top-end",
                             icon: "success",
-                            title: 'Событие успешно удалено!',
+                            title: @json(__('admin_appointments.cancelled')),
                             showConfirmButton: false,
                             iconColor: '#1463b8',
                             timerProgressBar: true,
@@ -159,7 +169,7 @@
                           });
                           Swal.fire({
                             icon: "success",
-                            title: "Событие успешно удалено!",
+                            title: @json(__('admin_appointments.cancelled')),
                             text: "Вы будете перенаправлены ко всем записям через 3 секунды.",
                             showConfirmButton: true,
                             confirmButtonText: "ОК",

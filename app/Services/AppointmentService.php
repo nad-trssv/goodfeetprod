@@ -22,11 +22,11 @@ class AppointmentService
         $userId = Auth::user()->id;
         try {
             if ($adminRole == 'superAdmin') {
-                $appointments = Appointments::with('media')->orderByDesc('appointment_start')->get();
+                $appointments = Appointments::with('media')->whereNotIn('status', ['cancelled_by_client', 'cancelled_by_business', 'rescheduled'])->orderByDesc('appointment_start')->get();
             } elseif ($adminRole == 'byMaster' && $masterId) {
-                $appointments = Appointments::with('media')->where('user_id', $masterId)->orderByDesc('appointment_start')->get();
+                $appointments = Appointments::with('media')->where('user_id', $masterId)->whereNotIn('status', ['cancelled_by_client', 'cancelled_by_business', 'rescheduled'])->orderByDesc('appointment_start')->get();
             } else {
-                $appointments = Appointments::with('media')->where('user_id', $userId)->orderByDesc('appointment_start')->get();
+                $appointments = Appointments::with('media')->where('user_id', $userId)->whereNotIn('status', ['cancelled_by_client', 'cancelled_by_business', 'rescheduled'])->orderByDesc('appointment_start')->get();
             }
 
             $users = User::all();

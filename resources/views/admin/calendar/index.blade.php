@@ -245,17 +245,24 @@
                         var y1 = destroyEventOffset.top;
                         var y2 = destroyEventOffset.top + destroyEventHeight;
                         if (jsEvent.pageX >= x1 && jsEvent.pageX <= x2 && jsEvent.pageY >= y1 && jsEvent.pageY <= y2) {
-                            if (confirm('Точно ли вы хотите удалить это событие?')) {
+                            if (confirm(@json(__('admin_appointments.cancel_confirm')))) {
+                              const reason = window.prompt(@json(__('admin_appointments.cancel_reason')));
+                              if (reason === null || reason.trim().length < 3) {
+                                isDeleting = false;
+                                $('#calendar').fullCalendar('refetchEvents');
+                                return;
+                              }
                               isDeleting = true;
                                 $.ajax({
                                     url: "{{ route('calendar.destroy', '') }}"+'/'+event.id,
                                     type: "DELETE",
+                                    data: { reason: reason.trim() },
                                     dataType: "json",
                                     success: function(response) {
                                         Swal.fire({
                                           position: "top-end",
                                           icon: "success",
-                                          title: 'Событие успешно удалено!',
+                                          title: @json(__('admin_appointments.cancelled')),
                                           showConfirmButton: false,
                                           iconColor: '#1463b8',
                                           timerProgressBar: true,

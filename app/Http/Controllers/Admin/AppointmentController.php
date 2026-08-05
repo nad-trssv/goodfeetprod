@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AppointmentRequest;
+use App\Http\Requests\BusinessCancellationRequest;
 use App\Models\Appointments;
 use App\Services\AppointmentService;
 use App\Services\Booking\AppointmentScheduler;
+use App\Services\Booking\BusinessCancellationService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -169,15 +171,14 @@ class AppointmentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy(BusinessCancellationRequest $request, $id, BusinessCancellationService $cancellations)
     {
-        try {
-            $event = Appointments::findOrFail($id);
-            $event->delete();
-            return response()->json(['message' => 'Событие успешно удалено'], 200);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Ошибка при удалении события'], 500);
-        }
+        $appointment = Appointments::findOrFail($id);
+        abort_unless($request->user()->role_id === 1 || $appointment->user_id === $request->user()->id, 403);
+
+        $cancellations->cancel($appointment, $request->user(), $request->validated('reason'));
+
+        return response()->json(['message' => __('admin_appointments.cancelled')]);
     }
 
     public function allAppointments(Request $request)
