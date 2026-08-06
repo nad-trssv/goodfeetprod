@@ -26,7 +26,7 @@ class Services extends Model
 
     public function getImageUrlAttribute(): string
     {
-        return $this->image_path
+        return $this->image_path && Storage::disk('public')->exists($this->image_path)
             ? Storage::disk('public')->url($this->image_path)
             : asset('assets/img/generic/default.png');
     }

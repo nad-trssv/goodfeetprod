@@ -87,9 +87,7 @@
                         @foreach ($service['users'] as $user)
                           @if ($loop->index < $shownUsers)
                             <a class="dropdown-toggle dropdown-caret-none d-inline-block" href="#!" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
-                              <div class="avatar avatar-m">
-                                <img class="rounded-circle border border-dark" src="{{ $user->profile_photo_url }}" alt="{{ $user->profile_photo_path }}" />
-                              </div>
+                              <x-ui.avatar :user="$user" :size="40" class="border border-dark rounded-circle" />
                             </a>
                             <div class="dropdown-menu avatar-dropdown-menu p-0 overflow-hidden" style="width: 320px;">
                               <div class="position-relative">
@@ -98,8 +96,7 @@
                                 <!--/.bg-holder-->
                                 <div class="p-3">
                                   <div class="text-center">
-                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2">
-                                      <img class="rounded-circle border border-light-subtle" src="{{ $user->profile_photo_url }}" alt="{{ $user->profile_photo_path }}" /></div>
+                                    <x-ui.avatar :user="$user" :size="64" online class="me-2 me-sm-0 me-xl-2 mb-2 border border-light-subtle rounded-circle" />
                                     <h6 class="text-white">{{ $user->name }}</h6>
                                     <p class="text-light text-opacity-50 fw-semibold fs-10 mb-2">{{ $user->username }}</p>
                                     {{-- <div class="d-flex flex-center mb-3">

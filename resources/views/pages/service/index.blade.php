@@ -18,13 +18,13 @@
                     <div class="row g-3 h-100">
                         @if(($settings['show_service_images'] ?? true))
                           <div class="col-12">
-                            <img src="{{ $item->image_url }}" alt="{{ $item->translation['name'] ?? $item['name'] }}" width="1200" height="800" loading="lazy" decoding="async" class="w-100 rounded-3" style="aspect-ratio:3/2;object-fit:cover;max-height:320px">
+                            <x-ui.service-image :service="$item" :alt="$item->translation['name'] ?? $item['name']" :width="1200" :height="800" class="w-100 rounded-3" style="aspect-ratio:3/2;max-height:320px" />
                           </div>
                         @endif
                         <div class="col-lg-8 col-xxl-7">
                             <div class="row flex-lg-nowrap g-3 mb-2">
                                 <div class="col-md-auto">
-                                    <h4 class="mb-0 fw-semibold">
+                                    <h4 class="mb-0 fw-semibold text-break">
                                         @if (isset($item->translation['name']))
                                             {{ $item->translation['name'] }}
                                         @else

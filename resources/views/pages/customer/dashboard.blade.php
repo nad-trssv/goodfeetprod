@@ -12,7 +12,7 @@
     <div class="row g-3 mb-6">
       @forelse($upcoming as $appointment)
         <div class="col-12 col-lg-6"><article class="card h-100" data-appointment="{{ $appointment->public_uuid }}"><div class="card-body">
-          <div class="d-flex justify-content-between gap-3"><div class="d-flex align-items-start gap-3"><img src="{{ $appointment->service->image_url }}" alt="" width="56" height="56" class="rounded object-fit-cover flex-shrink-0"><div><h3 class="fs-7 mb-2">{{ $appointment->service->getTranslation(app()->getLocale(), 'name') ?? $appointment->service->name }}</h3><div class="d-flex align-items-center gap-2"><img src="{{ $appointment->user->profile_photo_path ? asset('storage/'.$appointment->user->profile_photo_path) : asset('assets/img/team/avatar.webp') }}" alt="" width="32" height="32" class="rounded-circle object-fit-cover flex-shrink-0"><span>{{ $appointment->user->name }}</span></div></div></div><span class="badge bg-primary-subtle text-primary">{{ __('appointment_statuses.'.$appointment->status) }}</span></div>
+          <div class="d-flex justify-content-between gap-3"><div class="d-flex align-items-start gap-3"><x-ui.service-image :service="$appointment->service" :width="56" :height="56" class="rounded flex-shrink-0" /><div><h3 class="fs-7 mb-2">{{ $appointment->service->getTranslation(app()->getLocale(), 'name') ?? $appointment->service->name }}</h3><div class="d-flex align-items-center gap-2"><x-ui.avatar :user="$appointment->user" :size="32" /><span>{{ $appointment->user->name }}</span></div></div></div><x-appointments.status :status="$appointment->status" /></div>
           <p class="mt-3 mb-2 fw-semibold">{{ $appointment->appointment_start->format('d.m.Y H:i') }}</p>
           @if($appointment->rescheduleRequests->isNotEmpty())
             <div class="alert alert-warning py-2 mb-0">{{ __('customer.pending_master_approval') }}: {{ $appointment->rescheduleRequests->first()->requested_start->format('d.m.Y H:i') }}</div>
@@ -54,9 +54,9 @@
         <tbody>
           @forelse($history as $appointment)
             <tr data-appointment="{{ $appointment->public_uuid }}">
-              <td class="ps-3"><div class="d-flex align-items-center gap-2"><img src="{{ $appointment->service->image_url }}" alt="" width="44" height="44" loading="lazy" decoding="async" class="rounded object-fit-cover flex-shrink-0"><span>{{ $appointment->service->getTranslation(app()->getLocale(), 'name') ?? $appointment->service->name }}</span></div></td>
-              <td><div class="d-flex align-items-center gap-2"><img src="{{ $appointment->user->profile_photo_path ? asset('storage/'.$appointment->user->profile_photo_path) : asset('assets/img/team/avatar.webp') }}" alt="" width="40" height="40" loading="lazy" decoding="async" class="rounded-circle object-fit-cover flex-shrink-0"><span>{{ $appointment->user->name }}</span></div></td>
-              <td class="text-nowrap">{{ $appointment->appointment_start->format('d.m.Y H:i') }}</td><td>{{ __('appointment_statuses.'.$appointment->status) }}</td>
+              <td class="ps-3"><div class="d-flex align-items-center gap-2"><x-ui.service-image :service="$appointment->service" :width="44" :height="44" class="rounded flex-shrink-0" /><span>{{ $appointment->service->getTranslation(app()->getLocale(), 'name') ?? $appointment->service->name }}</span></div></td>
+              <td><div class="d-flex align-items-center gap-2"><x-ui.avatar :user="$appointment->user" :size="40" /><span>{{ $appointment->user->name }}</span></div></td>
+              <td class="text-nowrap">{{ $appointment->appointment_start->format('d.m.Y H:i') }}</td><td><x-appointments.status :status="$appointment->status" /></td>
             </tr>
           @empty
             <tr><td colspan="4" class="py-4 text-center text-body-secondary">{{ __('customer.no_results') }}</td></tr>

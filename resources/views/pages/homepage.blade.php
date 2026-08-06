@@ -11,7 +11,7 @@
           <div class="col-12 {{ $loop->remaining == 0 && $loop->count % 2 != 0 ? '' : 'col-lg-6' }} mb-8">
             <div class="service d-flex flex-row justify-content-between gap-3">
               @if(($settings['show_service_images'] ?? true))
-                <img src="{{ $item->image_url }}" alt="{{ $item->translation['name'] ?? $item['name'] }}" width="360" height="240" loading="lazy" decoding="async" class="rounded-3 flex-shrink-0" style="width:clamp(96px,18vw,180px);aspect-ratio:3/2;object-fit:cover">
+                <x-ui.service-image :service="$item" :alt="$item->translation['name'] ?? $item['name']" :width="360" :height="240" class="rounded-3 flex-shrink-0" style="width:clamp(96px,18vw,180px);aspect-ratio:3/2" />
               @endif
               <div class="service_name w-100">
                 <div class="service_name__title fs-6 fs-lg-5 fc_main ff_primary fw-semibold mt-2">

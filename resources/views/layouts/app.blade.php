@@ -36,7 +36,7 @@
       <div class="bg_primary py-2">
         <div class="container top_ff_secondary">
           <div class="header">
-            <div class="row justify-content-between mx-2">
+            <div class="row justify-content-between mx-0">
               <div class="row col-9 gap-1">
                 @if(!empty($settings['company_address']))<p class="col-12 lh-1 fc_main fw-bold mb-0 fs-10 fs-lg-9 px-1 d-flex align-items-center">{{ $settings['company_address'] }}</p>@endif
                 @if(!empty($settings['company_phone']))<a class="col-12 lh-1 fc_main fw-bold fs-10 fs-lg-9 px-1 d-flex align-items-center" href="tel:{{ $settings['company_phone'] }}">{{ $settings['company_phone'] }}</a>@endif

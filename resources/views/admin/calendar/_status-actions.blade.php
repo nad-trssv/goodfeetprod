@@ -23,7 +23,7 @@
   };
 @endphp
 <div class="d-flex flex-wrap align-items-center justify-content-end gap-1" data-appointment-status-wrap>
-  <span class="badge badge-phoenix badge-phoenix-{{ $badge }}">{{ $statusValue ? __('appointment_statuses.'.$statusValue) : 'Статус не указан' }}</span>
+  <x-appointments.status :status="$statusValue" />
   @if($options)
     <select class="form-select form-select-sm appointment-status-select" style="width:auto;max-width:180px" data-id="{{ $appointmentId }}" data-current="{{ $statusValue }}" aria-label="{{ __('appointment_statuses.change_status') }}">
       <option value="" selected>{{ __('appointment_statuses.change') }}</option>

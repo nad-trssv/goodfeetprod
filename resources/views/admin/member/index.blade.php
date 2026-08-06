@@ -39,8 +39,7 @@
         <article class="member-card" data-member-card data-state="{{ $state['code'] }}" data-online="{{ $user['is_online'] ? '1' : '0' }}" data-search="{{ mb_strtolower($user['name'].' '.$user['email'].' '.$user['phone'].' '.$user['username']) }}">
           <div class="d-flex align-items-start gap-3 mb-3">
             <a class="position-relative flex-shrink-0" href="{{ route('member.edit',$user['id']) }}">
-              @if($user['profile_photo_url'])<img class="member-card__avatar rounded-circle" src="{{ $user['profile_photo_url'] }}" alt="{{ $user['name'] }}" width="58" height="58" loading="lazy" decoding="async">@else<span class="member-card__avatar-fallback" aria-label="{{ $user['name'] }}">{{ $user['profile_initial'] }}</span>@endif
-              @if($user['is_online'])<span class="online-dot" title="Онлайн"></span>@endif
+              <x-ui.avatar :user="$user" :size="58" :online="$user['is_online']" />
             </a>
             <div class="min-w-0 flex-grow-1">
               <div class="d-flex align-items-start justify-content-between gap-2">

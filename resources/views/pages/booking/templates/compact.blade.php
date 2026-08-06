@@ -18,7 +18,7 @@
               @foreach($services as $item)
                 <div class="serviceChoose choose__item" data-duration="{{ $item['effective_duration_minutes'] }}" data-id="{{ $item['id'] }}" data-loop="{{ $loop->index }}" data-price="{{ $item['effective_price'] }}" data-name="{{ $item['translation']['name'] ?? $item['name'] }}">
                   <div class="d-flex justify-content-between gap-2">
-                    @if(($settings['show_service_images'] ?? true))<img src="{{ $item['image_url'] }}" alt="{{ $item['translation']['name'] ?? $item['name'] }}" width="192" height="128" loading="lazy" decoding="async" class="booking-option__image">@endif
+                    @if(($settings['show_service_images'] ?? true))<x-ui.service-image :service="$item" :alt="$item['translation']['name'] ?? $item['name']" :width="192" :height="128" class="booking-option__image" />@endif
                     <div class="min-w-0 w-100"><h3 class="fs-9 fw-semibold mb-1" style="display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;">{{ $item['translation']['name'] ?? $item['name'] }}</h3><span class="text-body-secondary fs-10">{{ $item['effective_duration_minutes'] }} {{ __('msg.min') }}</span></div>
                     <strong class="text-nowrap fs-9">@if($item['price_can_change']){{ __('msg.price_from') }} @endif{{ $item['effective_price'] }} &euro;</strong>
                   </div>

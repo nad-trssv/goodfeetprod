@@ -36,10 +36,7 @@
               <tr>
                 <td class="ps-3">
                   <div class="d-flex align-items-center gap-2">
-                    <img src="{{ asset('storage/' . $master->profile_photo_path) }}"
-                         class="rounded-circle"
-                         style="width:32px;height:32px;object-fit:cover;"
-                         alt="{{ $master->name }}">
+                    <x-ui.avatar :user="$master" :size="32" />
                     <div>
                       <div class="fw-semibold">{{ $master->name }}</div>
                       <div class="text-muted fs-10">{{ $master->role->name }}</div>

@@ -122,7 +122,7 @@
                                 <div class="col-12 gy-6">
                                   <label class="form-label fw-semibold" for="image">Изображение услуги</label>
                                   <div class="border rounded-3 p-2 mb-2 bg-body-tertiary" style="max-width:360px">
-                                    <img src="{{ $service->image_url }}" alt="{{ $service['name'] }}" width="1200" height="800" class="img-fluid rounded-2" style="width:100%;aspect-ratio:3/2;object-fit:cover" loading="lazy">
+                                    <x-ui.service-image :service="$service" :alt="$service['name']" :width="1200" :height="800" class="img-fluid rounded-2" style="width:100%;aspect-ratio:3/2" />
                                   </div>
                                   <input class="form-control @error('image') is-invalid @enderror" id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp">
                                   @error('image')<div class="invalid-feedback">{{ $message }}</div>@enderror

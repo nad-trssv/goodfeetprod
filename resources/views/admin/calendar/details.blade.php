@@ -27,7 +27,7 @@
   </div>
   <div class="row g-4 mb-4">
     <div class="col-12 col-xl-7"><section class="card h-100"><div class="card-body p-4"><h4 class="mb-3">Последние записи клиента</h4><div class="table-responsive"><table class="table table-sm align-middle"><thead><tr><th>Дата</th><th>Услуга</th><th>Мастер</th><th>Статус</th><th></th></tr></thead><tbody>
-      @forelse($customerAppointments as $item)<tr><td class="text-nowrap">{{ $item->appointment_start->format('d.m.Y H:i') }}</td><td>{{ $item->service->name }}</td><td>{{ $item->user->name }}</td><td>{{ __('appointment_statuses.'.$item->status) }}</td><td><a href="{{ route('calendar.show',$item) }}">Открыть</a></td></tr>@empty<tr><td colspan="5">Других записей не найдено.</td></tr>@endforelse
+      @forelse($customerAppointments as $item)<tr><td class="text-nowrap">{{ $item->appointment_start->format('d.m.Y H:i') }}</td><td>{{ $item->service->name }}</td><td>{{ $item->user->name }}</td><td><x-appointments.status :status="$item->status" /></td><td><a href="{{ route('calendar.show',$item) }}">Открыть</a></td></tr>@empty<tr><td colspan="5">Других записей не найдено.</td></tr>@endforelse
     </tbody></table></div></div></section></div>
     <div class="col-12 col-xl-5"><section class="card h-100"><div class="card-body p-4"><h4 class="mb-3">Написать клиенту</h4>
       @if($appointment->client_email)<form method="POST" action="{{ route('appointments.message.store',$appointment) }}">@csrf
