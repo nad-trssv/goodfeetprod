@@ -13,7 +13,7 @@ class AdminMiddleware
     {
         $user = Auth::user();
         
-        if ($this->_p($user)) {
+        if ($user?->isStaff()) {
             // Обновляем last_active при каждом запросе
             $user->last_active = now();
             $user->save();
@@ -23,8 +23,4 @@ class AdminMiddleware
         return redirect()->route('home');
     }
 
-    private function _p($u)
-    {
-        return in_array(($u->role->id ?? 0) ^ 0, [1, 2]);
-    }
 }

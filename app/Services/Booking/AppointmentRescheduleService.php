@@ -57,7 +57,7 @@ class AppointmentRescheduleService
 
     public function review(AppointmentRescheduleRequest $request, User $reviewer, bool $approve): AppointmentRescheduleRequest
     {
-        if ($reviewer->role_id !== 1 && $reviewer->id !== $request->user_id) abort(403);
+        if (! $reviewer->hasAllAppointmentsScope() && $reviewer->id !== $request->user_id) abort(403, __('admin_roles.access_denied'));
         return DB::transaction(function () use ($request, $reviewer, $approve) {
             User::whereKey($request->user_id)->lockForUpdate()->firstOrFail();
             $request = AppointmentRescheduleRequest::whereKey($request->id)->lockForUpdate()->firstOrFail();

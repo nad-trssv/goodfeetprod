@@ -88,8 +88,10 @@ class MemberController extends Controller
     public function edit(Request $request, string $id, EmployeeCardService $card, MasterServiceCatalog $catalog): \Illuminate\View\View
     {
         $member = User::with(['services', 'schedule', 'notificationRecipientsUsers', 'vacationClosures'])->findOrFail($id);
-        $roles = Roles::all();
-        $admins = User::whereIn('role_id', [1, 2])->orderBy('name')->get();
+        $roles = $request->user()->hasPermission('roles.manage')
+            ? Roles::query()->where(fn ($query) => $query->whereNull('slug')->orWhere('slug', '!=', 'customer'))->orderBy('name')->get()
+            : Roles::whereKey($member->role_id)->get();
+        $admins = User::with('role.permissions')->orderBy('name')->get()->filter(fn (User $user) => $user->hasPermission('notifications.view'));
         $search = trim((string) $request->query('search', ''));
         $catalogData = $catalog->get($member, $search, (string) $request->query('filter', 'all'));
 
@@ -113,7 +115,16 @@ class MemberController extends Controller
         $rules = [
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:15|unique:users,phone,' . $id,
-            'role_id' => 'required|exists:roles,id',
+            'role_id' => [
+                'required',
+                'integer',
+                \Illuminate\Validation\Rule::exists('roles', 'id')->where(fn ($query) => $query->whereNull('slug')->orWhere('slug', '!=', 'customer')),
+                function (string $attribute, mixed $value, \Closure $fail) use ($request, $member) {
+                    if (! $request->user()->hasPermission('roles.manage') && (int) $value !== (int) $member->role_id) {
+                        $fail(__('admin_roles.access_denied'));
+                    }
+                },
+            ],
             'username' => 'required|string|min:3|max:30|unique:users,username,' . $id,
             'email' => 'required|email|unique:users,email,' . $id,
             'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048|dimensions:min_width=400,min_height=400,max_width=4000,max_height=4000',
@@ -172,7 +183,7 @@ class MemberController extends Controller
     public function allSchedules()
     {
         $masters = \App\Models\User::with(['schedule', 'services', 'role'])
-            ->whereIn('role_id', [1, 2])
+            ->whereHas('role', fn ($query) => $query->where('is_service_provider', true)->orWhereIn('id', [1, 2]))
             ->orderBy('name')
             ->get();
 
@@ -185,7 +196,8 @@ class MemberController extends Controller
     {
         $master = User::findOrFail($id);
         $validated = $request->validate(['recipients' => ['nullable', 'array'], 'recipients.*' => ['integer', 'exists:users,id']]);
-        $recipients = User::whereIn('id', $validated['recipients'] ?? [])->whereIn('role_id', [1, 2])->pluck('id')->all();
+        $recipients = User::with('role.permissions')->whereIn('id', $validated['recipients'] ?? [])->get()
+            ->filter(fn (User $user) => $user->hasPermission('notifications.view'))->pluck('id')->all();
         
         // Всегда включаем самого мастера
         if (!in_array($id, $recipients)) {

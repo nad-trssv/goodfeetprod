@@ -7,7 +7,7 @@ use Illuminate\Validation\Rule;
 
 class PromoCodeRequest extends FormRequest
 {
-    public function authorize(): bool { return true; }
+    public function authorize(): bool { return $this->user()?->hasPermission('promo_codes.update') === true; }
 
     protected function prepareForValidation(): void
     {

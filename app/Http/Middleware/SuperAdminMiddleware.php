@@ -16,7 +16,7 @@ class SuperAdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if(Auth::user()->role->id == 1){
+        if(Auth::user()?->hasPermission('roles.manage')){
             return $next($request);
         }
         return redirect()->route('dashboard');

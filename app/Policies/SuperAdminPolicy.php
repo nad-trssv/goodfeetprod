@@ -13,7 +13,7 @@ class SuperAdminPolicy
 
     public function view(User $user): bool
     {
-        return (int) $user->role_id === 1;
+        return $user->hasPermission('roles.manage');
     }
 
     public function create(User $user): bool

@@ -12,7 +12,7 @@ class BusinessCancellationService
 
     public function cancel(Appointments $appointment, User $actor, string $reason): Appointments
     {
-        if ($actor->role_id !== 1 && $appointment->user_id !== $actor->id) {
+        if (! $actor->hasAllAppointmentsScope() && $appointment->user_id !== $actor->id) {
             throw new AuthorizationException('You may only cancel your own appointments.');
         }
 

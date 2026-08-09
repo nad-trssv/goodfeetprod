@@ -12,7 +12,7 @@ class RoomController extends Controller
     public function index()
     {
         $rooms = Room::with('users')->orderBy('name')->get();
-        $masters = User::whereIn('role_id', [1, 2])->orderBy('name')->get();
+        $masters = User::query()->whereHas('role', fn ($query) => $query->where('is_service_provider', true)->orWhereIn('id', [1, 2]))->orderBy('name')->get();
         return view('admin.rooms.index', compact('rooms', 'masters'));
     }
 

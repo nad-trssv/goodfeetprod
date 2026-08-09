@@ -72,7 +72,7 @@ class AppointmentController extends Controller
 
     private function calendarScope(): string
     {
-        return auth()->user()?->role_id === 1 ? 'superAdmin' : 'admin';
+        return auth()->user()?->hasAllAppointmentsScope() ? 'superAdmin' : 'admin';
     }
 
     public function today(Request $request, TodayAppointments $todayAppointments)
@@ -90,6 +90,7 @@ class AppointmentController extends Controller
 
     public function masterCalendar(string $id)
     {
+        abort_unless(auth()->user()->hasAllAppointmentsScope() || (int) auth()->id() === (int) $id, 403, __('admin_roles.access_denied'));
         $master = \App\Models\User::findOrFail($id);
         $data = $this->appointmentService->list('byMaster', $id, true);
 
@@ -106,6 +107,7 @@ class AppointmentController extends Controller
 
     public function masterCalendarList(string $id)
     {
+        abort_unless(auth()->user()->hasAllAppointmentsScope() || (int) auth()->id() === (int) $id, 403, __('admin_roles.access_denied'));
         $master = \App\Models\User::findOrFail($id);
         $data = $this->appointmentService->list('byMaster', $id, true);
 
@@ -162,7 +164,7 @@ class AppointmentController extends Controller
      */
     public function show(Appointments $appointment)
     {
-        abort_unless(auth()->user()->role_id === 1 || $appointment->user_id === auth()->id(), 403);
+        $this->authorize('view', $appointment);
         $event = $this->appointmentService->show($appointment);
         $event->load(['service', 'user', 'room', 'customer', 'media', 'auditTrail' => fn ($query) => $query->with('actor')->latest('id')]);
 
@@ -211,7 +213,7 @@ class AppointmentController extends Controller
         Appointments $appointment,
         AppointmentAuditService $audit
     ): RedirectResponse {
-        abort_unless($request->user()->role_id === 1 || $appointment->user_id === $request->user()->id, 403);
+        $this->authorize('message', $appointment);
 
         if (!$appointment->client_email) {
             return back()->withErrors(['message' => 'У записи не указан email клиента.']);
@@ -271,7 +273,7 @@ class AppointmentController extends Controller
     public function destroy(BusinessCancellationRequest $request, $id, BusinessCancellationService $cancellations)
     {
         $appointment = Appointments::findOrFail($id);
-        abort_unless($request->user()->role_id === 1 || $appointment->user_id === $request->user()->id, 403);
+        $this->authorize('delete', $appointment);
 
         $cancellations->cancel($appointment, $request->user(), $request->validated('reason'));
 
@@ -280,7 +282,7 @@ class AppointmentController extends Controller
 
     public function updateStatus(AppointmentStatusRequest $request, Appointments $appointment, AppointmentStatusService $statuses)
     {
-        abort_unless($request->user()->role_id === 1 || $appointment->user_id === $request->user()->id, 403);
+        $this->authorize('status', $appointment);
 
         if ($appointment->appointment_end->isFuture() && in_array($request->validated('status'), ['completed', 'no_show'], true)) {
             throw \Illuminate\Validation\ValidationException::withMessages([
@@ -313,6 +315,7 @@ class AppointmentController extends Controller
     public function allAppointments(Request $request)
     {
         $query = \App\Models\Appointments::with(['service', 'user'])
+            ->when(! $request->user()->hasAllAppointmentsScope(), fn ($query) => $query->where('user_id', $request->user()->id))
             ->orderByDesc('appointment_start');
 
         // Фильтры
@@ -351,7 +354,10 @@ class AppointmentController extends Controller
 
         $appointments = $query->paginate(100)->withQueryString();
 
-        $masters = \App\Models\User::whereIn('role_id', [1, 2])->orderBy('name')->get();
+        $masters = \App\Models\User::query()
+            ->whereHas('role', fn (Builder $query) => $query->where('slug', 'master')->orWhere('name', 'Master'))
+            ->when(! $request->user()->hasAllAppointmentsScope(), fn (Builder $query) => $query->whereKey($request->user()->id))
+            ->orderBy('name')->get();
         $services = \App\Models\Services::where('is_deleted', 0)->orderBy('name')->get();
 
         return view('admin.appointments.index', [
@@ -368,6 +374,7 @@ class AppointmentController extends Controller
         $locale = app()->getLocale();
         $services = Services::query()
             ->with(['translations', 'users' => fn ($query) => $query->orderBy('name')])
+            ->when(! $request->user()->hasAllAppointmentsScope(), fn (Builder $query) => $query->whereHas('users', fn (Builder $users) => $users->whereKey($request->user()->id)))
             ->where('status', true)
             ->where('is_deleted', false)
             ->orderBy('name')
@@ -382,7 +389,9 @@ class AppointmentController extends Controller
                     'image_url' => $service->image_url,
                     'price' => $service->effectivePriceForDate($date),
                     'duration_minutes' => app(\App\Services\Booking\BookingCalendarService::class)->serviceDuration($service->id, $date),
-                    'users' => $service->users->map(fn ($user) => [
+                    'users' => $service->users
+                        ->when(! request()->user()->hasAllAppointmentsScope(), fn ($users) => $users->where('id', request()->user()->id))
+                        ->map(fn ($user) => [
                         'id' => $user->id,
                         'name' => $user->name,
                         'profile_photo_url' => $user->profile_photo_url,
@@ -394,6 +403,7 @@ class AppointmentController extends Controller
             'services' => $services,
             'selectedDate' => $date,
             'currentUserId' => $request->user()->id,
+            'canChooseMaster' => $request->user()->hasAllAppointmentsScope(),
         ]);
     }
 
@@ -417,7 +427,7 @@ class AppointmentController extends Controller
         $viewer = $request->user();
 
         $customers = Customer::query()
-            ->when($viewer->role_id !== 1, fn (Builder $query) => $query->whereHas(
+            ->when(! $viewer->hasAllAppointmentsScope(), fn (Builder $query) => $query->whereHas(
                 'appointments',
                 fn (Builder $appointments) => $appointments->where('user_id', $viewer->id),
             ))

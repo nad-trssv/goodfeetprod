@@ -15,7 +15,21 @@ class AppointmentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        $user = $this->user();
+        if (! $user) {
+            return false;
+        }
+
+        if ($this->isMethod('post')) {
+            return $user->hasPermission('appointments.create')
+                && ($user->hasAllAppointmentsScope() || $this->integer('user_id') === (int) $user->id);
+        }
+
+        $appointment = Appointments::find($this->integer('id'));
+
+        return $appointment
+            && $user->can('update', $appointment)
+            && ($user->hasAllAppointmentsScope() || $this->integer('user_id') === (int) $user->id);
     }
 
     /**
@@ -62,7 +76,12 @@ class AppointmentRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $validator) {
-            if (! $this->filled('customer_id') || (int) $this->user()?->role_id === 1) {
+            $master = \App\Models\User::find($this->integer('user_id'));
+            if (! $master || ! $master->isServiceProvider() || ! $master->services()->whereKey($this->integer('service_id'))->exists()) {
+                $validator->errors()->add('user_id', __('admin_appointment_create.errors.master'));
+            }
+
+            if (! $this->filled('customer_id') || $this->user()?->hasAllAppointmentsScope()) {
                 return;
             }
 

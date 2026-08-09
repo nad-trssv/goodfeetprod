@@ -13,7 +13,9 @@ class ServiceRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::check();
+        $user = Auth::user();
+
+        return $user?->hasPermission($this->isMethod('post') ? 'services.create' : 'services.update') === true;
     }
 
     /**
@@ -28,9 +30,22 @@ class ServiceRequest extends FormRequest
             'price' => ['required', 'numeric', 'min:0', 'max:999999.99'],
             'duration_minutes' => ['required', 'integer', 'min:5', 'max:1440'],
             'masters' => 'required|array',
-            'masters.*' => 'integer|exists:users,id',
+            'masters.*' => ['integer', 'exists:users,id'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
         ];
+    }
+
+    public function withValidator(\Illuminate\Validation\Validator $validator): void
+    {
+        $validator->after(function (\Illuminate\Validation\Validator $validator) {
+            foreach ((array) $this->input('masters', []) as $masterId) {
+                $master = \App\Models\User::find($masterId);
+                if (! $master || ! $master->isServiceProvider()) {
+                    $validator->errors()->add('masters', __('Выбранный мастер не существует.'));
+                    break;
+                }
+            }
+        });
     }
 
     public function messages()

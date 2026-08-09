@@ -21,22 +21,24 @@
             <label class="mb-0 theme-control-toggle-label theme-control-toggle-dark" for="themeControlToggle" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Switch theme" style="height:32px;width:32px;"><span class="icon" data-feather="sun"></span></label>
           </div>
         </li>
+        @can('notifications.view')
         <li class="nav-item dropdown">
           <a class="nav-link px-2 position-relative d-flex align-items-center justify-content-center" id="navbarNotifications" href="#" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-label="{{ __('admin_notifications.title') }}" style="width:2.25rem;height:2.25rem">
             <span data-feather="bell"></span>
             <span id="header-notification-count" class="position-absolute badge rounded-pill bg-danger p-0 d-flex align-items-center justify-content-center {{ $unreadNotificationCount > 0 ? '' : 'd-none' }}" style="top:-.15rem;right:-.05rem;min-width:1rem;height:1rem;font-size:.62rem">{{ $unreadNotificationCount > 99 ? '99+' : $unreadNotificationCount }}<span class="visually-hidden">{{ __('admin_notifications.new') }}</span></span>
           </a>
           <div class="dropdown-menu dropdown-menu-end navbar-dropdown-caret shadow border p-0" aria-labelledby="navbarNotifications" style="width:min(24rem,calc(100vw - 1rem))">
-            <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom"><h6 class="mb-0">{{ __('admin_notifications.title') }}</h6><form id="header-notifications-read-all" class="{{ $unreadNotificationCount ? '' : 'd-none' }}" method="POST" action="{{ route('notifications.read-all') }}">@csrf<button class="btn btn-link btn-sm p-0" type="submit">{{ __('admin_notifications.mark_all_read') }}</button></form></div>
+            <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom"><h6 class="mb-0">{{ __('admin_notifications.title') }}</h6>@can('notifications.update')<form id="header-notifications-read-all" class="{{ $unreadNotificationCount ? '' : 'd-none' }}" method="POST" action="{{ route('notifications.read-all') }}">@csrf<button class="btn btn-link btn-sm p-0" type="submit">{{ __('admin_notifications.mark_all_read') }}</button></form>@endcan</div>
             <div id="header-notification-items" class="overflow-auto" style="max-height:24rem">
               @forelse($headerNotifications as $item)
                 @php($data = $item->data)
-                <form method="POST" action="{{ route('notifications.read', $item->id) }}">@csrf<button class="dropdown-item text-wrap border-bottom py-3" type="submit"><span class="d-block fw-semibold">{{ __('admin_notifications.events.'.($data['event'] ?? 'booking_created')) }}</span><small class="d-block text-body-secondary">{{ $data['client_name'] ?? '' }} · {{ $data['service_name'] ?? '' }}</small><small class="text-body-tertiary">{{ $item->created_at->diffForHumans() }}</small></button></form>
+                @can('notifications.update')<form method="POST" action="{{ route('notifications.read', $item->id) }}">@csrf<button class="dropdown-item text-wrap border-bottom py-3" type="submit"><span class="d-block fw-semibold">{{ __('admin_notifications.events.'.($data['event'] ?? 'booking_created')) }}</span><small class="d-block text-body-secondary">{{ $data['client_name'] ?? '' }} · {{ $data['service_name'] ?? '' }}</small><small class="text-body-tertiary">{{ $item->created_at->diffForHumans() }}</small></button></form>@else<div class="dropdown-item text-wrap border-bottom py-3"><span class="d-block fw-semibold">{{ __('admin_notifications.events.'.($data['event'] ?? 'booking_created')) }}</span><small class="d-block text-body-secondary">{{ $data['client_name'] ?? '' }} · {{ $data['service_name'] ?? '' }}</small></div>@endcan
               @empty<div class="p-4 text-center text-body-secondary">{{ __('admin_notifications.empty') }}</div>@endforelse
             </div>
             <a class="d-block text-center fw-semibold p-2" href="{{ route('notifications.index') }}">{{ __('admin_notifications.view_all') }}</a>
           </div>
         </li>
+        @endcan
         <li class="nav-item dropdown">
           <a class="nav-link lh-1 pe-0" id="navbarDropdownUser" href="#!" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-haspopup="true" aria-expanded="false">
             <x-ui.avatar :user="Auth::user()" :size="40" eager />
@@ -66,6 +68,7 @@
       </ul>
     </div>
   </nav>
+@can('notifications.view')
 @push('scripts')
 <script>
 (() => {
@@ -105,3 +108,4 @@
 })();
 </script>
 @endpush
+@endcan

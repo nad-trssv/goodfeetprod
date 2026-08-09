@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Models\Appointments;
+use App\Policies\AppointmentPolicy;
 use App\Policies\AdminPolicy;
 use App\Policies\SuperAdminPolicy;
 use Illuminate\Support\ServiceProvider;
@@ -25,5 +27,10 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::define('is-admin', [AdminPolicy::class, 'view']);
         Gate::define('is-superadmin', [SuperAdminPolicy::class, 'view']);
+        Gate::policy(Appointments::class, AppointmentPolicy::class);
+
+        foreach (array_keys(config('permissions')) as $permission) {
+            Gate::define($permission, fn (User $user) => $user->hasPermission($permission));
+        }
     }
 }

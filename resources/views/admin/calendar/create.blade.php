@@ -97,6 +97,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const services = @json($services);
   const currentUserId = @json((int)$currentUserId);
+  const canChooseMaster = @json((bool)$canChooseMaster);
   const locale = @json(app()->getLocale());
   const csrf = document.querySelector('meta[name="csrf-token"]').content;
   const urls = { availability: @json(route('calendar.availability')), customers: @json(route('calendar.customers.search')), store: @json(route('calendar.store')) };
@@ -125,14 +126,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function populateMasters() {
     const service = serviceById(el('serviceSelect').value);
-    el('masterSelect').innerHTML = `<option value="all">${escapeHtml(labels.anyMaster)}</option>`;
+    el('masterSelect').innerHTML = canChooseMaster ? `<option value="all">${escapeHtml(labels.anyMaster)}</option>` : '';
     el('masterSelect').disabled = !service;
     if (!service) { el('servicePreview').classList.add('d-none'); clearSelectedSlot(); return; }
     service.users.forEach(user => {
       const option = new Option(user.name + (Number(user.id) === currentUserId ? ` (${labels.currentMaster})` : ''), user.id);
       el('masterSelect').add(option);
     });
-    el('masterSelect').value = service.users.some(user => Number(user.id) === currentUserId) ? String(currentUserId) : 'all';
+    el('masterSelect').value = service.users.some(user => Number(user.id) === currentUserId) ? String(currentUserId) : (canChooseMaster ? 'all' : '');
     el('serviceImage').src = service.image_url;
     el('serviceImage').alt = service.name;
     el('serviceName').textContent = service.name;

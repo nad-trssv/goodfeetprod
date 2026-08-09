@@ -15,7 +15,7 @@ class TodayAppointments
 
         return Appointments::query()
             ->with(['service', 'user', 'room'])
-            ->when($user->role_id !== 1, fn ($query) => $query->where('user_id', $user->id))
+            ->when(! $user->hasAllAppointmentsScope(), fn ($query) => $query->where('user_id', $user->id))
             ->whereDate('appointment_start', $day->toDateString())
             ->orderBy('appointment_start')
             ->get();

@@ -56,6 +56,9 @@
 
 
   <body>
+    @if(session('authorization_error'))
+      <script>window.addEventListener('DOMContentLoaded', () => window.alert(@js(session('authorization_error'))));</script>
+    @endif
 
     <!-- ===============================================-->
     <!--    Main Content-->
@@ -102,6 +105,25 @@
     <script src="{{ asset('assets/js/ecommerce-dashboard.js') }}"></script>
     <script src="{{ asset('public/vendors/flatpickr/flatpickr.min.js') }}"></script>
     @stack('scripts')
+    <script>
+      (() => {
+        const nativeFetch = window.fetch.bind(window);
+        window.fetch = async (...argumentsList) => {
+          const response = await nativeFetch(...argumentsList);
+          if (response.status === 403) {
+            let message = @js(__('admin_roles.access_denied'));
+            try { message = (await response.clone().json()).message || message; } catch (_) {}
+            window.alert(message);
+          }
+          return response;
+        };
+        if (window.jQuery) {
+          window.jQuery(document).ajaxError((_event, xhr) => {
+            if (xhr.status === 403) window.alert(xhr.responseJSON?.message || @js(__('admin_roles.access_denied')));
+          });
+        }
+      })();
+    </script>
   </body>
 
 </html>

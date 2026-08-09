@@ -209,7 +209,7 @@
                                     </td>
                                     <td>{{ $day->repeat ? '✅' : '❌' }}</td>
                                     <td class="text-end">
-                                        @if ($day->user_id || auth()->user()->role_id == 1)
+                                        @if ($day->user_id || auth()->user()->hasAllAppointmentsScope())
                                             <button class="btn btn-sm btn-outline-primary me-1" type="button"
                                                 data-bs-toggle="modal" data-bs-target="#editModal"
                                                 data-id="{{ $day->id }}" data-name="{{ $day->name }}"

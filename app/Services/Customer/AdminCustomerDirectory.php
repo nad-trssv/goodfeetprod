@@ -12,7 +12,7 @@ class AdminCustomerDirectory
 {
     public function paginate(User $viewer, array $filters): array
     {
-        $masterId = $viewer->role_id === 1
+        $masterId = $viewer->hasAllAppointmentsScope()
             ? ($filters['master_id'] ?? null)
             : $viewer->id;
         $search = $filters['search'] ?? null;
@@ -57,8 +57,8 @@ class AdminCustomerDirectory
         $customers = $query->paginate(25)->withQueryString();
         $this->attachMasterBreakdown($customers, $masterId);
 
-        $masters = $viewer->role_id === 1
-            ? User::query()->whereIn('role_id', [1, 2])
+        $masters = $viewer->hasAllAppointmentsScope()
+            ? User::query()->whereHas('role', fn (Builder $query) => $query->where('is_service_provider', true)->orWhereIn('id', [1, 2]))
                 ->whereHas('appointments', fn (Builder $query) => $query->whereNotNull('customer_id'))
                 ->orderBy('name')->get(['id', 'name', 'profile_photo_path'])
             : collect([$viewer]);

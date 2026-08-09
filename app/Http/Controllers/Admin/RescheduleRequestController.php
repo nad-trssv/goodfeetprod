@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 class RescheduleRequestController extends Controller
 {
  public function index() {
-    $visible = fn ($query) => Auth::user()->role_id !== 1 ? $query->where('user_id', Auth::id()) : $query;
+    $visible = fn ($query) => ! Auth::user()->hasAllAppointmentsScope() ? $query->where('user_id', Auth::id()) : $query;
     $requests = $visible(AppointmentRescheduleRequest::with(['appointment','customer','service','user'])->where('status','pending'))->orderBy('requested_start')->paginate(20, ['*'], 'pending_page');
     $history = $visible(AppointmentRescheduleRequest::with(['appointment','customer','service','user','reviewer']))->latest('created_at')->paginate(20, ['*'], 'history_page');
     return view('admin.reschedule.index', compact('requests', 'history'));

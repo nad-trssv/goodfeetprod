@@ -92,6 +92,50 @@ class User extends Authenticatable
         return $this->belongsTo(Roles::class);
     }
 
+    public function hasPermission(string $permission): bool
+    {
+        $this->loadMissing('role.permissions');
+
+        if (! $this->role) {
+            return false;
+        }
+
+        $slug = $this->role->resolvedSlug();
+        if ($slug === 'super-admin') {
+            return true;
+        }
+
+        if ($this->role->permissions->contains('key', $permission)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function isStaff(): bool
+    {
+        $this->loadMissing('role.permissions');
+
+        return $this->role
+            && $this->role->resolvedSlug() !== 'customer'
+            && ($this->role->resolvedSlug() === 'super-admin' || $this->role->permissions->isNotEmpty() || $this->role->resolvedSlug() === 'master');
+    }
+
+    public function hasAllAppointmentsScope(): bool
+    {
+        $this->loadMissing('role');
+
+        return $this->role?->resolvedSlug() === 'super-admin'
+            || $this->role?->appointment_scope === 'all';
+    }
+
+    public function isServiceProvider(): bool
+    {
+        $this->loadMissing('role');
+
+        return (bool) $this->role?->is_service_provider;
+    }
+
     public function services()
     {
         return $this->belongsToMany(

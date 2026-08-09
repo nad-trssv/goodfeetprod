@@ -83,7 +83,7 @@ class AdminCustomerProfile
 
     public function canView(Customer $customer, User $viewer): bool
     {
-        return $viewer->role_id === 1
+        return $viewer->hasAllAppointmentsScope()
             || $customer->appointments()->where('user_id', $viewer->id)->exists();
     }
 
@@ -91,7 +91,7 @@ class AdminCustomerProfile
     {
         return Appointments::query()
             ->where('customer_id', $customer->id)
-            ->when($viewer->role_id !== 1, fn (Builder $query) => $query->where('user_id', $viewer->id));
+            ->when(! $viewer->hasAllAppointmentsScope(), fn (Builder $query) => $query->where('user_id', $viewer->id));
     }
 
     private function possibleAppointments(Customer $customer, User $viewer): array
@@ -116,7 +116,7 @@ class AdminCustomerProfile
                 $contact->whereRaw('LOWER(TRIM(client_email)) = ?', [$email])
                     ->orWhereRaw($phoneExpression.' = ?', [$phone]);
             })
-            ->when($viewer->role_id !== 1, fn (Builder $query) => $query->where('user_id', $viewer->id));
+            ->when(! $viewer->hasAllAppointmentsScope(), fn (Builder $query) => $query->where('user_id', $viewer->id));
 
         $count = (clone $query)->count();
         $appointments = $query

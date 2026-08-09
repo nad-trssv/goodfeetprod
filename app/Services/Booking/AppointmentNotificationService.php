@@ -12,7 +12,9 @@ class AppointmentNotificationService
 {
     public function send(Appointments $appointment, string $event, ?AppointmentRescheduleRequest $request = null): void
     {
-        $recipientIds = User::query()->where('role_id', 1)->pluck('id')
+        $recipientIds = User::query()->with('role.permissions')->get()
+            ->filter(fn (User $user) => $user->hasAllAppointmentsScope() && $user->hasPermission('notifications.view'))
+            ->pluck('id')
             ->push($appointment->user_id)
             ->merge(
                 User::whereKey($appointment->user_id)

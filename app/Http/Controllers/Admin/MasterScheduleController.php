@@ -337,7 +337,7 @@ class MasterScheduleController extends Controller
     public function updateTimeOff(Request $request, string $id)
     {
         $user = Auth::user();
-        if ($user->role_id == 1) {
+        if ($user->hasAllAppointmentsScope()) {
             $redDay = RedDay::where('id', $id)->firstOrFail();
         } else {
             $redDay = RedDay::where('id', $id)->where('user_id', $user->id)->firstOrFail();
@@ -390,7 +390,7 @@ class MasterScheduleController extends Controller
     public function destroyTimeOff(string $id)
     {
         $user = Auth::user();
-        if ($user->role_id == 1) {
+        if ($user->hasAllAppointmentsScope()) {
             $redDay = RedDay::where('id', $id)->firstOrFail();
         } else {
             $redDay = RedDay::where('id', $id)->where('user_id', $user->id)->firstOrFail();
@@ -463,7 +463,7 @@ class MasterScheduleController extends Controller
         $dayOfWeek = strtolower($today->format('l'));
 
         $masters = User::with(['schedule', 'services'])
-            ->whereIn('role_id', [1, 2])
+            ->whereHas('role', fn ($query) => $query->where('is_service_provider', true)->orWhereIn('id', [1, 2]))
             ->orderBy('name')
             ->get()
             ->map(function ($master) use ($today, $todayStr, $dayOfWeek) {

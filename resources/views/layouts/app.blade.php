@@ -69,7 +69,7 @@
           <button class="navbar-toggler fs-8 ps-1 ps-sm-3 pe-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mt-3 mt-lg-0 d-flex justify-content-end w-100">
-              @if(Auth::guard('web')->check() && in_array(Auth::guard('web')->user()->role_id, [1, 2], true))
+              @if(Auth::guard('web')->check() && Auth::guard('web')->user()->isStaff())
                 <li class="nav-item border-bottom border-translucent border-bottom-lg-0 text-end"><a class="nav_link" href="{{ route('dashboard') }}">{{ __('msg.menu_adminpanel') }}</a></li>
               @endif
               <li class="nav-item border-bottom border-translucent border-bottom-lg-0 text-end"><a class="nav_link" href="{{ route('clientservice') }}">{{ __('msg.services') }}</a></li>

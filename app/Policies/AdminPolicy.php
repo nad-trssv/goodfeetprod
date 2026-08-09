@@ -13,11 +13,7 @@ class AdminPolicy
 
     public function view(User $user): bool
     {
-        return in_array(
-            (int) $user->role_id,
-            [1, 2],
-            true
-        );
+        return $user->isStaff();
     }
 
     public function create(User $user): bool

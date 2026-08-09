@@ -8,7 +8,7 @@ class AdminCustomerSearchRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return in_array((int) $this->user()?->role_id, [1, 2], true);
+        return $this->user()?->hasPermission('customers.view') === true;
     }
 
     protected function prepareForValidation(): void

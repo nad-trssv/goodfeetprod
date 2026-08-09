@@ -43,7 +43,7 @@
             </a>
             <div class="min-w-0 flex-grow-1">
               <div class="d-flex align-items-start justify-content-between gap-2">
-                <div class="min-w-0"><a class="text-body-emphasis text-decoration-none" href="{{ route('member.edit',$user['id']) }}"><h5 class="member-card__name mb-1">{{ $user['name'] }} @if($user['vacation'])🌴@endif</h5></a><div class="text-body-tertiary fs-10">{{ $user['role_id'] === 1 ? 'Администратор' : 'Мастер' }} · {{ $user['username'] }}</div></div>
+                <div class="min-w-0"><a class="text-body-emphasis text-decoration-none" href="{{ route('member.edit',$user['id']) }}"><h5 class="member-card__name mb-1">{{ $user['name'] }} @if($user['vacation'])🌴@endif</h5></a><div class="text-body-tertiary fs-10">{{ $user['role_name'] ?: '—' }} · {{ $user['username'] }}</div></div>
                 <div class="dropdown"><button class="btn btn-sm btn-subtle-secondary dropdown-toggle dropdown-caret-none" data-bs-toggle="dropdown" aria-label="Действия"><span class="fas fa-ellipsis-h"></span></button><div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="{{ route('member.edit',$user['id']) }}">Карточка сотрудника</a><a class="dropdown-item" href="{{ route('master.calendar',$user['id']) }}">Календарь</a><a class="dropdown-item" href="{{ route('master.calendar.list',$user['id']) }}">Записи</a><div class="dropdown-divider"></div><button class="dropdown-item text-danger member-destroy" type="button" data-id="{{ $user['id'] }}" data-item="{{ $user['name'] }}" data-bs-toggle="modal" data-bs-target="#deleteModal">Удалить</button></div></div>
               </div>
               <div class="mt-2"><span class="member-state member-state--{{ $state['code'] }}">{{ $state['label'] }}</span></div>
@@ -65,7 +65,7 @@
             <div title="Отменено"><strong>{{ $user['today_stats']['cancelled'] }}</strong><small>отменено</small></div>
           </div>
 
-          @if($user['action_required'] && (auth()->user()->role_id === 1 || auth()->id() === $user['id']))
+          @if($user['action_required'] && (auth()->user()->hasAllAppointmentsScope() || auth()->id() === $user['id']))
             <div class="appointment-panel appointment-panel--action mb-3" data-status-panel>
               <small>Нужно указать результат · {{ $user['action_required']['start'] }}</small><strong>{{ $user['action_required']['service'] }}</strong><span class="fs-10 text-body-secondary mb-2">{{ $user['action_required']['client'] }}</span>
               <div class="d-flex gap-2"><button class="btn btn-sm btn-success flex-grow-1 appointment-status" data-id="{{ $user['action_required']['id'] }}" data-status="completed">Завершено</button><button class="btn btn-sm btn-outline-danger flex-grow-1 appointment-status" data-id="{{ $user['action_required']['id'] }}" data-status="no_show">Не пришёл</button></div>

@@ -4,6 +4,7 @@ namespace App\Http\Requests\Member;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class StoreRequest extends FormRequest
 {
@@ -17,7 +18,7 @@ class StoreRequest extends FormRequest
         $rules = [
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:15|unique:users,phone',
-            'role_id' => 'required|exists:roles,id',
+            'role_id' => ['required', Rule::exists('roles', 'id')->where(fn ($query) => $query->whereNull('slug')->orWhere('slug', '!=', 'customer'))],
             'username' => [
                 'required',
                 'string',

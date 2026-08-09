@@ -9,7 +9,14 @@ class AdminAppointmentAvailabilityRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return in_array((int) $this->user()?->role_id, [1, 2], true);
+        if (! $this->user()?->hasPermission('appointments.create')) {
+            return false;
+        }
+
+        $requestedMaster = (string) $this->input('user_id');
+
+        return $this->user()->hasAllAppointmentsScope()
+            || $requestedMaster === (string) $this->user()->id;
     }
 
     public function rules(): array
@@ -25,7 +32,8 @@ class AdminAppointmentAvailabilityRequest extends FormRequest
             'user_id' => [
                 'required',
                 function (string $attribute, mixed $value, \Closure $fail) {
-                    if ($value !== 'all' && (! ctype_digit((string) $value) || ! \App\Models\User::whereKey($value)->exists())) {
+                    $master = ctype_digit((string) $value) ? \App\Models\User::find($value) : null;
+                    if ($value !== 'all' && (! $master || ! $master->isServiceProvider())) {
                         $fail(__('admin_appointment_create.errors.master'));
                     }
                 },

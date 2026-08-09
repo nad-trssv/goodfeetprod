@@ -17,8 +17,11 @@ class AdminAppointmentAvailability
     public function get(Services $service, string $date, int|string $masterPreference): array
     {
         $masters = $service->users()
+            ->with('role')
             ->orderBy('name')
-            ->get(['users.id', 'users.name', 'users.profile_photo_path']);
+            ->get(['users.id', 'users.name', 'users.profile_photo_path', 'users.role_id'])
+            ->filter->isServiceProvider()
+            ->values();
 
         if ($masterPreference !== 'all') {
             $masters = $masters->where('id', (int) $masterPreference)->values();

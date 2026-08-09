@@ -30,13 +30,17 @@ class MemberService
             $members = User::query()
                 ->with([
                     'schedule',
+                    'role',
                     'vacationClosures',
                     'currentAppointment.service:id,name',
                     'nextAppointment.service:id,name',
                     'actionRequiredAppointment.service:id,name',
                 ])
                 ->withCount('services')
-                ->whereIn('role_id', [1, 2])
+                ->whereHas('role', fn ($query) => $query->where(function ($roles) {
+                    $roles->whereNull('slug')->whereIn('id', [1, 2])
+                        ->orWhere('slug', '!=', 'customer');
+                }))
                 ->orderBy('name')
                 ->get();
 
@@ -141,7 +145,7 @@ class MemberService
     {
         try {
             return [
-                'roles' => Roles::all(),
+                'roles' => Roles::query()->where(fn ($query) => $query->whereNull('slug')->orWhere('slug', '!=', 'customer'))->orderBy('name')->get(),
                 'services' => Services::where('status', 1)->orderBy('name')->get(),
             ];
         } catch (Exception $exception) {

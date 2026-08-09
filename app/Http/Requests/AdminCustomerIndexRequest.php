@@ -9,7 +9,7 @@ class AdminCustomerIndexRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return $this->user()?->hasPermission('customers.view') === true;
     }
 
     protected function prepareForValidation(): void

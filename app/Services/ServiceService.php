@@ -23,7 +23,10 @@ class ServiceService
     }
     
     function getMasters() {
-        return User::where('role_id', '1')->orWhere('role_id', '2')->get();
+        return User::query()
+            ->whereHas('role', fn ($query) => $query->where('is_service_provider', true)->orWhereIn('id', [1, 2]))
+            ->orderBy('name')
+            ->get();
     }
     /**
      * Create a new class instance.

@@ -43,7 +43,7 @@
                             <label class="form-label">Мастер</label>
                             <select class="form-select form-select-sm" name="user_id">
                                 <option value="">Общий (для всех)</option>
-                                @foreach (\App\Models\User::whereIn('role_id', [1, 2])->orderBy('name')->get() as $master)
+                                @foreach (\App\Models\User::whereHas('role', fn ($query) => $query->where('is_service_provider', true)->orWhereIn('id', [1, 2]))->orderBy('name')->get() as $master)
                                     <option value="{{ $master->id }}">{{ $master->name }}</option>
                                 @endforeach
                             </select>
@@ -115,7 +115,7 @@
                         <select class="form-select form-select-sm" name="master">
                             <option value="">Все мастера</option>
                             <option value="common" {{ request('master') == 'common' ? 'selected' : '' }}>Общие</option>
-                            @foreach (\App\Models\User::whereIn('role_id', [1, 2])->orderBy('name')->get() as $master)
+                            @foreach (\App\Models\User::whereHas('role', fn ($query) => $query->where('is_service_provider', true)->orWhereIn('id', [1, 2]))->orderBy('name')->get() as $master)
                                 <option value="{{ $master->id }}"
                                     {{ request('master') == $master->id ? 'selected' : '' }}>{{ $master->name }}
                                 </option>
