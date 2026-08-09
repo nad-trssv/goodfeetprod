@@ -61,6 +61,12 @@
                     <p class="navbar-vertical-label">Управление</p>
                     <hr class="navbar-vertical-line" />
 
+                    <div class="nav-item-wrapper">
+                        <a class="nav-link {{ request()->routeIs('admin.customers.*') ? 'active' : '' }} label-1" href="{{ route('admin.customers.index') }}" role="button">
+                            <div class="d-flex align-items-center"><span class="nav-link-icon"><span data-feather="user-check"></span></span><span class="nav-link-text-wrapper"><span class="nav-link-text">{{ __('admin_customers.title') }}</span></span></div>
+                        </a>
+                    </div>
+
                     {{-- Услуги --}}
                     <div class="nav-item-wrapper">
                         <a class="nav-link dropdown-indicator label-1" href="#nv-services" role="button"

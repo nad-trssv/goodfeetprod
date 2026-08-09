@@ -11,7 +11,7 @@ class Customer extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $fillable = [
-        'first_name', 'last_name', 'email', 'phone', 'password', 'locale',
+        'first_name', 'last_name', 'email', 'phone', 'password', 'account_registered_at', 'locale',
         'email_verified_at', 'phone_verified_at', 'marketing_consent',
     ];
 
@@ -21,6 +21,7 @@ class Customer extends Authenticatable
     {
         return [
             'password' => 'hashed',
+            'account_registered_at' => 'datetime',
             'email_verified_at' => 'datetime',
             'phone_verified_at' => 'datetime',
             'marketing_consent' => 'boolean',

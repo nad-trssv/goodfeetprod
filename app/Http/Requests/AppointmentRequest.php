@@ -5,6 +5,8 @@ namespace App\Http\Requests;
 use App\Models\Appointments;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
+use App\Models\Customer;
 
 class AppointmentRequest extends FormRequest
 {
@@ -28,12 +30,14 @@ class AppointmentRequest extends FormRequest
             'id' => ['nullable', 'integer', Rule::exists('appointments', 'id')],
             'title' => ['nullable', 'string', 'max:190'],
             'client_name' => ['required', 'string', 'max:190'],
-            'client_lastname' => ['required', 'string', 'max:190'],
-            'client_phone' => ['required', 'string', 'min:8'],
-            'description' => ['nullable', 'string', 'min:8'],
-            'service_id' => ['required', 'integer', Rule::exists('services', 'id')],
+            'client_lastname' => ['nullable', 'string', 'max:190'],
+            'client_phone' => ['required', 'string', 'min:8', 'max:32'],
+            'client_email' => ['nullable', 'email', 'max:190'],
+            'customer_id' => ['nullable', 'integer', Rule::exists('customers', 'id')],
+            'description' => ['nullable', 'string', 'max:2000'],
+            'service_id' => ['required', 'integer', Rule::exists('services', 'id')->where(fn ($query) => $query->where('status', true)->where('is_deleted', false))],
             'user_id' => ['required', 'integer', Rule::exists('users', 'id')],
-            'price' => ['required', 'numeric', 'min:0'],
+            'price' => ['nullable', 'numeric', 'min:0'],
             'appointment_start' => ['required', 'date'],
             'appointment_end' => ['required', 'date', 'after:appointment_start'],
         ];
@@ -53,6 +57,23 @@ class AppointmentRequest extends FormRequest
             'service_id.required' => 'Пожалуйста, укажите услугу.',
             'service_id.exists' => 'Выберите услугу из списка.',
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            if (! $this->filled('customer_id') || (int) $this->user()?->role_id === 1) {
+                return;
+            }
+
+            $canUseCustomer = Customer::whereKey($this->integer('customer_id'))
+                ->whereHas('appointments', fn ($query) => $query->where('user_id', $this->user()->id))
+                ->exists();
+
+            if (! $canUseCustomer) {
+                $validator->errors()->add('customer_id', __('admin_appointment_create.errors.customer_access'));
+            }
+        });
     }
 
 }

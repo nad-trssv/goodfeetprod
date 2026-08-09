@@ -79,6 +79,7 @@ class AppointmentService
                     'appointment_time_from' => $appint->service->duration_minutes_min,
                     'appointment_time_to' => $appint->service->duration_minutes,
                     'user_id' => $appint->user_id,
+                    'customer_id' => $appint->customer_id,
                     'client_phone' => $appint->client_phone,
                     'client_name' => $appint->client_name,
                     'client_lastname' => $appint->client_lastname,

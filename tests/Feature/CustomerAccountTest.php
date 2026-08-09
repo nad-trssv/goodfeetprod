@@ -36,6 +36,7 @@ class CustomerAccountTest extends TestCase
         $this->assertSame('anna@example.com', $customer->email);
         $this->assertSame('+37255551111', $customer->phone);
         $this->assertTrue(Hash::check('secret-pass', $customer->password));
+        $this->assertNotNull($customer->account_registered_at);
 
         $this->post(route('customer.logout'))->assertRedirect(route('home'));
         $this->post(route('customer.login.store'), ['identity' => 'ANNA@example.com', 'password' => 'secret-pass'])

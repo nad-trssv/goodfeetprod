@@ -82,7 +82,10 @@ Route::middleware([
 ])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::resource('calendar', AppointmentController::class);
+    Route::get('calendar/create', [AppointmentController::class, 'createAppointment'])->name('calendar.create');
+    Route::post('calendar/availability', [AppointmentController::class, 'availability'])->middleware('throttle:60,1')->name('calendar.availability');
+    Route::get('calendar/customers/search', [AppointmentController::class, 'searchCustomers'])->middleware('throttle:60,1')->name('calendar.customers.search');
+    Route::resource('calendar', AppointmentController::class)->except('create');
     Route::get('calendarList', [AppointmentController::class, 'calendarList'])->name('calendarList');
     Route::get('appointments/today', [AppointmentController::class, 'today'])->name('appointments.today');
     Route::get('reschedule-requests', [RescheduleRequestController::class, 'index'])->name('reschedule.index');
@@ -92,7 +95,6 @@ Route::middleware([
     Route::post('notifications/{notification}/read', [App\Http\Controllers\Admin\NotificationController::class, 'read'])->name('notifications.read');
     Route::post('reschedule-requests/{request:public_uuid}/approve', [RescheduleRequestController::class, 'approve'])->name('reschedule.approve');
     Route::post('reschedule-requests/{request:public_uuid}/reject', [RescheduleRequestController::class, 'reject'])->name('reschedule.reject');
-    Route::get('calendar/create', [AppointmentController::class, 'createAppointment'])->name('calendar.create');
     Route::get('calendar/details/{appointment}', [AppointmentController::class, 'show'])->name('calendar.show');
     Route::patch('appointments/{appointment}/status', [AppointmentController::class, 'updateStatus'])->name('appointments.status.update');
     Route::post('appointments/{appointment}/message', [AppointmentController::class, 'sendCustomerMessage'])->middleware('throttle:10,1')->name('appointments.message.store');
@@ -108,6 +110,8 @@ Route::middleware([
     Route::delete('service/rules/{rule}', [ServiceRuleController::class, 'destroy'])->name('service.rules.destroy');
 
     Route::get('member', [MemberController::class, 'index'])->name('member.index');
+    Route::get('admin/customers', [App\Http\Controllers\Admin\CustomerController::class, 'index'])->name('admin.customers.index');
+    Route::get('admin/customers/{customer}', [App\Http\Controllers\Admin\CustomerController::class, 'show'])->name('admin.customers.show');
 
     Route::resource('profile', ProfileController::class);
     Route::post('profile/update', [ProfileController::class, 'update'])->name('profile.ajax.update');

@@ -68,6 +68,7 @@ class CustomerAuthController extends Controller
             );
             $customer->update([
                 'password' => $data['password'],
+                'account_registered_at' => now(),
             ]);
 
             return $customer;

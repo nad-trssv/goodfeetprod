@@ -44,6 +44,7 @@ class BookingCreator
             $roomId = $this->rooms->assign($request->user_id, $request->choose_date, $slot['start'], $slot['end']);
             abort_if(User::whereKey($request->user_id)->whereHas('rooms')->exists() && $roomId === null, 409, 'No room is available for the selected slot.');
             $customer = Auth::guard('customer')->user();
+            $identityVerified = $customer !== null;
             if ($customer) {
                 if ($customer->email !== $this->customers->normalizeEmail($request->client_email)
                     || $customer->phone !== $this->customers->normalizePhone($request->client_phone)) {
@@ -71,6 +72,7 @@ class BookingCreator
 
             $appointment = Appointments::create([
                 'customer_id' => $customer->id,
+                'customer_identity_verified' => $identityVerified,
                 'status' => 'confirmed',
                 'user_id' => $request->user_id,
                 'room_id' => $roomId,

@@ -48,6 +48,7 @@ class BookingCreatorTest extends TestCase
 
         $this->assertEquals(75.50, $appointment->price);
         $this->assertNotNull($appointment->public_uuid);
+        $this->assertFalse($appointment->customer_identity_verified);
         $this->assertMatchesRegularExpression('/^[0-9a-f-]{36}$/', $appointment->public_uuid);
         $this->assertDatabaseHas('appointment_audits', [
             'appointment_id' => $appointment->id,
@@ -97,6 +98,32 @@ class BookingCreatorTest extends TestCase
 
         $this->expectException(ValidationException::class);
         $creator->create($this->request($user, $service), ['start' => '10:00', 'end' => '11:00'], $service);
+    }
+
+    public function test_booking_from_authenticated_customer_is_marked_as_identity_verified(): void
+    {
+        [$user, $service] = $this->bookingEntities('50.00');
+        $customer = Customer::create([
+            'first_name' => 'Account', 'last_name' => 'Customer',
+            'email' => 'account@example.com', 'phone' => '+37250000010', 'password' => 'secret-pass',
+        ]);
+        $this->actingAs($customer, 'customer');
+        $request = $this->request($user, $service);
+        $request->merge([
+            'client_name' => $customer->first_name,
+            'client_lastname' => $customer->last_name,
+            'client_email' => $customer->email,
+            'client_phone' => $customer->phone,
+        ]);
+
+        $appointment = (new BookingCreator(
+            $this->roomServiceWithoutAssignment(),
+            app(SlotAvailabilityService::class),
+            app(CustomerIdentityService::class),
+        ))->create($request, ['start' => '10:00', 'end' => '11:00'], $service);
+
+        $this->assertTrue($appointment->customer_identity_verified);
+        $this->assertSame($customer->id, $appointment->customer_id);
     }
 
     private function bookingEntities(string $price): array

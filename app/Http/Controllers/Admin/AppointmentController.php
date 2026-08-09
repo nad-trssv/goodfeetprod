@@ -21,6 +21,12 @@ use App\Models\AppointmentAudit;
 use App\Services\Booking\AppointmentAuditService;
 use Illuminate\Support\Facades\Mail;
 use App\Services\Booking\TodayAppointments;
+use App\Http\Requests\AdminAppointmentAvailabilityRequest;
+use App\Http\Requests\AdminCustomerSearchRequest;
+use App\Models\Customer;
+use App\Models\Services;
+use App\Services\Booking\AdminAppointmentAvailability;
+use Illuminate\Database\Eloquent\Builder;
 
 class AppointmentController extends Controller
 {
@@ -48,9 +54,16 @@ class AppointmentController extends Controller
         ]);
     }
 
-    public function calendarList()
+    public function calendarList(Request $request)
     {
         $data = $this->appointmentService->list($this->calendarScope(), null, true);
+        if ($request->integer('customer_id')) {
+            $customerId = $request->integer('customer_id');
+            $data['appointments'] = array_values(array_filter(
+                $data['appointments'],
+                fn (array $appointment) => (int) ($appointment['customer_id'] ?? 0) === $customerId
+            ));
+        }
         return view('admin.calendar.list', [
             'appointments' => $data['appointments'],
             'title' => 'Мои записи',
@@ -131,6 +144,7 @@ class AppointmentController extends Controller
                 'appointment_start' => $event->appointment_start,
                 'appointment_end' => $event->appointment_end,
                 'backgroundColor' => $event->service->eventColor,
+                'redirect_url' => route('calendar.show', $event),
                 'message' => 'Запись добавлена успешно!'
             ], 200);
         } catch (Exception $exception) {
@@ -315,6 +329,10 @@ class AppointmentController extends Controller
             $query->where('user_id', $request->master_id);
         }
 
+        if ($request->integer('customer_id')) {
+            $query->where('customer_id', $request->integer('customer_id'));
+        }
+
         if ($request->service_id) {
             $query->where('service_id', $request->service_id);
         }
@@ -342,12 +360,87 @@ class AppointmentController extends Controller
             'services' => $services,
         ]);
     }
-    public function createAppointment()
+    public function createAppointment(Request $request)
     {
-        $data = $this->appointmentService->list('admin');
+        $date = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $request->query('date'))
+            ? (string) $request->query('date')
+            : today()->toDateString();
+        $locale = app()->getLocale();
+        $services = Services::query()
+            ->with(['translations', 'users' => fn ($query) => $query->orderBy('name')])
+            ->where('status', true)
+            ->where('is_deleted', false)
+            ->orderBy('name')
+            ->get()
+            ->map(function (Services $service) use ($date, $locale) {
+                $translation = $service->translations->firstWhere('locale', $locale)
+                    ?? $service->translations->firstWhere('locale', config('app.fallback_locale'));
+
+                return [
+                    'id' => $service->id,
+                    'name' => $translation?->name ?: $service->name,
+                    'image_url' => $service->image_url,
+                    'price' => $service->effectivePriceForDate($date),
+                    'duration_minutes' => app(\App\Services\Booking\BookingCalendarService::class)->serviceDuration($service->id, $date),
+                    'users' => $service->users->map(fn ($user) => [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'profile_photo_url' => $user->profile_photo_url,
+                    ])->values(),
+                ];
+            })->values();
+
         return view('admin.calendar.create', [
-            'services' => $data['services'],
-            'users' => $data['users'],
+            'services' => $services,
+            'selectedDate' => $date,
+            'currentUserId' => $request->user()->id,
         ]);
+    }
+
+    public function availability(
+        AdminAppointmentAvailabilityRequest $request,
+        AdminAppointmentAvailability $availability,
+    ): JsonResponse {
+        $service = Services::findOrFail($request->integer('service_id'));
+
+        return response()->json($availability->get(
+            $service,
+            $request->validated('date'),
+            $request->validated('user_id'),
+        ));
+    }
+
+    public function searchCustomers(AdminCustomerSearchRequest $request): JsonResponse
+    {
+        $search = $request->validated('query');
+        $like = '%'.addcslashes($search, '%_\\').'%';
+        $viewer = $request->user();
+
+        $customers = Customer::query()
+            ->when($viewer->role_id !== 1, fn (Builder $query) => $query->whereHas(
+                'appointments',
+                fn (Builder $appointments) => $appointments->where('user_id', $viewer->id),
+            ))
+            ->where(function (Builder $query) use ($like) {
+                $query->where('first_name', 'like', $like)
+                    ->orWhere('last_name', 'like', $like)
+                    ->orWhere('email', 'like', $like)
+                    ->orWhere('phone', 'like', $like);
+            })
+            ->withCount('appointments')
+            ->orderByDesc('appointments_count')
+            ->orderBy('first_name')
+            ->limit(8)
+            ->get()
+            ->map(fn (Customer $customer) => [
+                'id' => $customer->id,
+                'name' => $customer->full_name,
+                'email' => $customer->email,
+                'phone' => $customer->phone,
+                'has_account' => filled($customer->getRawOriginal('password')),
+                'appointments_count' => $customer->appointments_count,
+            ]);
+
+        return response()->json(['customers' => $customers]);
     }
 }

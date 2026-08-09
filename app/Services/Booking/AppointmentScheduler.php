@@ -9,6 +9,8 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Customer;
+use App\Services\Customer\CustomerIdentityService;
 use RuntimeException;
 
 class AppointmentScheduler
@@ -18,6 +20,7 @@ class AppointmentScheduler
         private readonly RoomAllocationService $rooms,
         private readonly AppointmentNotificationService $notifications,
         private readonly AppointmentAuditService $audit,
+        private readonly CustomerIdentityService $customers,
     ) {
     }
 
@@ -31,7 +34,19 @@ class AppointmentScheduler
             $this->assertRoomAvailable((int) $request->user_id, $roomId);
             $service = Services::findOrFail($request->service_id);
 
-            $appointment = Appointments::create(array_merge($request->validated(), [
+            $customer = $this->resolveCustomer($request);
+            $payload = $request->validated();
+            $payload['client_lastname'] = (string) ($payload['client_lastname'] ?? '');
+            $payload['customer_identity_verified'] = false;
+            if ($customer) {
+                $payload['customer_id'] = $customer->id;
+                $payload['client_name'] = $customer->first_name;
+                $payload['client_lastname'] = (string) $customer->last_name;
+                $payload['client_email'] = $customer->email;
+                $payload['client_phone'] = $customer->phone;
+            }
+
+            $appointment = Appointments::create(array_merge($payload, [
                 'room_id' => $roomId,
                 'price' => $service->effectivePriceForDate($date),
                 'original_price' => $service->effectivePriceForDate($date),
@@ -101,5 +116,25 @@ class AppointmentScheduler
         if ($roomId === null && User::whereKey($userId)->whereHas('rooms')->exists()) {
             throw new RuntimeException('На это время нет свободного кабинета. Выберите другое время.');
         }
+    }
+
+    private function resolveCustomer(AppointmentRequest $request): ?Customer
+    {
+        if ($request->filled('customer_id')) {
+            return Customer::whereKey($request->integer('customer_id'))->lockForUpdate()->firstOrFail();
+        }
+
+        if ($request->filled('client_email')) {
+            return $this->customers->resolveForBooking(
+                $request->string('client_name')->toString(),
+                $request->input('client_lastname'),
+                $request->string('client_email')->toString(),
+                $request->string('client_phone')->toString(),
+            );
+        }
+
+        $phone = $this->customers->normalizePhone($request->string('client_phone')->toString());
+
+        return Customer::where('phone', $phone)->lockForUpdate()->first();
     }
 }
