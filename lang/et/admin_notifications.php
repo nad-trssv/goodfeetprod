@@ -20,5 +20,6 @@ return [
         'cancelled_by_client' => 'Klient tühistas broneeringu',
         'cancelled_by_business' => 'Ettevõte tühistas broneeringu',
         'reschedule_requested' => 'Uus aja muutmise taotlus',
+        'crm_chat_message' => 'Uus kliendi sõnum vestluses',
     ],
 ];

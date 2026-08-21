@@ -21,7 +21,7 @@
               <span class="min-w-0"><strong class="d-block text-body-emphasis text-truncate">{{ $serviceName }}</strong><small class="text-body-secondary">{{ number_format((float)$item->price, 2, ',', ' ') }} € · {{ $item->status ? __('admin_search.active') : __('admin_search.inactive') }}</small></span>
             </a>
           @elseif($type === 'customers')
-            <a class="d-flex align-items-center gap-3 px-3 py-2 text-decoration-none hover-bg-100" href="{{ route('admin.customers.show', $item) }}">
+            <a class="d-flex align-items-center gap-3 px-3 py-2 text-decoration-none hover-bg-100" href="{{ route(auth()->user()->hasPermission('crm.view') ? 'crm.customers.show' : 'admin.customers.show', $item) }}">
               <span class="rounded-circle bg-body-secondary d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width:{{ $compact ? 34 : 44 }}px;height:{{ $compact ? 34 : 44 }}px"><span data-feather="user"></span></span>
               <span class="min-w-0"><strong class="d-block text-body-emphasis text-truncate">{{ $item->full_name ?: __('admin_search.unnamed_customer') }}</strong><small class="d-block text-body-secondary text-truncate">{{ $item->email ?: $item->phone }} · {{ trans_choice('admin_search.appointments_count', $item->appointments_count, ['count' => $item->appointments_count]) }}</small></span>
             </a>

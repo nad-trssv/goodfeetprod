@@ -78,6 +78,14 @@
           </div>
         </li>
         @endcan
+        @can('crm.chat.view')
+        <li class="nav-item">
+          <a class="nav-link px-2 position-relative d-flex align-items-center justify-content-center" href="{{ route('crm.chat.index') }}" aria-label="{{ __('crm.chat') }}" style="width:2.25rem;height:2.25rem">
+            <span data-feather="message-square"></span>
+            <span id="header-crm-chat-count" class="position-absolute badge rounded-pill bg-danger p-0 d-flex align-items-center justify-content-center {{ ($unreadCrmChatCount ?? 0) > 0 ? '' : 'd-none' }}" style="top:-.15rem;right:-.05rem;min-width:1rem;height:1rem;font-size:.62rem">{{ ($unreadCrmChatCount ?? 0) > 99 ? '99+' : ($unreadCrmChatCount ?? 0) }}</span>
+          </a>
+        </li>
+        @endcan
         <li class="nav-item dropdown">
           <a class="nav-link lh-1 pe-0" id="navbarDropdownUser" href="#!" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-haspopup="true" aria-expanded="false">
             <x-ui.avatar :user="Auth::user()" :size="40" eager />
@@ -185,6 +193,37 @@
   window.setInterval(refreshNotifications, 4000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshNotifications(); });
   window.addEventListener('focus', refreshNotifications);
+})();
+</script>
+@endpush
+@endcan
+@can('crm.chat.view')
+@push('scripts')
+<script>
+(() => {
+  const endpoint = @js(route('crm.chat.status'));
+  let loading = false;
+  const render = (element, count) => {
+    if (!element) return;
+    element.textContent = count > 99 ? '99+' : String(count);
+    element.classList.toggle('d-none', count < 1);
+  };
+  const refresh = async () => {
+    if (loading || document.hidden) return;
+    loading = true;
+    try {
+      const response = await fetch(endpoint, {headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'},credentials:'same-origin',cache:'no-store'});
+      if (!response.ok) return;
+      const data = await response.json();
+      render(document.getElementById('header-crm-chat-count'), data.count);
+      render(document.getElementById('sidebar-crm-chat-count'), data.count);
+    } catch (_) {
+      // Polling resumes automatically after a temporary connection failure.
+    } finally { loading = false; }
+  };
+  window.setInterval(refresh, 4000);
+  window.addEventListener('focus', refresh);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
 })();
 </script>
 @endpush

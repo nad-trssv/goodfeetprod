@@ -12,6 +12,12 @@ return [
 
     'customers.view' => ['group' => 'customers', 'action' => 'view'],
     'customers.update' => ['group' => 'customers', 'action' => 'update'],
+    'crm.view' => ['group' => 'crm', 'action' => 'view'],
+    'crm.update' => ['group' => 'crm', 'action' => 'update'],
+    'crm.documents' => ['group' => 'crm', 'action' => 'documents'],
+    'crm.chat.view' => ['group' => 'crm_chat', 'action' => 'view'],
+    'crm.chat.reply' => ['group' => 'crm_chat', 'action' => 'reply'],
+    'crm.settings' => ['group' => 'crm', 'action' => 'settings'],
 
     'services.view' => ['group' => 'services', 'action' => 'view'],
     'services.create' => ['group' => 'services', 'action' => 'create'],

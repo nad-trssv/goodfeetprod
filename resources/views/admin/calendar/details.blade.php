@@ -4,6 +4,7 @@
   <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <div><a href="{{ route('calendarList') }}" class="text-decoration-none">← Все записи</a><h2 class="mt-2 mb-1">Запись #{{ $appointment->id }}</h2><p class="text-body-tertiary mb-0">{{ $appointment->service->name }}</p></div>
     <div class="d-flex gap-2 align-items-center">@include('admin.calendar._status-actions',['appointment'=>$appointment])
+      @if(auth()->user()->hasPermission('appointments.create'))<a href="{{ route('calendar.create',['repeat'=>$appointment->id]) }}" class="btn btn-outline-primary btn-sm"><span class="fas fa-rotate-right me-1"></span>{{ __('admin_appointment_create.repeat_booking') }}</a>@endif
       @unless(in_array($appointment->status,['completed','no_show','cancelled_by_client','cancelled_by_business','rescheduled'],true))<button id="destroyEvent" class="btn btn-outline-danger btn-sm">Отменить</button>@endunless
     </div>
   </div>
@@ -16,6 +17,8 @@
       <div class="col-sm-6"><small class="text-body-tertiary">Стоимость</small><div class="fw-bold">{{ number_format((float)$appointment->price,2,',',' ') }} €</div></div>
       <div class="col-sm-6"><small class="text-body-tertiary">Кабинет</small><div class="fw-bold">{{ $appointment->room?->name ?? 'Не назначен' }}</div></div>
       <div class="col-12"><small class="text-body-tertiary">Комментарий</small><div>{{ $appointment->description ?: 'Комментария нет' }}</div></div>
+      @if($appointment->admin_notes)<div class="col-12"><small class="text-body-tertiary">{{ __('admin_appointment_create.admin_note') }}</small><div class="p-3 rounded bg-body-tertiary">{{ $appointment->admin_notes }}</div></div>@endif
+      @if($appointment->series_uuid)<div class="col-12"><small class="text-body-tertiary">{{ __('admin_appointment_create.repeat_booking') }}</small><div>{{ $appointment->series_sequence }} / {{ $appointment->series_total }}</div></div>@endif
     </div></div></section></div>
     <div class="col-12 col-xl-5"><section class="card h-100"><div class="card-body p-4">
       <div class="d-flex justify-content-between"><h4>О клиенте</h4><span class="badge badge-phoenix">{{ $appointment->customer ? 'Есть аккаунт' : 'Гость' }}</span></div>

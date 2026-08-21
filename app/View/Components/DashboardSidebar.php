@@ -2,6 +2,7 @@
 
 namespace App\View\Components;
 
+use App\Services\Crm\CrmChatAccess;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
@@ -21,8 +22,10 @@ class DashboardSidebar extends Component
      */
     public function render(): View|Closure|string
     {
+        $user = auth()->user();
         return view('components.dashboard-sidebar', [
-            'unreadNotificationCount' => auth()->user()?->unreadNotifications()->count() ?? 0,
+            'unreadNotificationCount' => $user?->unreadNotifications()->count() ?? 0,
+            'unreadCrmChatCount' => $user?->hasPermission('crm.chat.view') ? app(CrmChatAccess::class)->unreadCount($user) : 0,
         ]);
     }
 }

@@ -36,23 +36,23 @@
     "src": "public/assets/img/icons/star.svg"
   },
   "resources/css/app.css": {
-    "file": "app-D0lNWTL9.css",
+    "file": "app-DF5rLIGW.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/css/homepage.css": {
-    "file": "homepage-BX9hibsf.css",
+    "file": "homepage-CdC_mAti.css",
     "src": "resources/css/homepage.css",
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "app-Db7y798K.js",
+    "file": "app-CZgeuol5.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true
   },
   "resources/js/homepage.js": {
-    "file": "homepage-BtpDLtag.js",
+    "file": "homepage-CIjiBUTg.js",
     "name": "homepage",
     "src": "resources/js/homepage.js",
     "isEntry": true

@@ -20,5 +20,6 @@ return [
         'cancelled_by_client' => 'Appointment cancelled by client',
         'cancelled_by_business' => 'Appointment cancelled by business',
         'reschedule_requested' => 'New reschedule request',
+        'crm_chat_message' => 'New customer chat message',
     ],
 ];

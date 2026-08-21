@@ -49,11 +49,15 @@ class AppointmentRequest extends FormRequest
             'client_email' => ['nullable', 'email', 'max:190'],
             'customer_id' => ['nullable', 'integer', Rule::exists('customers', 'id')],
             'description' => ['nullable', 'string', 'max:2000'],
+            'admin_notes' => ['nullable', 'string', 'max:5000'],
             'service_id' => ['required', 'integer', Rule::exists('services', 'id')->where(fn ($query) => $query->where('status', true)->where('is_deleted', false))],
             'user_id' => ['required', 'integer', Rule::exists('users', 'id')],
             'price' => ['nullable', 'numeric', 'min:0'],
             'appointment_start' => ['required', 'date'],
             'appointment_end' => ['required', 'date', 'after:appointment_start'],
+            'slot_hold_token' => ['nullable', 'uuid', Rule::exists('appointment_slot_holds', 'token')],
+            'repeat_count' => ['nullable', 'integer', 'min:1', 'max:12'],
+            'repeat_interval_weeks' => ['nullable', 'integer', 'min:1', 'max:8'],
         ];
     }
     

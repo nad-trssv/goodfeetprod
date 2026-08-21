@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'visitor'=>'Посетитель',
+    'contact_required'=>'Укажите имя и хотя бы email или телефон.','transferred_to'=>'Обращение передано сотруднику :name.',
+    'settings_saved' => 'Настройки CRM сохранены.', 'tag_added' => 'Тег добавлен.', 'tag_updated' => 'Тег обновлён.',
+    'title' => 'CRM', 'customers' => 'Клиенты', 'customer_card' => 'Карточка клиента', 'chat' => 'Онлайн-чат', 'settings' => 'Настройки CRM',
+    'overview' => 'Обзор', 'profile' => 'Данные CRM', 'notes' => 'Внутренние заметки', 'consents' => 'Согласия', 'documents' => 'Документы и фотографии', 'appointments' => 'Записи',
+    'saved' => 'Данные CRM сохранены.', 'save' => 'Сохранить', 'back' => 'Назад к клиентам',
+    'warnings' => 'Важные предупреждения', 'contraindications' => 'Противопоказания', 'no_warnings' => 'Важных предупреждений нет.', 'no_contraindications' => 'Противопоказания не указаны.',
+    'tags' => 'Теги и сегменты', 'tag' => 'Тег', 'all_tags' => 'Все теги', 'segment' => 'Сегмент', 'all_segments' => 'Все сегменты',
+    'segment_new' => 'Новые за 30 дней', 'segment_loyal' => 'Постоянные (5+ посещений)', 'segment_no_show' => 'Есть неявки', 'segment_inactive' => 'Не посещали 90 дней',
+    'preferred_master' => 'Предпочтительный специалист', 'preferred_services' => 'Предпочтительные услуги', 'not_selected' => 'Не выбран',
+    'invalid_preferred_master' => 'Выбранный сотрудник не является специалистом.',
+    'note' => 'Заметка', 'note_placeholder' => 'Информация, видимая только сотрудникам…', 'pin_note' => 'Закрепить', 'note_added' => 'Заметка добавлена.', 'note_deleted' => 'Заметка удалена.', 'delete' => 'Удалить',
+    'consent_type' => 'Тип согласия', 'consent_data_processing' => 'Обработка персональных данных', 'consent_marketing' => 'Маркетинг', 'consent_photos' => 'Фото и документы', 'consent_health_data' => 'Данные о здоровье', 'consent_terms' => 'Условия обслуживания',
+    'granted' => 'Согласие получено', 'withdrawn' => 'Отозвано / не получено', 'captured_at' => 'Дата и время', 'source' => 'Источник', 'consent_added' => 'Согласие зафиксировано.', 'no_consents' => 'Согласия пока не зафиксированы.',
+    'document_category' => 'Категория', 'document_general' => 'Общее', 'document_consent' => 'Согласие', 'document_photo' => 'Фотография', 'document_medical' => 'Медицинский документ', 'document_other' => 'Другое',
+    'upload' => 'Загрузить', 'document_hint' => 'PDF, JPG, PNG или WebP, не более 10 МБ. Файлы хранятся приватно.', 'document_added' => 'Файл загружен.', 'document_deleted' => 'Файл удалён.', 'download' => 'Скачать', 'preview' => 'Открыть', 'no_documents' => 'Документов пока нет.',
+    'statistics' => 'Статистика клиента', 'visits' => 'Посещения', 'cancellations' => 'Отмены', 'no_shows' => 'Неявки', 'revenue' => 'Выручка', 'average_check' => 'Средний чек', 'frequency' => 'Частота посещений',
+    'chat_title' => 'Обращения клиентов', 'open_conversations' => 'Открытые', 'closed_conversations' => 'Закрытые', 'all_conversations' => 'Все', 'no_conversations' => 'Обращений пока нет.',
+    'new_message' => 'Новое сообщение клиента', 'write_reply' => 'Введите ответ…', 'send' => 'Отправить', 'transfer' => 'Передать сотруднику', 'close' => 'Закрыть обращение', 'assigned_to' => 'Ответственный', 'unassigned' => 'Не назначен', 'conversation_closed' => 'Обращение закрыто.', 'not_staff' => 'Выбранный пользователь не является сотрудником.',
+    'widget' => 'Виджет онлайн-чата', 'widget_enabled' => 'Показывать чат на сайте', 'widget_title' => 'Заголовок', 'welcome_message' => 'Приветствие', 'offline_message' => 'Сообщение вне рабочего времени', 'timezone' => 'Часовой пояс', 'working_hours' => 'Время ответа', 'enabled' => 'Рабочий день',
+    'staff_access' => 'Доступ сотрудников', 'staff_enabled' => 'Доступ к чату', 'can_view_history' => 'Видит общую историю', 'must_answer' => 'Обязан отвечать', 'assignment_hint' => 'После передачи обращения выбранный сотрудник получает доступ к нему, даже если общая история ему недоступна.',
+    'tags_settings' => 'Теги клиентов', 'tag_name' => 'Название', 'tag_color' => 'Цвет', 'add_tag' => 'Добавить тег', 'tag_saved' => 'Тег сохранён.', 'tag_deleted' => 'Тег удалён.',
+    'online' => 'Сейчас отвечаем', 'offline' => 'Сейчас не в сети', 'start_chat' => 'Написать нам', 'your_name' => 'Ваше имя', 'email' => 'Email', 'phone' => 'Телефон', 'message' => 'Сообщение', 'begin' => 'Начать диалог', 'today_hours' => 'Сегодня отвечаем :start–:end',
+];

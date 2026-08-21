@@ -1,10 +1,13 @@
 @php
   $staff = auth()->user();
   $unread = (int) ($unreadNotificationCount ?? 0);
+  $crmUnread = (int) ($unreadCrmChatCount ?? 0);
+  $showCrm = $staff->hasPermission('crm.view') || $staff->hasPermission('crm.chat.view') || $staff->hasPermission('crm.settings');
   $showBookings = $staff->hasPermission('appointments.view') || $staff->hasPermission('appointments.create') || $staff->hasPermission('notifications.view') || $staff->hasPermission('reschedule_requests.view');
-  $showManagement = $staff->hasPermission('customers.view') || $staff->hasPermission('services.view') || $staff->hasPermission('staff.view');
+  $showManagement = $staff->hasPermission('services.view') || $staff->hasPermission('staff.view');
+  $crmOpen = request()->routeIs('crm.*');
   $showAdministration = $staff->hasPermission('settings.view') || $staff->hasPermission('promo_codes.view') || $staff->hasPermission('rooms.view') || $staff->hasPermission('activity_logs.view') || $staff->hasPermission('roles.manage') || ($staff->hasAllAppointmentsScope() && ($staff->hasPermission('appointments.view') || $staff->hasPermission('schedules.view')));
-  $managementOpen = request()->routeIs('admin.customers.*', 'service.*', 'languages.*', 'fixedtime.*', 'member.*', 'admin.masters.schedule', 'admin.master-services.*');
+  $managementOpen = request()->routeIs('service.*', 'languages.*', 'fixedtime.*', 'member.*', 'admin.masters.schedule', 'admin.master-services.*');
   $profileOpen = request()->routeIs('profile.*', 'master.schedule.*', 'master.services.*', 'master.time-off.*');
   $administrationOpen = request()->routeIs('settings.*', 'promo-codes.*', 'admin.red-days.*', 'admin.appointments.*', 'admin.rooms.*', 'admin.activity-logs.*', 'admin.roles.*');
 @endphp
@@ -32,9 +35,18 @@
           </li>
         @endif
 
+        @if($showCrm)
+          <x-admin-nav-group id="adminNavCrm" icon="message-circle" :label="__('admin_nav.crm')" :open="$crmOpen">
+            @can('crm.view')<x-admin-nav-link route="crm.customers.index" icon="users" :label="__('admin_nav.crm_customers')" />@endcan
+            @can('crm.chat.view')
+              <div class="nav-item-wrapper"><a class="nav-link {{ request()->routeIs('crm.chat.*') ? 'active' : '' }} label-1" href="{{ route('crm.chat.index') }}"><div class="d-flex align-items-center w-100"><span class="nav-link-icon"><span data-feather="message-square"></span></span><span class="nav-link-text-wrapper flex-grow-1"><span class="nav-link-text">{{ __('admin_nav.crm_chat') }}</span></span><span id="sidebar-crm-chat-count" class="badge rounded-pill bg-danger ms-auto {{ $crmUnread > 0 ? '' : 'd-none' }}">{{ $crmUnread > 99 ? '99+' : $crmUnread }}</span></div></a></div>
+            @endcan
+            @if($staff->hasAllAppointmentsScope()) @can('crm.settings')<x-admin-nav-link route="crm.settings.index" icon="sliders" :label="__('admin_nav.crm_settings')" />@endcan @endif
+          </x-admin-nav-group>
+        @endif
+
         @if($showManagement)
           <x-admin-nav-group id="adminNavManagement" icon="briefcase" :label="__('admin_nav.management')" :open="$managementOpen">
-            @can('customers.view')<x-admin-nav-link route="admin.customers.index" icon="user-check" :label="__('admin_nav.customers')" />@endcan
             @can('services.view')
               <x-admin-nav-link route="service.index" icon="clipboard" :label="__('admin_nav.services')" />
               @can('services.create')<x-admin-nav-link route="service.create" icon="plus" :label="__('admin_nav.add_service')" />@endcan

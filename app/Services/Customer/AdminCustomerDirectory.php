@@ -5,6 +5,7 @@ namespace App\Services\Customer;
 use App\Models\Appointments;
 use App\Models\Customer;
 use App\Models\User;
+use App\Models\CrmTag;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -20,6 +21,16 @@ class AdminCustomerDirectory
 
         $query = Customer::query()
             ->whereHas('appointments', $scope)
+            ->with('crmTags:id,name,color')
+            ->when($filters['tag_id'] ?? null, fn (Builder $query, int $tagId) => $query->whereHas('crmTags', fn (Builder $tags) => $tags->whereKey($tagId)))
+            ->when($filters['segment'] ?? null, function (Builder $query, string $segment) use ($scope) {
+                match ($segment) {
+                    'new' => $query->where('created_at', '>=', now()->subDays(30)),
+                    'loyal' => $query->whereHas('appointments', fn (Builder $appointments) => $scope($appointments)->where('status', 'completed'), '>=', 5),
+                    'no_show' => $query->whereHas('appointments', fn (Builder $appointments) => $scope($appointments)->where('status', 'no_show')),
+                    'inactive' => $query->whereDoesntHave('appointments', fn (Builder $appointments) => $scope($appointments)->where('appointment_start', '>=', now()->subDays(90))),
+                };
+            })
             ->when($search, function (Builder $query, string $search) use ($scope) {
                 $like = '%'.addcslashes($search, '%_\\').'%';
                 $query->where(function (Builder $identity) use ($like, $scope) {
@@ -63,7 +74,9 @@ class AdminCustomerDirectory
                 ->orderBy('name')->get(['id', 'name', 'profile_photo_path'])
             : collect([$viewer]);
 
-        return compact('customers', 'masters', 'masterId');
+        $tags = CrmTag::query()->orderBy('name')->get(['id', 'name', 'color']);
+
+        return compact('customers', 'masters', 'masterId', 'tags');
     }
 
     private function attachMasterBreakdown(LengthAwarePaginator $customers, ?int $masterId): void

@@ -23,9 +23,11 @@ use Illuminate\Support\Facades\Mail;
 use App\Services\Booking\TodayAppointments;
 use App\Http\Requests\AdminAppointmentAvailabilityRequest;
 use App\Http\Requests\AdminCustomerSearchRequest;
+use App\Http\Requests\AdminCustomerDuplicateRequest;
 use App\Models\Customer;
 use App\Models\Services;
 use App\Services\Booking\AdminAppointmentAvailability;
+use App\Services\Customer\AdminCustomerDuplicateDetector;
 use Illuminate\Database\Eloquent\Builder;
 
 class AppointmentController extends Controller
@@ -131,7 +133,8 @@ class AppointmentController extends Controller
     public function store(AppointmentRequest $request): JsonResponse|RedirectResponse
     {
         try {
-            $event = $this->scheduler->create($request);
+            $events = $this->scheduler->createBatch($request);
+            $event = $events->firstOrFail();
 
             return response()->json([
                 'id' => $event->id,
@@ -147,6 +150,8 @@ class AppointmentController extends Controller
                 'appointment_end' => $event->appointment_end,
                 'backgroundColor' => $event->service->eventColor,
                 'redirect_url' => route('calendar.show', $event),
+                'created_count' => $events->count(),
+                'series_uuid' => $event->series_uuid,
                 'message' => 'Запись добавлена успешно!'
             ], 200);
         } catch (Exception $exception) {
@@ -399,11 +404,33 @@ class AppointmentController extends Controller
                 ];
             })->values();
 
+        $repeatAppointment = null;
+        if ($request->filled('repeat')) {
+            $source = Appointments::with('customer')->findOrFail($request->integer('repeat'));
+            $this->authorize('view', $source);
+            $repeatAppointment = [
+                'id' => $source->id,
+                'service_id' => $source->service_id,
+                'user_id' => $source->user_id,
+                'customer_id' => $source->customer_id,
+                'client_name' => $source->client_name,
+                'client_lastname' => $source->client_lastname,
+                'client_phone' => $source->client_phone,
+                'client_email' => $source->client_email,
+                'description' => $source->description,
+                'admin_notes' => $source->admin_notes,
+                'customer_name' => trim($source->client_name.' '.$source->client_lastname),
+                'appointments_count' => $source->customer?->appointments()->count() ?? 0,
+                'has_account' => filled($source->customer?->getRawOriginal('password')),
+            ];
+        }
+
         return view('admin.calendar.create', [
             'services' => $services,
             'selectedDate' => $date,
             'currentUserId' => $request->user()->id,
             'canChooseMaster' => $request->user()->hasAllAppointmentsScope(),
+            'repeatAppointment' => $repeatAppointment,
         ]);
     }
 
@@ -417,7 +444,17 @@ class AppointmentController extends Controller
             $service,
             $request->validated('date'),
             $request->validated('user_id'),
+            $request->validated('hold_token'),
         ));
+    }
+
+    public function duplicateCustomers(
+        AdminCustomerDuplicateRequest $request,
+        AdminCustomerDuplicateDetector $duplicates,
+    ): JsonResponse {
+        return response()->json([
+            'customers' => $duplicates->find($request->user(), $request->validated())->values(),
+        ]);
     }
 
     public function searchCustomers(AdminCustomerSearchRequest $request): JsonResponse

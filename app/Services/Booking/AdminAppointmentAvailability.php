@@ -14,7 +14,7 @@ class AdminAppointmentAvailability
     ) {
     }
 
-    public function get(Services $service, string $date, int|string $masterPreference): array
+    public function get(Services $service, string $date, int|string $masterPreference, ?string $excludedHoldToken = null): array
     {
         $masters = $service->users()
             ->with('role')
@@ -30,7 +30,7 @@ class AdminAppointmentAvailability
         abort_if($masters->isEmpty(), 422, __('admin_appointment_create.errors.master_service'));
 
         $loadedDates = [];
-        $selectedSlots = $this->slotsForDate($date, $service->id, $masters);
+        $selectedSlots = $this->slotsForDate($date, $service->id, $masters, $excludedHoldToken);
         $loadedDates[$date] = $selectedSlots;
         $recommendations = collect($selectedSlots)->take(6);
 
@@ -42,7 +42,7 @@ class AdminAppointmentAvailability
                 break;
             }
             $candidateDate = $candidate->toDateString();
-            $loadedDates[$candidateDate] = $this->slotsForDate($candidateDate, $service->id, $masters);
+            $loadedDates[$candidateDate] = $this->slotsForDate($candidateDate, $service->id, $masters, $excludedHoldToken);
             $recommendations = $recommendations->concat($loadedDates[$candidateDate])->take(6);
         }
 
@@ -69,10 +69,10 @@ class AdminAppointmentAvailability
         ];
     }
 
-    private function slotsForDate(string $date, int $serviceId, Collection $masters): array
+    private function slotsForDate(string $date, int $serviceId, Collection $masters, ?string $excludedHoldToken = null): array
     {
-        return $masters->flatMap(function ($master) use ($date, $serviceId) {
-            return collect($this->availability->slots($date, $serviceId, $master->id))->map(fn (array $slot) => [
+        return $masters->flatMap(function ($master) use ($date, $serviceId, $excludedHoldToken) {
+            return collect($this->availability->slots($date, $serviceId, $master->id, null, null, $excludedHoldToken))->map(fn (array $slot) => [
                 'date' => $date,
                 'start' => $slot['start'],
                 'end' => $slot['end'],

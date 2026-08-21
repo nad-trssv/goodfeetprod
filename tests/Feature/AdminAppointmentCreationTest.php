@@ -92,6 +92,118 @@ class AdminAppointmentCreationTest extends TestCase
         ])->assertUnprocessable()->assertJsonValidationErrors('customer_id');
     }
 
+    public function test_selected_slot_is_held_and_consumed_when_appointment_is_created(): void
+    {
+        [$admin, $master, , $service] = $this->records();
+
+        $hold = $this->actingAs($admin)->postJson(route('calendar.slot-holds.store'), [
+            'service_id' => $service->id,
+            'user_id' => $master->id,
+            'appointment_start' => '2030-01-15 09:00',
+            'appointment_end' => '2030-01-15 10:00',
+        ])->assertOk()->assertJsonStructure(['token', 'expires_at'])->json();
+
+        $availability = $this->actingAs($admin)->postJson(route('calendar.availability'), [
+            'service_id' => $service->id, 'user_id' => $master->id, 'date' => '2030-01-15',
+        ])->assertOk();
+        $this->assertFalse(collect($availability->json('slots'))->contains(
+            fn (array $slot) => $slot['start'] === '09:00' && $slot['user_id'] === $master->id
+        ));
+
+        $this->actingAs($admin)->postJson(route('calendar.store'), [
+            'client_name' => 'Held', 'client_phone' => '+37255550111',
+            'service_id' => $service->id, 'user_id' => $master->id,
+            'appointment_start' => '2030-01-15 09:00', 'appointment_end' => '2030-01-15 10:00',
+            'slot_hold_token' => $hold['token'], 'admin_notes' => 'Internal only',
+        ])->assertOk()->assertJsonPath('created_count', 1);
+
+        $this->assertDatabaseMissing('appointment_slot_holds', ['token' => $hold['token']]);
+        $this->assertDatabaseHas('appointments', ['admin_notes' => 'Internal only']);
+    }
+
+    public function test_recurring_series_is_created_atomically(): void
+    {
+        [$admin, $master, , $service] = $this->records();
+
+        $this->actingAs($admin)->postJson(route('calendar.store'), [
+            'client_name' => 'Recurring', 'client_phone' => '+37255550112',
+            'service_id' => $service->id, 'user_id' => $master->id,
+            'appointment_start' => '2030-01-15 10:00', 'appointment_end' => '2030-01-15 11:00',
+            'repeat_count' => 3, 'repeat_interval_weeks' => 1,
+        ])->assertOk()->assertJsonPath('created_count', 3);
+
+        $appointments = Appointments::orderBy('appointment_start')->get();
+        $this->assertCount(3, $appointments);
+        $this->assertNotNull($appointments->first()->series_uuid);
+        $this->assertSame([1, 2, 3], $appointments->pluck('series_sequence')->all());
+        $this->assertSame(['2030-01-15', '2030-01-22', '2030-01-29'], $appointments->map(fn ($item) => $item->appointment_start->toDateString())->all());
+    }
+
+    public function test_recurring_series_rolls_back_if_one_occurrence_conflicts(): void
+    {
+        [$admin, $master, , $service] = $this->records();
+        Appointments::create($this->appointmentPayload($master, $service, '2030-01-29 10:00:00', '2030-01-29 11:00:00'));
+
+        $this->actingAs($admin)->postJson(route('calendar.store'), [
+            'client_name' => 'Recurring', 'client_phone' => '+37255550113',
+            'service_id' => $service->id, 'user_id' => $master->id,
+            'appointment_start' => '2030-01-15 10:00', 'appointment_end' => '2030-01-15 11:00',
+            'repeat_count' => 3, 'repeat_interval_weeks' => 1,
+        ])->assertUnprocessable()->assertJsonValidationErrors('appointment_start');
+
+        $this->assertSame(1, Appointments::count());
+    }
+
+    public function test_duplicate_warning_returns_existing_customer_and_respects_scope(): void
+    {
+        [$admin, $firstMaster, $secondMaster, $service] = $this->records();
+        $own = Customer::create(['first_name'=>'Same','last_name'=>'Person','email'=>'same@example.test','phone'=>'+37255550114','locale'=>'et']);
+        $foreign = Customer::create(['first_name'=>'Other','last_name'=>'Person','email'=>'other@example.test','phone'=>'+37255550115','locale'=>'et']);
+        Appointments::create($this->appointmentPayload($firstMaster, $service, '2030-01-15 09:00:00', '2030-01-15 10:00:00') + ['customer_id'=>$own->id]);
+        Appointments::create($this->appointmentPayload($secondMaster, $service, '2030-01-15 11:00:00', '2030-01-15 12:00:00') + ['customer_id'=>$foreign->id]);
+
+        $this->actingAs($firstMaster)->postJson(route('calendar.customers.duplicates'), [
+            'email' => 'SAME@example.test', 'phone' => '+372 5555 0114',
+        ])->assertOk()->assertJsonFragment(['id'=>$own->id])->assertJsonMissing(['id'=>$foreign->id]);
+
+        $this->actingAs($admin)->postJson(route('calendar.customers.duplicates'), [
+            'email' => 'other@example.test',
+        ])->assertOk()->assertJsonFragment(['id'=>$foreign->id]);
+    }
+
+    public function test_repeat_action_prefills_previous_appointment_without_copying_its_time(): void
+    {
+        [$admin, $master, , $service] = $this->records();
+        $appointment = Appointments::create($this->appointmentPayload($master, $service, '2030-01-15 09:00:00', '2030-01-15 10:00:00') + [
+            'client_name'=>'Repeat','client_email'=>'repeat@example.test','admin_notes'=>'Call first',
+        ]);
+
+        $this->actingAs($admin)->get(route('calendar.create', ['repeat'=>$appointment->id]))
+            ->assertOk()
+            ->assertSee('repeatAppointment', false)
+            ->assertSee('repeat@example.test')
+            ->assertSee('Call first')
+            ->assertDontSee('value="2030-01-15 09:00"', false);
+    }
+
+    public function test_hold_and_duplicate_routes_require_authentication_and_own_scope(): void
+    {
+        [$admin, $firstMaster, $secondMaster, $service] = $this->records();
+        $payload = [
+            'service_id' => $service->id,
+            'user_id' => $secondMaster->id,
+            'appointment_start' => '2030-01-15 09:00',
+            'appointment_end' => '2030-01-15 10:00',
+        ];
+
+        $this->postJson(route('calendar.slot-holds.store'), $payload)->assertUnauthorized();
+        $this->postJson(route('calendar.customers.duplicates'), ['email'=>'test@example.test'])->assertUnauthorized();
+        $this->actingAs($firstMaster)->postJson(route('calendar.slot-holds.store'), $payload)
+            ->assertUnprocessable()->assertJsonValidationErrors('user_id');
+
+        $this->actingAs($admin)->postJson(route('calendar.slot-holds.store'), $payload)->assertOk();
+    }
+
     private function records(): array
     {
         $adminRole = Roles::create(['name'=>'Super Admin']);

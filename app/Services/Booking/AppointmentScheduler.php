@@ -4,13 +4,15 @@ namespace App\Services\Booking;
 
 use App\Http\Requests\AppointmentRequest;
 use App\Models\Appointments;
+use App\Models\Customer;
 use App\Models\Services;
 use App\Models\User;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Customer;
 use App\Services\Customer\CustomerIdentityService;
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use RuntimeException;
 
 class AppointmentScheduler
@@ -21,45 +23,118 @@ class AppointmentScheduler
         private readonly AppointmentNotificationService $notifications,
         private readonly AppointmentAuditService $audit,
         private readonly CustomerIdentityService $customers,
+        private readonly AppointmentSlotHoldService $holds,
     ) {
     }
 
     public function create(AppointmentRequest $request): Appointments
     {
-        $appointment = DB::transaction(function () use ($request) {
-            User::whereKey($request->user_id)->lockForUpdate()->firstOrFail();
-            [$date, $start, $end] = $this->interval($request);
-            $this->assertAvailable($date, $start, $end, (int) $request->service_id, (int) $request->user_id);
-            $roomId = $this->rooms->assign((int) $request->user_id, $date, $start, $end);
-            $this->assertRoomAvailable((int) $request->user_id, $roomId);
-            $service = Services::findOrFail($request->service_id);
+        return $this->createBatch($request)->firstOrFail();
+    }
 
+    /**
+     * Create one appointment or a weekly series atomically. Every occurrence
+     * is validated against the same server-side availability rules.
+     */
+    public function createBatch(AppointmentRequest $request): Collection
+    {
+        $appointments = DB::transaction(function () use ($request) {
+            $repeatCount = (int) ($request->validated('repeat_count') ?: 1);
+            $repeatInterval = (int) ($request->validated('repeat_interval_weeks') ?: 1);
+            [$firstDate, $firstStart, $firstEnd] = $this->interval(
+                $request->validated('appointment_start'),
+                $request->validated('appointment_end'),
+            );
+            $holdToken = $request->validated('slot_hold_token');
+            $hold = $holdToken ? $this->holds->lockValid(
+                $request->user(),
+                $holdToken,
+                $request->integer('user_id'),
+                $request->validated('appointment_start'),
+                $request->validated('appointment_end'),
+            ) : null;
+
+            User::whereKey($request->integer('user_id'))->lockForUpdate()->firstOrFail();
+            $service = Services::findOrFail($request->integer('service_id'));
             $customer = $this->resolveCustomer($request);
-            $payload = $request->validated();
-            $payload['client_lastname'] = (string) ($payload['client_lastname'] ?? '');
-            $payload['customer_identity_verified'] = false;
+            $seriesUuid = $repeatCount > 1 ? (string) Str::uuid() : null;
+            $basePayload = $request->safe()->except([
+                'slot_hold_token', 'repeat_count', 'repeat_interval_weeks', 'price',
+            ]);
+            $basePayload['client_lastname'] = (string) ($basePayload['client_lastname'] ?? '');
+            $basePayload['customer_identity_verified'] = false;
             if ($customer) {
-                $payload['customer_id'] = $customer->id;
-                $payload['client_name'] = $customer->first_name;
-                $payload['client_lastname'] = (string) $customer->last_name;
-                $payload['client_email'] = $customer->email;
-                $payload['client_phone'] = $customer->phone;
+                $basePayload['customer_id'] = $customer->id;
+                $basePayload['client_name'] = $customer->first_name;
+                $basePayload['client_lastname'] = (string) $customer->last_name;
+                $basePayload['client_email'] = $customer->email;
+                $basePayload['client_phone'] = $customer->phone;
             }
 
-            $appointment = Appointments::create(array_merge($payload, [
-                'room_id' => $roomId,
-                'price' => $service->effectivePriceForDate($date),
-                'original_price' => $service->effectivePriceForDate($date),
-                'discount_amount' => 0,
-            ]));
-            $this->audit->created($appointment, Auth::user());
+            $firstStartAt = Carbon::parse($firstDate.' '.$firstStart);
+            $firstEndAt = Carbon::parse($firstDate.' '.$firstEnd);
+            $created = collect();
 
-            return $appointment;
-        });
+            for ($sequence = 1; $sequence <= $repeatCount; $sequence++) {
+                $weeks = ($sequence - 1) * $repeatInterval;
+                $startAt = $firstStartAt->copy()->addWeeks($weeks);
+                $endAt = $firstEndAt->copy()->addWeeks($weeks);
+                $date = $startAt->toDateString();
+                $start = $startAt->format('H:i');
+                $end = $endAt->format('H:i');
+                $excludedHold = $sequence === 1 ? $holdToken : null;
 
-        $this->notifications->send($appointment, 'booking_created');
+                try {
+                    $this->assertAvailable(
+                        $date,
+                        $start,
+                        $end,
+                        $service->id,
+                        $request->integer('user_id'),
+                        null,
+                        $excludedHold,
+                    );
+                    $roomId = $this->rooms->assign(
+                        $request->integer('user_id'),
+                        $date,
+                        $start,
+                        $end,
+                        null,
+                        null,
+                        $excludedHold,
+                    );
+                    $this->assertRoomAvailable($request->integer('user_id'), $roomId);
+                } catch (RuntimeException $exception) {
+                    throw new RuntimeException(__('admin_appointment_create.series_conflict', [
+                        'date' => $startAt->translatedFormat('d M Y H:i'),
+                        'message' => $exception->getMessage(),
+                    ]));
+                }
 
-        return $appointment;
+                $price = $service->effectivePriceForDate($date);
+                $appointment = Appointments::create(array_merge($basePayload, [
+                    'appointment_start' => $startAt,
+                    'appointment_end' => $endAt,
+                    'room_id' => $roomId,
+                    'price' => $price,
+                    'original_price' => $price,
+                    'discount_amount' => 0,
+                    'series_uuid' => $seriesUuid,
+                    'series_sequence' => $seriesUuid ? $sequence : null,
+                    'series_total' => $seriesUuid ? $repeatCount : null,
+                ]));
+                $this->audit->created($appointment, Auth::user());
+                $created->push($appointment);
+            }
+
+            $hold?->delete();
+
+            return $created;
+        }, 3);
+
+        $appointments->each(fn (Appointments $appointment) => $this->notifications->send($appointment, 'booking_created'));
+
+        return $appointments;
     }
 
     public function update(AppointmentRequest $request): Appointments
@@ -68,7 +143,7 @@ class AppointmentScheduler
             $appointment = Appointments::whereKey($request->id)->lockForUpdate()->firstOrFail();
             $before = $this->audit->snapshot($appointment);
             User::whereKey($request->user_id)->lockForUpdate()->firstOrFail();
-            [$date, $start, $end] = $this->interval($request);
+            [$date, $start, $end] = $this->interval($request->appointment_start, $request->appointment_end);
             $this->assertAvailable($date, $start, $end, (int) $request->service_id, (int) $request->user_id, $appointment->id);
             $roomId = $this->rooms->assign((int) $request->user_id, $date, $start, $end, $appointment->id);
             $this->assertRoomAvailable((int) $request->user_id, $roomId);
@@ -84,37 +159,37 @@ class AppointmentScheduler
                 'price' => $service->effectivePriceForDate($date),
             ] : [];
 
-            $appointment->update(array_merge($request->validated(), [
-                'room_id' => $roomId,
-            ], $pricing));
+            $appointment->update(array_merge($request->safe()->except([
+                'slot_hold_token', 'repeat_count', 'repeat_interval_weeks',
+            ]), ['room_id' => $roomId], $pricing));
             $this->audit->updated($appointment, $before, Auth::user());
 
             return $appointment->refresh();
         });
     }
 
-    private function interval(AppointmentRequest $request): array
+    private function interval(string $startValue, string $endValue): array
     {
-        $start = Carbon::parse($request->appointment_start);
-        $end = Carbon::parse($request->appointment_end);
+        $start = Carbon::parse($startValue);
+        $end = Carbon::parse($endValue);
         if (! $start->isSameDay($end)) {
-            throw new RuntimeException('Запись должна начинаться и заканчиваться в один день.');
+            throw new RuntimeException(__('admin_appointment_create.errors.same_day'));
         }
 
         return [$start->format('Y-m-d'), $start->format('H:i'), $end->format('H:i')];
     }
 
-    private function assertAvailable(string $date, string $start, string $end, int $serviceId, int $userId, ?int $excludedId = null): void
+    private function assertAvailable(string $date, string $start, string $end, int $serviceId, int $userId, ?int $excludedId = null, ?string $excludedHoldToken = null): void
     {
-        if (! $this->availability->containsSlot($date, $serviceId, $userId, $start, $end, $excludedId)) {
-            throw new RuntimeException('Выбранное время недоступно: проверьте расписание, перерыв, закрытые интервалы и существующие записи.');
+        if (! $this->availability->containsSlot($date, $serviceId, $userId, $start, $end, $excludedId, null, $excludedHoldToken)) {
+            throw new RuntimeException(__('admin_appointment_create.errors.unavailable'));
         }
     }
 
     private function assertRoomAvailable(int $userId, ?int $roomId): void
     {
         if ($roomId === null && User::whereKey($userId)->whereHas('rooms')->exists()) {
-            throw new RuntimeException('На это время нет свободного кабинета. Выберите другое время.');
+            throw new RuntimeException(__('admin_appointment_create.errors.room_unavailable'));
         }
     }
 

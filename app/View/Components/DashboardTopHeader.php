@@ -2,6 +2,7 @@
 
 namespace App\View\Components;
 
+use App\Services\Crm\CrmChatAccess;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
@@ -26,6 +27,7 @@ class DashboardTopHeader extends Component
         return view('components.dashboard-top-header', [
             'unreadNotificationCount' => $user?->unreadNotifications()->count() ?? 0,
             'headerNotifications' => $user?->unreadNotifications()->latest()->limit(6)->get() ?? collect(),
+            'unreadCrmChatCount' => $user?->hasPermission('crm.chat.view') ? app(CrmChatAccess::class)->unreadCount($user) : 0,
         ]);
     }
 }

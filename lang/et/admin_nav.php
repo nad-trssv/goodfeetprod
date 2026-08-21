@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'crm' => 'CRM', 'crm_customers' => 'Kliendibaas', 'crm_chat' => 'Veebivestlus', 'crm_settings' => 'CRM-i seaded',
     'dashboard' => 'Töölaud',
     'appointments' => 'Broneeringud',
     'new_appointment' => 'Uus broneering',

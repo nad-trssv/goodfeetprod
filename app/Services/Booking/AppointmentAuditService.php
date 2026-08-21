@@ -11,7 +11,8 @@ class AppointmentAuditService
 {
     public const TRACKED_FIELDS = [
         'status', 'service_id', 'user_id', 'room_id', 'appointment_start', 'appointment_end',
-        'price', 'original_price', 'discount_amount', 'promo_code', 'description',
+        'price', 'original_price', 'discount_amount', 'promo_code', 'description', 'admin_notes',
+        'series_uuid', 'series_sequence', 'series_total',
     ];
 
     public function created(Appointments $appointment, ?Model $actor = null): AppointmentAudit

@@ -29,6 +29,10 @@ use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\AdminMasterServiceController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\AdminGlobalSearchController;
+use App\Http\Controllers\Admin\AppointmentSlotHoldController;
+use App\Http\Controllers\PublicChatController;
+use App\Http\Controllers\Admin\CrmChatController;
+use App\Http\Controllers\Admin\CrmSettingsController;
 
 Route::get('/', [PageController::class, 'index'])->name('home');
 Route::get('/sitemap.xml', [PageController::class, 'sitemap'])->name('sitemap');
@@ -56,6 +60,10 @@ Route::post('/booking/busy-days', [AjaxBookingController::class, 'getBusyDays'])
 Route::post('/booking', [AjaxBookingController::class, 'storeBooking'])->name('booking.store');
 Route::post('/booking/effective-service', [AjaxServiceController::class, 'effective'])->name('booking.service.effective');
 Route::post('/booking/promo-code/preview', [AjaxBookingController::class, 'previewPromo'])->middleware('throttle:20,1')->name('booking.promo.preview');
+Route::get('/chat/state', [PublicChatController::class, 'state'])->middleware('throttle:60,1')->name('chat.state');
+Route::post('/chat/conversations', [PublicChatController::class, 'store'])->middleware('throttle:10,1')->name('chat.store');
+Route::post('/chat/conversations/{conversation}/poll', [PublicChatController::class, 'show'])->middleware('throttle:120,1')->name('chat.show');
+Route::post('/chat/conversations/{conversation}/messages', [PublicChatController::class, 'message'])->middleware('throttle:30,1')->name('chat.messages.store');
 
 Route::middleware('guest:customer')->group(function () {
     Route::get('/account/login', [CustomerAuthController::class, 'showLogin'])->name('customer.login');
@@ -88,6 +96,10 @@ Route::middleware([
     Route::get('calendar/create', [AppointmentController::class, 'createAppointment'])->middleware('permission:appointments.create')->name('calendar.create');
     Route::post('calendar/availability', [AppointmentController::class, 'availability'])->middleware(['permission:appointments.create', 'throttle:60,1'])->name('calendar.availability');
     Route::get('calendar/customers/search', [AppointmentController::class, 'searchCustomers'])->middleware(['permission:appointments.create', 'permission:customers.view', 'throttle:60,1'])->name('calendar.customers.search');
+    Route::post('calendar/customers/duplicates', [AppointmentController::class, 'duplicateCustomers'])->middleware(['permission:appointments.create', 'permission:customers.view', 'throttle:60,1'])->name('calendar.customers.duplicates');
+    Route::post('calendar/slot-holds', [AppointmentSlotHoldController::class, 'store'])->middleware(['permission:appointments.create', 'throttle:120,1'])->name('calendar.slot-holds.store');
+    Route::patch('calendar/slot-holds/{token}', [AppointmentSlotHoldController::class, 'renew'])->middleware(['permission:appointments.create', 'throttle:120,1'])->name('calendar.slot-holds.renew');
+    Route::delete('calendar/slot-holds/{token}', [AppointmentSlotHoldController::class, 'destroy'])->middleware(['permission:appointments.create', 'throttle:120,1'])->name('calendar.slot-holds.destroy');
     Route::get('calendar', [AppointmentController::class, 'index'])->middleware('permission:appointments.view')->name('calendar.index');
     Route::post('calendar', [AppointmentController::class, 'store'])->middleware('permission:appointments.create')->name('calendar.store');
     Route::match(['put', 'patch'], 'calendar/{calendar}', [AppointmentController::class, 'update'])->middleware('permission:appointments.update')->name('calendar.update');
@@ -121,6 +133,28 @@ Route::middleware([
     Route::get('member', [MemberController::class, 'index'])->middleware('permission:staff.view')->name('member.index');
     Route::get('admin/customers', [App\Http\Controllers\Admin\CustomerController::class, 'index'])->middleware('permission:customers.view')->name('admin.customers.index');
     Route::get('admin/customers/{customer}', [App\Http\Controllers\Admin\CustomerController::class, 'show'])->middleware('permission:customers.view')->name('admin.customers.show');
+    Route::get('crm/customers', [App\Http\Controllers\Admin\CustomerController::class, 'index'])->middleware('permission:crm.view')->name('crm.customers.index');
+    Route::get('crm/customers/{customer}', [App\Http\Controllers\Admin\CustomerController::class, 'show'])->middleware('permission:crm.view')->name('crm.customers.show');
+    Route::put('crm/customers/{customer}', [App\Http\Controllers\Admin\CustomerController::class, 'updateCrm'])->middleware('permission:crm.update')->name('crm.customers.update');
+    Route::post('crm/customers/{customer}/notes', [App\Http\Controllers\Admin\CustomerController::class, 'storeNote'])->middleware('permission:crm.update')->name('crm.customers.notes.store');
+    Route::delete('crm/customers/{customer}/notes/{note}', [App\Http\Controllers\Admin\CustomerController::class, 'destroyNote'])->middleware('permission:crm.update')->name('crm.customers.notes.destroy');
+    Route::post('crm/customers/{customer}/consents', [App\Http\Controllers\Admin\CustomerController::class, 'storeConsent'])->middleware('permission:crm.update')->name('crm.customers.consents.store');
+    Route::post('crm/customers/{customer}/documents', [App\Http\Controllers\Admin\CustomerController::class, 'storeDocument'])->middleware('permission:crm.documents')->name('crm.customers.documents.store');
+    Route::get('crm/documents/{document}', [App\Http\Controllers\Admin\CustomerController::class, 'downloadDocument'])->middleware('permission:crm.documents')->name('crm.documents.download');
+    Route::get('crm/documents/{document}/preview', [App\Http\Controllers\Admin\CustomerController::class, 'previewDocument'])->middleware('permission:crm.documents')->name('crm.documents.preview');
+    Route::delete('crm/documents/{document}', [App\Http\Controllers\Admin\CustomerController::class, 'destroyDocument'])->middleware('permission:crm.documents')->name('crm.documents.destroy');
+    Route::get('crm/chat', [CrmChatController::class, 'index'])->middleware('permission:crm.chat.view')->name('crm.chat.index');
+    Route::get('crm/chat/status', [CrmChatController::class, 'status'])->middleware(['permission:crm.chat.view','throttle:60,1'])->name('crm.chat.status');
+    Route::get('crm/chat/{conversation}', [CrmChatController::class, 'show'])->middleware('permission:crm.chat.view')->name('crm.chat.show');
+    Route::get('crm/chat/{conversation}/messages', [CrmChatController::class, 'messages'])->middleware(['permission:crm.chat.view','throttle:120,1'])->name('crm.chat.messages');
+    Route::post('crm/chat/{conversation}/reply', [CrmChatController::class, 'reply'])->middleware(['permission:crm.chat.reply','throttle:60,1'])->name('crm.chat.reply');
+    Route::post('crm/chat/{conversation}/transfer', [CrmChatController::class, 'transfer'])->middleware('permission:crm.chat.reply')->name('crm.chat.transfer');
+    Route::post('crm/chat/{conversation}/close', [CrmChatController::class, 'close'])->middleware('permission:crm.chat.reply')->name('crm.chat.close');
+    Route::get('crm/settings', [CrmSettingsController::class, 'index'])->middleware('permission:crm.settings')->name('crm.settings.index');
+    Route::put('crm/settings', [CrmSettingsController::class, 'update'])->middleware('permission:crm.settings')->name('crm.settings.update');
+    Route::post('crm/settings/tags', [CrmSettingsController::class, 'storeTag'])->middleware('permission:crm.settings')->name('crm.tags.store');
+    Route::put('crm/settings/tags/{tag}', [CrmSettingsController::class, 'updateTag'])->middleware('permission:crm.settings')->name('crm.tags.update');
+    Route::delete('crm/settings/tags/{tag}', [CrmSettingsController::class, 'destroyTag'])->middleware('permission:crm.settings')->name('crm.tags.destroy');
 
     Route::resource('profile', ProfileController::class)->only(['index', 'show'])->middleware('permission:profile.view');
     Route::resource('profile', ProfileController::class)->only(['create', 'store', 'edit', 'update', 'destroy'])->middleware('permission:profile.update');

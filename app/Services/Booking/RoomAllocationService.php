@@ -4,6 +4,7 @@ namespace App\Services\Booking;
 
 use App\Models\Appointments;
 use App\Models\AppointmentRescheduleRequest;
+use App\Models\AppointmentSlotHold;
 use App\Models\Room;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -27,7 +28,7 @@ class RoomAllocationService
      * appointment lookup per eligible room. This deliberately does not cache:
      * every call observes the current schedules, room assignments and bookings.
      */
-    public function filterAvailableSlots(int $userId, string $date, array $slots, ?int $excludedAppointmentId = null, ?int $excludedRescheduleRequestId = null): array
+    public function filterAvailableSlots(int $userId, string $date, array $slots, ?int $excludedAppointmentId = null, ?int $excludedRescheduleRequestId = null, ?string $excludedHoldToken = null): array
     {
         if ($slots === []) {
             return [];
@@ -64,11 +65,18 @@ class RoomAllocationService
                 ->where('requested_start', '<', $dayEnd)->where('requested_end', '>', $dayStart)
                 ->get(['requested_start', 'requested_end'])];
         });
+        $roomHolds = $rooms->mapWithKeys(function (Room $room) use ($dayStart, $dayEnd, $excludedHoldToken) {
+            return [$room->id => AppointmentSlotHold::query()
+                ->where('room_id', $room->id)->where('expires_at', '>', now())
+                ->when($excludedHoldToken, fn ($query) => $query->whereKeyNot($excludedHoldToken))
+                ->where('appointment_start', '<', $dayEnd)->where('appointment_end', '>', $dayStart)
+                ->get(['appointment_start', 'appointment_end'])];
+        });
 
-        return array_values(array_filter($slots, function (array $slot) use ($date, $rooms, $roomAppointments, $roomReservations) {
+        return array_values(array_filter($slots, function (array $slot) use ($date, $rooms, $roomAppointments, $roomReservations, $roomHolds) {
             [$start, $end] = $this->dateTimes($date, $slot['start'], $slot['end']);
 
-            return $rooms->contains(function (Room $room) use ($start, $end, $roomAppointments, $roomReservations) {
+            return $rooms->contains(function (Room $room) use ($start, $end, $roomAppointments, $roomReservations, $roomHolds) {
                 $load = $roomAppointments->get($room->id)->filter(
                     fn (Appointments $appointment) => $appointment->appointment_start < $end
                         && $appointment->appointment_end > $start
@@ -77,13 +85,17 @@ class RoomAllocationService
                     fn (AppointmentRescheduleRequest $reservation) => $reservation->requested_start < $end
                         && $reservation->requested_end > $start
                 )->count();
+                $load += $roomHolds->get($room->id)->filter(
+                    fn (AppointmentSlotHold $hold) => $hold->appointment_start < $end
+                        && $hold->appointment_end > $start
+                )->count();
 
                 return $load < $room->capacity;
             });
         }));
     }
 
-    public function assign(int $userId, string $date, string $slotStart, string $slotEnd, ?int $excludedAppointmentId = null, ?int $excludedRescheduleRequestId = null): ?int
+    public function assign(int $userId, string $date, string $slotStart, string $slotEnd, ?int $excludedAppointmentId = null, ?int $excludedRescheduleRequestId = null, ?string $excludedHoldToken = null): ?int
     {
         $rooms = $this->eligibleRooms($userId, true);
         if ($rooms->isEmpty()) {
@@ -93,7 +105,7 @@ class RoomAllocationService
         [$start, $end] = $this->dateTimes($date, $slotStart, $slotEnd);
 
         return $rooms
-            ->map(fn (Room $room) => ['room' => $room, 'load' => $this->load($room, $start, $end, $excludedAppointmentId, $excludedRescheduleRequestId)])
+            ->map(fn (Room $room) => ['room' => $room, 'load' => $this->load($room, $start, $end, $excludedAppointmentId, $excludedRescheduleRequestId, $excludedHoldToken)])
             ->filter(fn (array $candidate) => $candidate['load'] < $candidate['room']->capacity)
             ->sortBy(fn (array $candidate) => [$candidate['load'], $candidate['room']->id])
             ->first()['room']->id ?? null;
@@ -113,7 +125,7 @@ class RoomAllocationService
         return $query->get();
     }
 
-    private function load(Room $room, string $start, string $end, ?int $excludedAppointmentId = null, ?int $excludedRescheduleRequestId = null): int
+    private function load(Room $room, string $start, string $end, ?int $excludedAppointmentId = null, ?int $excludedRescheduleRequestId = null, ?string $excludedHoldToken = null): int
     {
         $appointments = Appointments::query()
             ->whereIn('status', Appointments::BLOCKING_STATUSES)
@@ -132,8 +144,12 @@ class RoomAllocationService
             ->where('room_id', $room->id)->where('status', 'pending')
             ->when($excludedRescheduleRequestId, fn ($query) => $query->whereKeyNot($excludedRescheduleRequestId))
             ->where('requested_start', '<', $end)->where('requested_end', '>', $start)->count();
+        $holds = AppointmentSlotHold::query()
+            ->where('room_id', $room->id)->where('expires_at', '>', now())
+            ->when($excludedHoldToken, fn ($query) => $query->whereKeyNot($excludedHoldToken))
+            ->where('appointment_start', '<', $end)->where('appointment_end', '>', $start)->count();
 
-        return $appointments + $reservations;
+        return $appointments + $reservations + $holds;
     }
 
     private function dateTimes(string $date, string $start, string $end): array

@@ -14,7 +14,7 @@ class Appointments extends Model
     public const STATUSES = ['pending', 'confirmed', 'checked_in', 'in_progress', 'completed', 'cancelled_by_client', 'cancelled_by_business', 'no_show', 'rescheduled'];
     public const BLOCKING_STATUSES = ['pending', 'confirmed', 'checked_in', 'in_progress'];
 
-    protected $fillable = ['public_uuid', 'customer_id', 'customer_identity_verified', 'status', 'status_changed_at', 'title', 'client_name', 'client_lastname', 'client_phone', 'client_email', 'service_id', 'promo_code_id', 'promo_code', 'user_id', 'room_id', 'appointment_start', 'appointment_end', 'description', 'price', 'original_price', 'discount_amount'];
+    protected $fillable = ['public_uuid', 'customer_id', 'customer_identity_verified', 'status', 'status_changed_at', 'title', 'client_name', 'client_lastname', 'client_phone', 'client_email', 'service_id', 'promo_code_id', 'promo_code', 'user_id', 'room_id', 'appointment_start', 'appointment_end', 'description', 'admin_notes', 'series_uuid', 'series_sequence', 'series_total', 'price', 'original_price', 'discount_amount'];
 
     protected function casts(): array
     {

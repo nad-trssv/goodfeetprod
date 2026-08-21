@@ -56,6 +56,10 @@ class NotificationController extends Controller
             return route('reschedule.index');
         }
 
+        if (($data['event'] ?? null) === 'crm_chat_message' && filled($data['conversation_uuid'] ?? null)) {
+            return route('crm.chat.show', ['conversation' => $data['conversation_uuid']]);
+        }
+
         return isset($data['appointment_id'])
             ? route('calendar.show', ['appointment' => $data['appointment_id']])
             : route('notifications.index');

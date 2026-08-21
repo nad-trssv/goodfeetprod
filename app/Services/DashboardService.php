@@ -23,7 +23,7 @@ class DashboardService
     public function index()
     {
         try {
-            function getAppointments($appointments){
+            $getAppointments = function ($appointments) {
                 $events = array();
                 foreach($appointments as $appint)
                 {
@@ -45,18 +45,18 @@ class DashboardService
                     ];
                 }
                 return $events;
-            }
-            function getServices(){
+            };
+            $getServices = function () {
                 return Services::with('users')->get();
-            }
-            function getStats() {
+            };
+            $getStats = function () {
                 $userId = Auth::user()->id;
                 $currentMonthStart = Carbon::now()->startOfMonth()->toDateString();
                 $currentMonthEnd = Carbon::now()->endOfMonth()->toDateString();
                 $previousMonthStart = Carbon::now()->subMonth()->startOfMonth()->toDateString();
                 $previousMonthEnd = Carbon::now()->subMonth()->endOfMonth()->toDateString();
 
-                function calculateMonthlyDifference($query, $field, $currentRange, $previousRange, $operation = 'count', $column = null) {
+                $calculateMonthlyDifference = function ($query, $field, $currentRange, $previousRange, $operation = 'count', $column = null) {
                     if ($operation === 'count') {
                         $currentValue = (clone $query)->whereBetween($field, $currentRange)->count();
                         $preventValue = (clone $query)->whereBetween($field, $previousRange)->count();
@@ -66,7 +66,7 @@ class DashboardService
                     }
                     $difference = $currentValue - $preventValue;
                     return ($difference != 0 ? ($difference > 0 ? '+' : '') . $difference : '0');
-                }
+                };
 
                 $currentRange = [$currentMonthStart, $currentMonthEnd];
                 $previousRange = [$previousMonthStart, $previousMonthEnd];
@@ -75,14 +75,14 @@ class DashboardService
                 $myQuery = Appointments::where('user_id', $userId);
                 $myClients = (clone $myQuery)->whereBetween('appointment_start', $currentRange)->count();
                 $mySalary = (clone $myQuery)->whereBetween('appointment_start', $currentRange)->sum('price');
-                $myClientsDiff = calculateMonthlyDifference(clone $myQuery, 'appointment_start', $currentRange, $previousRange, 'count');
-                $mySalaryDiff = calculateMonthlyDifference(clone $myQuery, 'appointment_start', $currentRange, $previousRange, 'sum', 'price');
+                $myClientsDiff = $calculateMonthlyDifference(clone $myQuery, 'appointment_start', $currentRange, $previousRange, 'count');
+                $mySalaryDiff = $calculateMonthlyDifference(clone $myQuery, 'appointment_start', $currentRange, $previousRange, 'sum', 'price');
 
                 // Общая статистика
                 $allClients = Appointments::whereBetween('appointment_start', $currentRange)->count();
                 $allSalary = Appointments::whereBetween('appointment_start', $currentRange)->sum('price');
-                $allClientsDiff = calculateMonthlyDifference(Appointments::query(), 'appointment_start', $currentRange, $previousRange, 'count');
-                $allSalaryDiff = calculateMonthlyDifference(Appointments::query(), 'appointment_start', $currentRange, $previousRange, 'sum', 'price');
+                $allClientsDiff = $calculateMonthlyDifference(Appointments::query(), 'appointment_start', $currentRange, $previousRange, 'count');
+                $allSalaryDiff = $calculateMonthlyDifference(Appointments::query(), 'appointment_start', $currentRange, $previousRange, 'sum', 'price');
 
                 return [
                     'redDays' => RedDay::visibleFor($userId)->whereBetween('date', [$currentMonthStart, $currentMonthEnd])->count(),
@@ -97,8 +97,8 @@ class DashboardService
                     'all_clientsDifference' => $allClientsDiff,
                     'all_salaryDifference' => $allSalaryDiff,
                 ];
-            }
-            function getChartDataByDay() {
+            };
+            $getChartDataByDay = function () {
                 $userId = Auth::user()->id;
 
                 // Мои данные
@@ -140,8 +140,8 @@ class DashboardService
                     'all_data' => $allData->pluck('total_price'),
                     'all_counts' => $allData->pluck('appointments_count'),
                 ];
-            }
-            function getChartDataByMonth() {
+            };
+            $getChartDataByMonth = function () {
                 $userId = Auth::user()->id;
 
                 $myData = Appointments::where('user_id', $userId)
@@ -181,8 +181,8 @@ class DashboardService
                     'all_data' => $allData->pluck('total_price'),
                     'all_counts' => $allData->pluck('appointments_count'),
                 ];
-            }
-            function getEvents(){
+            };
+            $getEvents = function () {
                 $today = Carbon::now();
                 $userId = Auth::user()->id;
 
@@ -267,8 +267,8 @@ class DashboardService
                     'my' => $combined,
                     'all' => $allCombined,
                 ];
-            }
-            function getActivity(){
+            };
+            $getActivity = function () {
                 $appointments = Appointments::whereDate('appointment_start', Carbon::now()->toDateString())
                     ->orderBy('appointment_start')
                     ->get();
@@ -316,16 +316,16 @@ class DashboardService
                         return 0;
                     }
                 }
-            }
+            };
 
             return [
-                'appointments' => getAppointments($this->todayAppointments->forUser(Auth::user())),
-                'services' => getServices(),
-                'chartDataByDay' => getChartDataByDay(),
-                'chartDataByMonth' => getChartDataByMonth(),
-                'stats' => getStats(),
-                'events' => getEvents(),
-                'activity' => getActivity(),
+                'appointments' => $getAppointments($this->todayAppointments->forUser(Auth::user())),
+                'services' => $getServices(),
+                'chartDataByDay' => $getChartDataByDay(),
+                'chartDataByMonth' => $getChartDataByMonth(),
+                'stats' => $getStats(),
+                'events' => $getEvents(),
+                'activity' => $getActivity(),
             ];
 
         } catch (Exception $exception) {

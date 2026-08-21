@@ -8,6 +8,8 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
+use App\Models\CrmTag;
+use App\Models\Services;
 
 class AdminCustomerProfile
 {
@@ -68,6 +70,16 @@ class AdminCustomerProfile
             ->get();
 
         [$possibleAppointments, $possibleCount] = $this->possibleAppointments($customer, $viewer);
+        $customer->load([
+            'crmProfile.preferredMaster:id,name,profile_photo_path', 'crmTags',
+            'crmNotes'=>fn($query)=>$query->with('author:id,name')->orderByDesc('is_pinned')->latest(),
+            'consents'=>fn($query)=>$query->with('recordedBy:id,name')->latest('captured_at'),
+            'documents'=>fn($query)=>$query->with('uploadedBy:id,name')->latest(),
+            'preferredServices.translations',
+        ]);
+        $tags = CrmTag::orderBy('name')->get();
+        $masters = User::query()->whereHas('role', fn(Builder $query)=>$query->where('is_service_provider',true))->orderBy('name')->get(['id','name','profile_photo_path']);
+        $services = Services::query()->where('status',true)->where('is_deleted',false)->with('translations')->orderBy('name')->get();
 
         return compact(
             'customer',
@@ -78,6 +90,9 @@ class AdminCustomerProfile
             'favoriteMasters',
             'possibleAppointments',
             'possibleCount',
+            'tags',
+            'masters',
+            'services',
         );
     }
 

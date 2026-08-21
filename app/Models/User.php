@@ -179,6 +179,11 @@ class User extends Authenticatable
         return $this->hasMany(Appointments::class);
     }
 
+    public function chatSettings()
+    {
+        return $this->hasOne(CrmChatStaff::class, 'user_id');
+    }
+
     public function currentAppointment()
     {
         return $this->hasOne(Appointments::class)

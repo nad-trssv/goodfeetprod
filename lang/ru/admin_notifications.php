@@ -20,5 +20,6 @@ return [
         'cancelled_by_client' => 'Запись отменена клиентом',
         'cancelled_by_business' => 'Запись отменена компанией',
         'reschedule_requested' => 'Новый запрос на изменение времени',
+        'crm_chat_message' => 'Новое сообщение клиента в чате',
     ],
 ];

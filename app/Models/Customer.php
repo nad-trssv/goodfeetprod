@@ -33,6 +33,14 @@ class Customer extends Authenticatable
         return $this->hasMany(Appointments::class);
     }
 
+    public function crmProfile() { return $this->hasOne(CustomerCrmProfile::class); }
+    public function crmTags() { return $this->belongsToMany(CrmTag::class, 'customer_crm_tag'); }
+    public function crmNotes() { return $this->hasMany(CustomerCrmNote::class); }
+    public function consents() { return $this->hasMany(CustomerConsent::class); }
+    public function documents() { return $this->hasMany(CustomerDocument::class); }
+    public function preferredServices() { return $this->belongsToMany(Services::class, 'customer_preferred_services', 'customer_id', 'service_id'); }
+    public function conversations() { return $this->hasMany(CrmConversation::class); }
+
     public function getFullNameAttribute(): string
     {
         return trim($this->first_name.' '.$this->last_name);

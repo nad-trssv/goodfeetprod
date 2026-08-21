@@ -39,6 +39,7 @@ class AdminAppointmentAvailabilityRequest extends FormRequest
                 },
             ],
             'date' => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
+            'hold_token' => ['nullable', 'uuid'],
         ];
     }
 }

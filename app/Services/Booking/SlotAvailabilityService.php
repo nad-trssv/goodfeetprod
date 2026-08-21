@@ -4,6 +4,7 @@ namespace App\Services\Booking;
 
 use App\Models\Appointments;
 use App\Models\AppointmentRescheduleRequest;
+use App\Models\AppointmentSlotHold;
 use App\Models\Services;
 use App\Models\SiteSettings;
 use App\Models\UserSchedule;
@@ -17,7 +18,7 @@ class SlotAvailabilityService
     ) {
     }
 
-    public function slots(string $date, int $serviceId, int $userId, ?int $excludedAppointmentId = null, ?int $excludedRescheduleRequestId = null): array
+    public function slots(string $date, int $serviceId, int $userId, ?int $excludedAppointmentId = null, ?int $excludedRescheduleRequestId = null, ?string $excludedHoldToken = null): array
     {
         $day = Carbon::parse($date)->startOfDay();
         $limit = max(0, (int) ($this->calendar->bookingLimit()['days'] ?? 30));
@@ -62,6 +63,12 @@ class SlotAvailabilityService
             ->where('requested_start', '<', $day->copy()->addDay())
             ->where('requested_end', '>', $day)
             ->get(['requested_start', 'requested_end']);
+        $holds = AppointmentSlotHold::where('user_id', $userId)
+            ->where('expires_at', '>', now())
+            ->when($excludedHoldToken, fn ($query) => $query->whereKeyNot($excludedHoldToken))
+            ->where('appointment_start', '<', $day->copy()->addDay())
+            ->where('appointment_end', '>', $day)
+            ->get(['appointment_start', 'appointment_end']);
 
         $starts = $this->candidateStarts($service, $userId, $day, $workStart, $workEnd, $duration);
         $slots = [];
@@ -90,10 +97,15 @@ class SlotAvailabilityService
             ))) {
                 continue;
             }
+            if ($holds->contains(fn (AppointmentSlotHold $hold) => $this->overlaps(
+                $start, $end, $hold->appointment_start, $hold->appointment_end,
+            ))) {
+                continue;
+            }
             $slots[] = ['start' => $start->format('H:i'), 'end' => $end->format('H:i')];
         }
 
-        return $this->rooms->filterAvailableSlots($userId, $date, $slots, $excludedAppointmentId, $excludedRescheduleRequestId);
+        return $this->rooms->filterAvailableSlots($userId, $date, $slots, $excludedAppointmentId, $excludedRescheduleRequestId, $excludedHoldToken);
     }
 
     public function containsSlot(
@@ -104,8 +116,9 @@ class SlotAvailabilityService
         string $end,
         ?int $excludedAppointmentId = null,
         ?int $excludedRescheduleRequestId = null,
+        ?string $excludedHoldToken = null,
     ): bool {
-        return collect($this->slots($date, $serviceId, $userId, $excludedAppointmentId, $excludedRescheduleRequestId))
+        return collect($this->slots($date, $serviceId, $userId, $excludedAppointmentId, $excludedRescheduleRequestId, $excludedHoldToken))
             ->contains(fn (array $slot) => $slot['start'] === $start && $slot['end'] === $end);
     }
 

@@ -185,6 +185,7 @@
       <!-- <section> footer ============================-->
       <!-- ============================================-->
     </main>
+    <x-crm-chat-widget />
 
     <script src="{{ asset('public/vendors/popper/popper.min.js') }}"></script>
     <script src="{{ asset('public/vendors/bootstrap/bootstrap.min.js') }}"></script>
