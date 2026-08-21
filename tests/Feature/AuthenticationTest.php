@@ -14,7 +14,11 @@ class AuthenticationTest extends TestCase
     {
         $response = $this->get('/admin7f4k2qbackoffice');
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+            ->assertSee('development-login-account', false)
+            ->assertSee('admin@localhost.test')
+            ->assertSee('reception@localhost.test')
+            ->assertSee('anna.master@example.test');
     }
 
     public function test_users_can_authenticate_using_the_login_screen(): void

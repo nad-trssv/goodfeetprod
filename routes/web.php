@@ -33,6 +33,7 @@ use App\Http\Controllers\Admin\AppointmentSlotHoldController;
 use App\Http\Controllers\PublicChatController;
 use App\Http\Controllers\Admin\CrmChatController;
 use App\Http\Controllers\Admin\CrmSettingsController;
+use App\Http\Controllers\Admin\CrmRatingController;
 
 Route::get('/', [PageController::class, 'index'])->name('home');
 Route::get('/sitemap.xml', [PageController::class, 'sitemap'])->name('sitemap');
@@ -60,10 +61,12 @@ Route::post('/booking/busy-days', [AjaxBookingController::class, 'getBusyDays'])
 Route::post('/booking', [AjaxBookingController::class, 'storeBooking'])->name('booking.store');
 Route::post('/booking/effective-service', [AjaxServiceController::class, 'effective'])->name('booking.service.effective');
 Route::post('/booking/promo-code/preview', [AjaxBookingController::class, 'previewPromo'])->middleware('throttle:20,1')->name('booking.promo.preview');
-Route::get('/chat/state', [PublicChatController::class, 'state'])->middleware('throttle:60,1')->name('chat.state');
-Route::post('/chat/conversations', [PublicChatController::class, 'store'])->middleware('throttle:10,1')->name('chat.store');
-Route::post('/chat/conversations/{conversation}/poll', [PublicChatController::class, 'show'])->middleware('throttle:120,1')->name('chat.show');
-Route::post('/chat/conversations/{conversation}/messages', [PublicChatController::class, 'message'])->middleware('throttle:30,1')->name('chat.messages.store');
+Route::get('/chat/state', [PublicChatController::class, 'state'])->middleware('throttle:chat-state')->name('chat.state');
+Route::get('/chat/csrf-token', [PublicChatController::class, 'csrf'])->middleware('throttle:chat-csrf')->name('chat.csrf');
+Route::post('/chat/conversations', [PublicChatController::class, 'store'])->middleware('throttle:chat-start')->name('chat.store');
+Route::get('/chat/conversations/{conversation}/poll', [PublicChatController::class, 'show'])->middleware('throttle:chat-poll')->name('chat.show');
+Route::post('/chat/conversations/{conversation}/messages', [PublicChatController::class, 'message'])->middleware('throttle:chat-message')->name('chat.messages.store');
+Route::post('/chat/conversations/{conversation}/rating', [PublicChatController::class, 'rating'])->middleware('throttle:chat-rating')->name('chat.rating.store');
 
 Route::middleware('guest:customer')->group(function () {
     Route::get('/account/login', [CustomerAuthController::class, 'showLogin'])->name('customer.login');
@@ -108,7 +111,7 @@ Route::middleware([
     Route::get('appointments/today', [AppointmentController::class, 'today'])->middleware('permission:appointments.view')->name('appointments.today');
     Route::get('reschedule-requests', [RescheduleRequestController::class, 'index'])->middleware('permission:reschedule_requests.view')->name('reschedule.index');
     Route::get('notifications', [App\Http\Controllers\Admin\NotificationController::class, 'index'])->middleware('permission:notifications.view')->name('notifications.index');
-    Route::get('notifications/status', [App\Http\Controllers\Admin\NotificationController::class, 'status'])->middleware(['permission:notifications.view', 'throttle:30,1'])->name('notifications.status');
+    Route::get('notifications/status', [App\Http\Controllers\Admin\NotificationController::class, 'status'])->middleware(['permission:notifications.view', 'throttle:admin-notifications-status'])->name('notifications.status');
     Route::post('notifications/read-all', [App\Http\Controllers\Admin\NotificationController::class, 'readAll'])->middleware('permission:notifications.update')->name('notifications.read-all');
     Route::post('notifications/{notification}/read', [App\Http\Controllers\Admin\NotificationController::class, 'read'])->middleware('permission:notifications.update')->name('notifications.read');
     Route::post('reschedule-requests/{request:public_uuid}/approve', [RescheduleRequestController::class, 'approve'])->middleware('permission:reschedule_requests.update')->name('reschedule.approve');
@@ -144,12 +147,13 @@ Route::middleware([
     Route::get('crm/documents/{document}/preview', [App\Http\Controllers\Admin\CustomerController::class, 'previewDocument'])->middleware('permission:crm.documents')->name('crm.documents.preview');
     Route::delete('crm/documents/{document}', [App\Http\Controllers\Admin\CustomerController::class, 'destroyDocument'])->middleware('permission:crm.documents')->name('crm.documents.destroy');
     Route::get('crm/chat', [CrmChatController::class, 'index'])->middleware('permission:crm.chat.view')->name('crm.chat.index');
-    Route::get('crm/chat/status', [CrmChatController::class, 'status'])->middleware(['permission:crm.chat.view','throttle:60,1'])->name('crm.chat.status');
+    Route::get('crm/chat/status', [CrmChatController::class, 'status'])->middleware(['permission:crm.chat.view','throttle:admin-crm-status'])->name('crm.chat.status');
     Route::get('crm/chat/{conversation}', [CrmChatController::class, 'show'])->middleware('permission:crm.chat.view')->name('crm.chat.show');
-    Route::get('crm/chat/{conversation}/messages', [CrmChatController::class, 'messages'])->middleware(['permission:crm.chat.view','throttle:120,1'])->name('crm.chat.messages');
-    Route::post('crm/chat/{conversation}/reply', [CrmChatController::class, 'reply'])->middleware(['permission:crm.chat.reply','throttle:60,1'])->name('crm.chat.reply');
+    Route::get('crm/chat/{conversation}/messages', [CrmChatController::class, 'messages'])->middleware(['permission:crm.chat.view','throttle:admin-crm-messages'])->name('crm.chat.messages');
+    Route::post('crm/chat/{conversation}/reply', [CrmChatController::class, 'reply'])->middleware(['permission:crm.chat.reply','throttle:admin-crm-reply'])->name('crm.chat.reply');
     Route::post('crm/chat/{conversation}/transfer', [CrmChatController::class, 'transfer'])->middleware('permission:crm.chat.reply')->name('crm.chat.transfer');
     Route::post('crm/chat/{conversation}/close', [CrmChatController::class, 'close'])->middleware('permission:crm.chat.reply')->name('crm.chat.close');
+    Route::get('crm/ratings', [CrmRatingController::class, 'index'])->middleware('permission:crm.settings')->name('crm.ratings.index');
     Route::get('crm/settings', [CrmSettingsController::class, 'index'])->middleware('permission:crm.settings')->name('crm.settings.index');
     Route::put('crm/settings', [CrmSettingsController::class, 'update'])->middleware('permission:crm.settings')->name('crm.settings.update');
     Route::post('crm/settings/tags', [CrmSettingsController::class, 'storeTag'])->middleware('permission:crm.settings')->name('crm.tags.store');

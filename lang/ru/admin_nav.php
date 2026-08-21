@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'crm' => 'CRM', 'crm_customers' => 'База клиентов', 'crm_chat' => 'Онлайн-чат', 'crm_settings' => 'Настройки CRM',
+    'crm' => 'CRM', 'crm_customers' => 'База клиентов', 'crm_chat' => 'Онлайн-чат', 'crm_ratings' => 'Рейтинг сотрудников', 'crm_settings' => 'Настройки CRM',
     'dashboard' => 'Панель управления',
     'appointments' => 'Записи',
     'new_appointment' => 'Новая запись',

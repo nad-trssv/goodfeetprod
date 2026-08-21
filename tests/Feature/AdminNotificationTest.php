@@ -55,6 +55,18 @@ class AdminNotificationTest extends TestCase
         $this->assertSame('cancelled_by_client', $master->notifications()->first()->data['event']);
     }
 
+    public function test_opening_appointment_directly_marks_its_notifications_as_read(): void
+    {
+        [, $master, , $appointment] = $this->records();
+        app(AppointmentNotificationService::class)->send($appointment, 'booking_created');
+        $notification = $master->notifications()->firstOrFail();
+
+        $this->actingAs($master)->get(route('calendar.show',$appointment))->assertOk();
+
+        $this->assertNotNull($notification->fresh()->read_at);
+        $this->assertSame(0,$master->fresh()->unreadNotifications()->count());
+    }
+
     public function test_reschedule_page_keeps_processed_request_history_for_the_master(): void
     {
         [, $master, , $appointment] = $this->records();

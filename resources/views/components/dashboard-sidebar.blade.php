@@ -36,11 +36,12 @@
         @endif
 
         @if($showCrm)
-          <x-admin-nav-group id="adminNavCrm" icon="message-circle" :label="__('admin_nav.crm')" :open="$crmOpen">
+          <x-admin-nav-group id="adminNavCrm" icon="message-circle" :label="__('admin_nav.crm')" :open="$crmOpen" badge-id="sidebar-crm-group-count" :badge-count="$crmUnread">
             @can('crm.view')<x-admin-nav-link route="crm.customers.index" icon="users" :label="__('admin_nav.crm_customers')" />@endcan
             @can('crm.chat.view')
               <div class="nav-item-wrapper"><a class="nav-link {{ request()->routeIs('crm.chat.*') ? 'active' : '' }} label-1" href="{{ route('crm.chat.index') }}"><div class="d-flex align-items-center w-100"><span class="nav-link-icon"><span data-feather="message-square"></span></span><span class="nav-link-text-wrapper flex-grow-1"><span class="nav-link-text">{{ __('admin_nav.crm_chat') }}</span></span><span id="sidebar-crm-chat-count" class="badge rounded-pill bg-danger ms-auto {{ $crmUnread > 0 ? '' : 'd-none' }}">{{ $crmUnread > 99 ? '99+' : $crmUnread }}</span></div></a></div>
             @endcan
+            @if($staff->hasAllAppointmentsScope()) @can('crm.settings')<x-admin-nav-link route="crm.ratings.index" icon="star" :label="__('admin_nav.crm_ratings')" />@endcan @endif
             @if($staff->hasAllAppointmentsScope()) @can('crm.settings')<x-admin-nav-link route="crm.settings.index" icon="sliders" :label="__('admin_nav.crm_settings')" />@endcan @endif
           </x-admin-nav-group>
         @endif

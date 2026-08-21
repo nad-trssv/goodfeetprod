@@ -4,9 +4,9 @@ namespace App\Services\Crm;
 
 use App\Models\CrmChatStaff;
 use App\Models\CrmConversation;
-use App\Models\CrmConversationRead;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class CrmChatAccess
 {
@@ -38,9 +38,15 @@ class CrmChatAccess
     public function markRead(User $user, CrmConversation $conversation): void
     {
         $lastId = $conversation->messages()->max('id');
-        CrmConversationRead::updateOrCreate(
-            ['conversation_id'=>$conversation->id,'user_id'=>$user->id],
-            ['last_read_message_id'=>$lastId]
-        );
+        $now = now();
+        DB::table('crm_conversation_reads')->upsert([
+            [
+                'conversation_id' => $conversation->id,
+                'user_id' => $user->id,
+                'last_read_message_id' => $lastId,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+        ], ['conversation_id', 'user_id'], ['last_read_message_id', 'updated_at']);
     }
 }

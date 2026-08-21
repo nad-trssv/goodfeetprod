@@ -217,6 +217,7 @@
       const data = await response.json();
       render(document.getElementById('header-crm-chat-count'), data.count);
       render(document.getElementById('sidebar-crm-chat-count'), data.count);
+      render(document.getElementById('sidebar-crm-group-count'), data.count);
     } catch (_) {
       // Polling resumes automatically after a temporary connection failure.
     } finally { loading = false; }

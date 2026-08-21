@@ -29,6 +29,7 @@ use App\Models\Services;
 use App\Services\Booking\AdminAppointmentAvailability;
 use App\Services\Customer\AdminCustomerDuplicateDetector;
 use Illuminate\Database\Eloquent\Builder;
+use App\Services\Notifications\NotificationReadService;
 
 class AppointmentController extends Controller
 {
@@ -167,9 +168,10 @@ class AppointmentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Appointments $appointment)
+    public function show(Appointments $appointment, NotificationReadService $notifications)
     {
         $this->authorize('view', $appointment);
+        $notifications->appointment(auth()->user(), $appointment);
         $event = $this->appointmentService->show($appointment);
         $event->load(['service', 'user', 'room', 'customer', 'media', 'auditTrail' => fn ($query) => $query->with('actor')->latest('id')]);
 

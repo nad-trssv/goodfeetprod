@@ -79,9 +79,33 @@ class CrmFeatureTest extends TestCase
         $this->assertSame(hash('sha256',$response->json('token')), $conversation->access_token_hash);
         $this->assertDatabaseHas('notifications',['notifiable_id'=>$admin->id]);
 
-        $this->postJson(route('chat.show',$conversation))->assertUnprocessable();
-        $this->postJson(route('chat.show',$conversation),['token'=>str_repeat('x',64)])->assertForbidden();
-        $this->postJson(route('chat.show',$conversation),['token'=>$response->json('token')])->assertOk()->assertJsonCount(1,'messages');
+        $this->getJson(route('chat.show',$conversation))->assertUnprocessable();
+        $this->withHeader('X-Chat-Token',str_repeat('x',64))->getJson(route('chat.show',$conversation))->assertForbidden();
+        $this->withHeader('X-Chat-Token',$response->json('token'))->getJson(route('chat.show',$conversation))->assertOk()->assertJsonCount(1,'messages');
+    }
+
+    public function test_polling_does_not_consume_message_or_csrf_rate_limits(): void
+    {
+        $this->records();
+        $this->enableChat();
+        $created=$this->postJson(route('chat.store'),[
+            'name'=>'Rate limit visitor',
+            'phone'=>'+37250000119',
+            'message'=>'Hello',
+        ])->assertCreated()->json();
+        $conversation=CrmConversation::where('public_uuid',$created['uuid'])->firstOrFail();
+
+        for($attempt=0;$attempt<35;$attempt++){
+            $this->withHeader('X-Chat-Token',$created['token'])
+                ->getJson(route('chat.show',$conversation))
+                ->assertOk();
+        }
+
+        $this->getJson(route('chat.csrf'))->assertOk()->assertJsonStructure(['token']);
+        $this->postJson(route('chat.messages.store',$conversation),[
+            'token'=>$created['token'],
+            'message'=>'This is my first reply',
+        ])->assertCreated();
     }
 
     public function test_transferring_chat_grants_only_that_conversation_to_restricted_employee(): void
@@ -94,9 +118,94 @@ class CrmFeatureTest extends TestCase
 
         $this->actingAs($master)->get(route('crm.chat.show',$conversation))->assertForbidden();
         $this->actingAs($admin)->postJson(route('crm.chat.transfer',$conversation),['user_id'=>$master->id])->assertOk();
+        $this->assertSame(1,$master->fresh()->unreadNotifications()->count());
+        $initialMessageId = $conversation->messages()->where('sender_type','visitor')->value('id');
+        $transferMessage = $this->withHeader('X-Chat-Token',$created['token'])
+            ->getJson(route('chat.show',[$conversation,'after'=>$initialMessageId]))
+            ->assertOk()
+            ->assertJsonCount(1,'messages')
+            ->assertJsonPath('messages.0.sender','system')
+            ->assertJsonPath('messages.0.kind','system')
+            ->json('messages.0');
+
         $this->actingAs($master)->get(route('crm.chat.show',$conversation))->assertOk();
-        $this->actingAs($master)->postJson(route('crm.chat.reply',$conversation),['message'=>'I will help you'])->assertCreated();
+        $this->assertSame(0,$master->fresh()->unreadNotifications()->count());
+        $this->actingAs($master)->postJson(route('crm.chat.reply',$conversation),['message'=>'I will help you'])
+            ->assertCreated()
+            ->assertJsonCount(2,'messages')
+            ->assertJsonPath('messages.0.sender','system')
+            ->assertJsonPath('messages.1.body','I will help you')
+            ->assertJsonPath('messages.1.sender','staff')
+            ->assertJsonPath('messages.1.sender_name','CRM Master');
+        $this->withHeader('X-Chat-Token',$created['token'])
+            ->getJson(route('chat.show',[$conversation,'after'=>$transferMessage['id']]))
+            ->assertOk()
+            ->assertJsonCount(2,'messages')
+            ->assertJsonPath('messages.0.sender','system')
+            ->assertJsonPath('messages.1.sender_name','CRM Master')
+            ->assertJsonPath('messages.1.body','I will help you');
+        $this->actingAs($master)->get(route('crm.chat.show',$conversation))->assertOk();
         $this->assertDatabaseHas('crm_messages',['conversation_id'=>$conversation->id,'sender_type'=>'staff','sender_id'=>$master->id,'body'=>'I will help you']);
+        $this->assertDatabaseCount('crm_conversation_reads',1);
+
+        $this->actingAs($master)->postJson(route('crm.chat.close',$conversation))->assertOk()->assertJsonPath('status','closed');
+        $closedState=$this->withHeader('X-Chat-Token',$created['token'])
+            ->getJson(route('chat.show',$conversation))
+            ->assertOk()
+            ->assertJsonPath('status','closed')
+            ->assertJsonPath('can_rate',true)
+            ->assertJsonPath('rating',null);
+        $this->assertContains('system',collect($closedState->json('messages'))->pluck('sender')->all());
+        $this->postJson(route('chat.messages.store',$conversation),['token'=>$created['token'],'message'=>'Can I still write?'])
+            ->assertStatus(409);
+
+        $this->postJson(route('chat.rating.store',$conversation),['token'=>$created['token'],'rating'=>5])
+            ->assertCreated()
+            ->assertJsonPath('rating',5);
+        $this->postJson(route('chat.rating.store',$conversation),['token'=>$created['token'],'rating'=>2])
+            ->assertOk()
+            ->assertJsonPath('rating',5);
+        $this->assertDatabaseCount('crm_conversation_ratings',1);
+        $this->assertDatabaseHas('crm_conversation_ratings',[
+            'conversation_id'=>$conversation->id,
+            'staff_user_id'=>$master->id,
+            'staff_name'=>'CRM Master',
+            'rating'=>5,
+        ]);
+        $this->actingAs($admin)->get(route('crm.ratings.index'))
+            ->assertOk()
+            ->assertSee('CRM Master')
+            ->assertSee('5.00');
+        $this->actingAs($master)->get(route('crm.ratings.index'))->assertForbidden();
+    }
+
+    public function test_staff_events_can_be_hidden_from_client_without_losing_internal_transfer_history(): void
+    {
+        [$admin, $master] = $this->records();
+        $this->enableChat();
+        SiteSettings::where('key','crm_chat_notify_client_staff_events')->update(['payload'=>'false']);
+        CrmChatStaff::create(['user_id'=>$master->id,'is_enabled'=>true,'can_view_history'=>false,'must_answer'=>false]);
+        $created = $this->postJson(route('chat.store'),['name'=>'Visitor','phone'=>'+37250000112','message'=>'Hello'])->json();
+        $conversation = CrmConversation::where('public_uuid',$created['uuid'])->firstOrFail();
+        $initialMessageId = $conversation->messages()->value('id');
+
+        $this->actingAs($admin)->postJson(route('crm.chat.transfer',$conversation),['user_id'=>$master->id])->assertOk();
+        $this->actingAs($master)->postJson(route('crm.chat.reply',$conversation),['message'=>'How can I help?'])
+            ->assertCreated()
+            ->assertJsonCount(1,'messages');
+
+        $this->assertDatabaseHas('crm_messages',[
+            'conversation_id'=>$conversation->id,
+            'event_type'=>'conversation_transferred',
+            'is_public'=>false,
+        ]);
+        $this->withHeader('X-Chat-Token',$created['token'])
+            ->getJson(route('chat.show',[$conversation,'after'=>$initialMessageId]))
+            ->assertOk()
+            ->assertJsonCount(1,'messages')
+            ->assertJsonPath('messages.0.sender','staff')
+            ->assertJsonPath('messages.0.sender_name','CRM Master')
+            ->assertJsonPath('messages.0.body','How can I help?');
     }
 
     public function test_only_full_scope_administrator_can_change_crm_settings(): void
@@ -106,6 +215,7 @@ class CrmFeatureTest extends TestCase
         $this->actingAs($master)->put(route('crm.settings.update'),$payload)->assertRedirect();
         $this->actingAs($admin)->put(route('crm.settings.update'),$payload)->assertRedirect()->assertSessionHasNoErrors();
         $this->assertDatabaseHas('crm_chat_staff',['user_id'=>$master->id,'must_answer'=>true,'can_view_history'=>false]);
+        $this->assertDatabaseHas('site_settings',['key'=>'crm_chat_notify_client_staff_events','payload'=>'true']);
     }
 
     private function records(): array
@@ -134,6 +244,6 @@ class CrmFeatureTest extends TestCase
     private function settingsPayload(User $admin, User $master): array
     {
         $schedule=[]; foreach(['monday','tuesday','wednesday','thursday','friday','saturday','sunday'] as $day) $schedule[$day]=['enabled'=>true,'start'=>'09:00','end'=>'18:00'];
-        return ['enabled'=>true,'title'=>'Support','welcome_message'=>'Hello','offline_message'=>'We are away','timezone'=>'Europe/Tallinn','schedule'=>$schedule,'staff'=>[['user_id'=>$admin->id,'is_enabled'=>true,'can_view_history'=>true,'must_answer'=>true],['user_id'=>$master->id,'is_enabled'=>true,'can_view_history'=>false,'must_answer'=>true]]];
+        return ['enabled'=>true,'notify_client_staff_events'=>true,'title'=>'Support','welcome_message'=>'Hello','offline_message'=>'We are away','timezone'=>'Europe/Tallinn','schedule'=>$schedule,'staff'=>[['user_id'=>$admin->id,'is_enabled'=>true,'can_view_history'=>true,'must_answer'=>true],['user_id'=>$master->id,'is_enabled'=>true,'can_view_history'=>false,'must_answer'=>true]]];
     }
 }

@@ -11,7 +11,7 @@ class CrmSettingsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'enabled'=>['required','boolean'],'title'=>['required','string','max:100'],
+            'enabled'=>['required','boolean'],'notify_client_staff_events'=>['required','boolean'],'title'=>['required','string','max:100'],
             'welcome_message'=>['required','string','max:1000'],'offline_message'=>['required','string','max:1000'],
             'timezone'=>['required','timezone:all'],
             'schedule'=>['required','array'],'schedule.*.enabled'=>['required','boolean'],

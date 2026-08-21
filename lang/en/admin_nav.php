@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'crm' => 'CRM', 'crm_customers' => 'Customer database', 'crm_chat' => 'Live chat', 'crm_settings' => 'CRM settings',
+    'crm' => 'CRM', 'crm_customers' => 'Customer database', 'crm_chat' => 'Live chat', 'crm_ratings' => 'Staff ratings', 'crm_settings' => 'CRM settings',
     'dashboard' => 'Dashboard',
     'appointments' => 'Appointments',
     'new_appointment' => 'New appointment',

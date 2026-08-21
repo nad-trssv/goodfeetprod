@@ -18,6 +18,7 @@ class CrmChatSettings
             'title'=>(string)$value('title', 'Online chat'),
             'welcome_message'=>(string)$value('welcome_message', 'Hello! How can we help you?'),
             'offline_message'=>(string)$value('offline_message', 'We are currently offline. Leave a message and we will reply during working hours.'),
+            'notify_client_staff_events'=>(bool)$value('notify_client_staff_events', true),
             'timezone'=>(string)$value('timezone', config('app.timezone')),
             'schedule'=>(array)$value('schedule', []),
         ];

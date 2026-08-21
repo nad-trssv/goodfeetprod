@@ -30,7 +30,7 @@ class CrmSettingsController extends Controller
     {
         $data=$request->validated();
         DB::transaction(function() use($data){
-            foreach(['enabled','title','welcome_message','offline_message','timezone','schedule'] as $key){
+            foreach(['enabled','notify_client_staff_events','title','welcome_message','offline_message','timezone','schedule'] as $key){
                 SiteSettings::updateOrCreate(['key'=>'crm_chat_'.$key],['group'=>'crm_chat','payload'=>json_encode($data[$key],JSON_UNESCAPED_UNICODE)]);
             }
             $ids=collect($data['staff']??[])->pluck('user_id')->map(fn($id)=>(int)$id);

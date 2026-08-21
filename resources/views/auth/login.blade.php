@@ -105,6 +105,34 @@
                         </div>
                         <button class="btn btn-primary w-100 mb-3">{{ __('Log in') }}</button>
                       </form>
+                      @if((app()->isLocal() && config('app.debug')) || app()->runningUnitTests())
+                        @php($developmentAccounts = [
+                          ['label' => 'Администратор', 'email' => 'admin@localhost.test', 'password' => 'ChangeMe123!'],
+                          ['label' => 'Ресепшионист', 'email' => 'reception@localhost.test', 'password' => 'ChangeMe123!'],
+                          ['label' => 'Мастер', 'email' => 'anna.master@example.test', 'password' => 'Master123!'],
+                        ])
+                        <section class="mt-4 pt-3 border-top" aria-labelledby="development-login-title">
+                          <h6 id="development-login-title" class="text-body-highlight mb-1">Быстрый вход</h6>
+                          <p class="text-body-tertiary fs-9 mb-3">Только для локальной разработки. Кнопка заполняет поля, но не отправляет форму.</p>
+                          <div class="d-grid gap-2">
+                            @foreach($developmentAccounts as $account)
+                              <button class="btn btn-phoenix-secondary development-login-account text-start" type="button" data-email="{{ $account['email'] }}" data-password="{{ $account['password'] }}">
+                                <span class="fw-semibold d-block">{{ $account['label'] }}</span>
+                                <small class="text-body-tertiary">{{ $account['email'] }}</small>
+                              </button>
+                            @endforeach
+                          </div>
+                        </section>
+                        <script>
+                          document.querySelectorAll('.development-login-account').forEach(button => {
+                            button.addEventListener('click', () => {
+                              document.getElementById('email').value = button.dataset.email;
+                              document.getElementById('password').value = button.dataset.password;
+                              document.getElementById('password').focus();
+                            });
+                          });
+                        </script>
+                      @endif
                     </div>
                   </div>
                 </div>

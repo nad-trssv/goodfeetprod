@@ -16,4 +16,5 @@ class CrmConversation extends Model
     public function customer() { return $this->belongsTo(Customer::class); }
     public function assignee() { return $this->belongsTo(User::class, 'assigned_to_user_id'); }
     public function reads() { return $this->hasMany(CrmConversationRead::class, 'conversation_id'); }
+    public function rating() { return $this->hasOne(CrmConversationRating::class, 'conversation_id'); }
 }

@@ -8,7 +8,9 @@ use App\Http\Requests\CrmChatTransferRequest;
 use App\Models\CrmConversation;
 use App\Models\User;
 use App\Services\Crm\CrmChatAccess;
+use App\Services\Crm\CrmChatMessagePresenter;
 use App\Services\Crm\CrmChatService;
+use App\Services\Notifications\NotificationReadService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -23,29 +25,34 @@ class CrmChatController extends Controller
         return view('admin.crm.chat.index',compact('conversations'));
     }
 
-    public function show(Request $request, CrmConversation $conversation, CrmChatAccess $access): View
+    public function show(Request $request, CrmConversation $conversation, CrmChatAccess $access, NotificationReadService $notifications): View
     {
         abort_unless($access->canView($request->user(),$conversation),403);
         $access->markRead($request->user(),$conversation);
+        $notifications->conversation($request->user(),$conversation);
         $conversation->load(['customer','assignee:id,name,profile_photo_path','messages'=>fn($q)=>$q->with('staffSender:id,name,profile_photo_path')->orderBy('id')]);
         $staff=User::with('role')->get()->filter->isStaff()->sortBy('name')->values();
         return view('admin.crm.chat.show',compact('conversation','staff'));
     }
 
-    public function messages(Request $request, CrmConversation $conversation, CrmChatAccess $access): JsonResponse
+    public function messages(Request $request, CrmConversation $conversation, CrmChatAccess $access, CrmChatMessagePresenter $presenter, NotificationReadService $notifications): JsonResponse
     {
         abort_unless($access->canView($request->user(),$conversation),403);
         $messages=$conversation->messages()->where('id','>',$request->integer('after'))->with('staffSender:id,name')->orderBy('id')->limit(100)->get();
         $access->markRead($request->user(),$conversation);
-        return response()->json(['messages'=>$messages->map(fn($m)=>['id'=>$m->id,'sender'=>$m->sender_type,'sender_name'=>$m->staffSender?->name,'body'=>$m->body,'time'=>$m->created_at->toIso8601String()])]);
+        $notifications->conversation($request->user(),$conversation);
+        return response()->json(['messages'=>$messages->map(fn($message)=>$presenter->present($message))]);
     }
 
-    public function reply(CrmChatReplyRequest $request, CrmConversation $conversation, CrmChatAccess $access, CrmChatService $chat): JsonResponse
+    public function reply(CrmChatReplyRequest $request, CrmConversation $conversation, CrmChatAccess $access, CrmChatService $chat, CrmChatMessagePresenter $presenter): JsonResponse
     {
         abort_unless($access->canView($request->user(),$conversation),403);
-        $message=$chat->staffMessage($conversation,$request->user(),$request->validated('message'));
+        $messages=$chat->staffMessage($conversation,$request->user(),$request->validated('message'));
         $access->markRead($request->user(),$conversation);
-        return response()->json(['id'=>$message->id],201);
+        return response()->json([
+            'id' => end($messages)->id,
+            'messages' => collect($messages)->map(fn($message)=>$presenter->present($message))->values(),
+        ], 201);
     }
 
     public function transfer(CrmChatTransferRequest $request, CrmConversation $conversation, CrmChatAccess $access, CrmChatService $chat): JsonResponse
@@ -57,10 +64,10 @@ class CrmChatController extends Controller
         return response()->json(['assigned_to'=>$target->name]);
     }
 
-    public function close(Request $request, CrmConversation $conversation, CrmChatAccess $access): JsonResponse
+    public function close(Request $request, CrmConversation $conversation, CrmChatAccess $access, CrmChatService $chat): JsonResponse
     {
         abort_unless($request->user()->hasPermission('crm.chat.reply') && $access->canView($request->user(),$conversation),403);
-        $conversation->update(['status'=>'closed','closed_at'=>now()]);
+        $chat->close($conversation,$request->user());
         return response()->json(['status'=>'closed']);
     }
 
