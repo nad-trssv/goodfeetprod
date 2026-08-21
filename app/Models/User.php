@@ -30,6 +30,7 @@ class User extends Authenticatable
         'professional_titles',
         'phone',
         'email',
+        'locale',
         'role_id',
         'last_active',
         'profile_photo_path',

@@ -72,6 +72,7 @@ class ProfileService
                 'phone' => $request['phone'],
                 'date_birthday' => $request['date_birthday'],
                 'email' => $request['email'],
+                'locale' => $request->input('locale', $this->profile->locale ?? config('app.locale')),
                 'profile_photo_path' => $newPhotoPath ?? $this->profile->profile_photo_path,
             ]);
             if ($this->profile['date_birthday']) {

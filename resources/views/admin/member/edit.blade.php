@@ -31,6 +31,7 @@
               <div class="col-12 col-md-6"><label class="form-label" for="role_id">Роль</label><select class="form-select" id="role_id" @disabled(!auth()->user()->hasPermission('roles.manage'))>@foreach($roles as $role)<option value="{{ $role->id }}" @selected($member->role_id === $role->id)>{{ $role->name }}</option>@endforeach</select>@cannot('roles.manage')<input type="hidden" id="role_id_locked" value="{{ $member->role_id }}">@endcannot</div>
               <div class="col-12 col-md-6"><label class="form-label" for="date_birthday">Дата рождения</label><input class="form-control" id="date_birthday" type="date" value="{{ $member->date_birthday?->format('Y-m-d') }}"></div>
               <div class="col-12 col-md-6"><label class="form-label" for="employment_started_at">Начало работы в компании</label><input class="form-control" id="employment_started_at" type="date" value="{{ $member->employment_started_at?->format('Y-m-d') }}"><div class="form-text">Если не указано, для статистики используется дата создания сотрудника.</div></div>
+              <div class="col-12 col-md-6"><label class="form-label" for="locale">{{ __('admin_nav.interface_language') }}</label><select class="form-select" id="locale">@foreach(config('supported_locales') as $localeCode => $language)<option value="{{ $localeCode }}" @selected(($member->locale ?? config('app.locale')) === $localeCode)>{{ $language }}</option>@endforeach</select><div class="form-text">{{ __('admin_nav.employee_language_hint') }}</div></div>
               <div class="col-12 col-md-6"><label class="form-label" for="photoInput">Фотография</label><input class="form-control" id="photoInput" type="file" accept="image/jpeg,image/png,image/webp"><div class="form-text">JPG, PNG или WebP; минимум 400×400 px, максимум 2 МБ.</div></div>
               <div class="col-12">
                 <label class="form-label">Должности на языках</label>
@@ -105,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('photoInput')?.addEventListener('change', function(){ const file=this.files[0]; if(file) document.getElementById('photoPreview').src=URL.createObjectURL(file); });
   document.getElementById('saveBtn')?.addEventListener('click', async function(){
     const data = new FormData(); data.append('_method','PUT');
-    ['name','username','email','phone','date_birthday','employment_started_at'].forEach(id => data.append(id, document.getElementById(id).value));
+    ['name','username','email','phone','date_birthday','employment_started_at','locale'].forEach(id => data.append(id, document.getElementById(id).value));
     data.append('role_id', document.getElementById('role_id').value || document.getElementById('role_id_locked')?.value || '');
     document.querySelectorAll('.professional-title').forEach(input => data.append(`professional_titles[${input.dataset.locale}]`, input.value));
     if(document.getElementById('password').value){data.append('password',document.getElementById('password').value);data.append('password_confirmation',document.getElementById('password_confirmation').value);}

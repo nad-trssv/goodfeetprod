@@ -62,6 +62,15 @@
                                 <div class="invalid-feedback" id="date_birthday-error"></div>
                               </div>
                             </div>
+                            <div class="col-12 col-sm-6">
+                              <label class="form-label" for="locale">{{ __('admin_nav.interface_language') }}</label>
+                              <select class="form-select" id="locale" name="locale">
+                                @foreach(config('supported_locales') as $localeCode => $language)
+                                  <option value="{{ $localeCode }}" @selected(($profile->locale ?? config('app.locale')) === $localeCode)>{{ $language }}</option>
+                                @endforeach
+                              </select>
+                              <div class="form-text">{{ __('admin_nav.interface_language_hint') }}</div>
+                            </div>
                             <div class="col-12">
                               <label class="form-label mb-2">Специализация мастера</label>
                               <ul class="nav nav-pills gap-1 mb-2" role="tablist">
@@ -183,7 +192,8 @@
                 formData.append("username", username); 
                 formData.append("email", $("#emailSocial").val());
                 formData.append("phone", $("#phone").val());
-                formData.append("date_birthday", $("#date_birthday").val());
+                 formData.append("date_birthday", $("#date_birthday").val());
+                 formData.append("locale", $("#locale").val());
                 $('.profile-professional-title').each(function () {
                     formData.append(`professional_titles[${$(this).data('locale')}]`, $(this).val());
                 });
@@ -223,6 +233,9 @@
                         timerProgressBar: true,
                         timer: 1500,
                     });
+                    if (response.profile.locale !== @js(app()->getLocale())) {
+                      window.setTimeout(() => window.location.reload(), 500);
+                    }
   
                   },
                   error: function(xhr) { 

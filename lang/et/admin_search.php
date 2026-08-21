@@ -1,0 +1,2 @@
+<?php
+return ['title'=>'Halduspaneeli otsing','subtitle'=>'Otsi ühest kohast teenuseid, kliente ja broneeringuid.','enter_more'=>'Sisestage vähemalt kaks märki.','no_results'=>'Tulemusi ei leitud.','active'=>'aktiivne','inactive'=>'mitteaktiivne','unnamed_customer'=>'Nimeta klient','appointments_count'=>'{0} broneeringuid pole|{1} :count broneering|[2,*] :count broneeringut','types'=>['services'=>'Teenused','customers'=>'Kliendid','appointments'=>'Broneeringud']];

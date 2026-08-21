@@ -1,0 +1,2 @@
+<?php
+return ['title'=>'Administration search','subtitle'=>'Search services, customers and appointments in one place.','enter_more'=>'Enter at least two characters.','no_results'=>'Nothing was found.','active'=>'active','inactive'=>'inactive','unnamed_customer'=>'Unnamed customer','appointments_count'=>'{0} no appointments|{1} :count appointment|[2,*] :count appointments','types'=>['services'=>'Services','customers'=>'Customers','appointments'=>'Appointments']];

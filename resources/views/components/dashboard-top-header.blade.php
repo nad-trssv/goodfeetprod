@@ -1,4 +1,17 @@
 
+@php
+  $canAdminSearch = auth()->user()->hasPermission('appointments.view') || auth()->user()->hasPermission('customers.view') || auth()->user()->hasPermission('services.view');
+  $canQuickAppointments = auth()->user()->hasPermission('appointments.view') || auth()->user()->hasPermission('appointments.create');
+@endphp
+<style>
+  .admin-header-search{width:min(32rem,38vw)}
+  .admin-header-search-results{top:calc(100% + .45rem);max-height:min(32rem,70vh);overflow:auto;z-index:1080}
+  .admin-quick-link{white-space:nowrap}
+  .admin-nav-group-chevron{transition:transform .2s ease}
+  [aria-expanded="true"] .admin-nav-group-chevron{transform:rotate(180deg)}
+  @media(max-width:1399.98px){.admin-header-search{width:min(25rem,42vw)}}
+  @media(min-width:1400px) and (max-width:1599.98px){.admin-header-search{width:min(20rem,23vw)}}
+</style>
 <nav class="navbar navbar-top fixed-top navbar-expand" id="navbarDefault">
     <div class="collapse navbar-collapse justify-content-between">
       <div class="navbar-logo">
@@ -13,12 +26,38 @@
           </div>
         </a>
       </div>
-      <ul class="navbar-nav navbar-nav-icons flex-row">
+      <div class="d-none d-md-flex align-items-center justify-content-center gap-2 flex-grow-1 mx-3 min-w-0">
+        <div class="d-none d-xxl-flex align-items-center gap-1">
+          @can('appointments.view')
+            <a class="btn btn-sm btn-phoenix-secondary admin-quick-link" href="{{ route('calendar.index') }}"><span data-feather="calendar" class="me-1"></span>{{ __('admin_nav.calendar') }}</a>
+            <a class="btn btn-sm btn-phoenix-secondary admin-quick-link" href="{{ route('appointments.today') }}"><span data-feather="clock" class="me-1"></span>{{ __('admin_nav.today') }}</a>
+          @endcan
+          @can('appointments.create')<a class="btn btn-sm btn-primary admin-quick-link" href="{{ route('calendar.create') }}"><span data-feather="plus" class="me-1"></span>{{ __('admin_nav.new_appointment') }}</a>@endcan
+        </div>
+        @if($canAdminSearch)
+          <div class="admin-header-search position-relative">
+            <form method="GET" action="{{ route('admin.search') }}" role="search" autocomplete="off">
+              <div class="input-group input-group-sm"><span class="input-group-text bg-body border-end-0"><span data-feather="search" style="width:15px;height:15px"></span></span><input id="adminHeaderSearch" class="form-control border-start-0 ps-0" type="search" name="q" minlength="2" maxlength="100" value="{{ request()->routeIs('admin.search') ? request('q') : '' }}" placeholder="{{ __('admin_nav.search_placeholder') }}" aria-label="{{ __('admin_nav.search') }}"></div>
+            </form>
+            <div id="adminHeaderSearchResults" class="admin-header-search-results position-absolute start-0 end-0 bg-body rounded-3 shadow border d-none"></div>
+          </div>
+        @endif
+      </div>
+      <ul class="navbar-nav navbar-nav-icons flex-row align-items-center">
+        @if($canAdminSearch)<li class="nav-item d-md-none"><a class="nav-link px-2" href="{{ route('admin.search') }}" aria-label="{{ __('admin_nav.search') }}"><span data-feather="search"></span></a></li>@endif
+        @if($canQuickAppointments)<li class="nav-item dropdown d-xxl-none">
+          <a class="nav-link px-2" href="#" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{{ __('admin_nav.quick_actions') }}"><span data-feather="zap"></span></a>
+          <div class="dropdown-menu dropdown-menu-end navbar-dropdown-caret shadow border">
+            <h6 class="dropdown-header">{{ __('admin_nav.quick_actions') }}</h6>
+            @can('appointments.view')<a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('calendar.index') }}"><span data-feather="calendar"></span>{{ __('admin_nav.calendar') }}</a><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('appointments.today') }}"><span data-feather="clock"></span>{{ __('admin_nav.today') }}</a>@endcan
+            @can('appointments.create')<a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('calendar.create') }}"><span data-feather="plus-circle"></span>{{ __('admin_nav.new_appointment') }}</a>@endcan
+          </div>
+        </li>@endif
         <li class="nav-item">
           <div class="theme-control-toggle fa-icon-wait px-2">
             <input class="form-check-input ms-0 theme-control-toggle-input" type="checkbox" data-theme-control="phoenixTheme" value="dark" id="themeControlToggle" />
-            <label class="mb-0 theme-control-toggle-label theme-control-toggle-light" for="themeControlToggle" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Switch theme" style="height:32px;width:32px;"><span class="icon" data-feather="moon"></span></label>
-            <label class="mb-0 theme-control-toggle-label theme-control-toggle-dark" for="themeControlToggle" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Switch theme" style="height:32px;width:32px;"><span class="icon" data-feather="sun"></span></label>
+            <label class="mb-0 theme-control-toggle-label theme-control-toggle-light" for="themeControlToggle" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="{{ __('admin_nav.switch_theme') }}" style="height:32px;width:32px;"><span class="icon" data-feather="moon"></span></label>
+            <label class="mb-0 theme-control-toggle-label theme-control-toggle-dark" for="themeControlToggle" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="{{ __('admin_nav.switch_theme') }}" style="height:32px;width:32px;"><span class="icon" data-feather="sun"></span></label>
           </div>
         </li>
         @can('notifications.view')
@@ -54,8 +93,9 @@
               </div>
               <div class="card-footer p-0 border-top border-translucent">
                 <div class="px-3">
+                  @can('profile.view')<a class="btn btn-phoenix-secondary d-flex flex-center w-100 mb-2" href="{{ route('profile.index') }}"><span class="me-2" data-feather="user"></span>{{ __('admin_nav.profile') }}</a>@endcan
                   <a class="btn btn-phoenix-secondary d-flex flex-center w-100" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                    <span class="me-2" data-feather="log-out"> </span>Sign out
+                    <span class="me-2" data-feather="log-out"> </span>{{ __('admin_nav.sign_out') }}
                   </a>
                   <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                       @csrf
@@ -68,6 +108,46 @@
       </ul>
     </div>
   </nav>
+@if($canAdminSearch)
+@push('scripts')
+<script>
+(() => {
+  const input = document.getElementById('adminHeaderSearch');
+  const results = document.getElementById('adminHeaderSearchResults');
+  if (!input || !results) return;
+  let timer;
+  let requestController;
+  const close = () => results.classList.add('d-none');
+  input.addEventListener('input', () => {
+    window.clearTimeout(timer);
+    requestController?.abort();
+    const query = input.value.trim();
+    if (query.length < 2) { close(); results.innerHTML = ''; return; }
+    timer = window.setTimeout(async () => {
+      requestController = new AbortController();
+      try {
+        const response = await fetch(@js(route('admin.search')) + '?q=' + encodeURIComponent(query), {
+          headers: {'Accept':'application/json', 'X-Requested-With':'XMLHttpRequest'},
+          signal: requestController.signal,
+          cache: 'no-store'
+        });
+        if (!response.ok) return;
+        const payload = await response.json();
+        results.innerHTML = payload.html;
+        results.classList.remove('d-none');
+        window.feather?.replace();
+      } catch (error) {
+        if (error.name !== 'AbortError') close();
+      }
+    }, 250);
+  });
+  input.addEventListener('focus', () => { if (results.innerHTML) results.classList.remove('d-none'); });
+  input.addEventListener('keydown', event => { if (event.key === 'Escape') close(); });
+  document.addEventListener('click', event => { if (!event.target.closest('.admin-header-search')) close(); });
+})();
+</script>
+@endpush
+@endif
 @can('notifications.view')
 @push('scripts')
 <script>

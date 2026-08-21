@@ -16,9 +16,15 @@ class SetLocale
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if($request->session()->has('locale')) {
-            App::setLocale($request->session()->get('locale', 'en'));
-        }
+        $supported = array_keys(config('supported_locales'));
+        $accountLocale = $request->user()?->locale;
+        $sessionLocale = $request->session()->get('locale');
+        $locale = in_array($accountLocale, $supported, true)
+            ? $accountLocale
+            : (in_array($sessionLocale, $supported, true) ? $sessionLocale : config('app.locale'));
+
+        App::setLocale($locale);
+
         return $next($request);
     }
     

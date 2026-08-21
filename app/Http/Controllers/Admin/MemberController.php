@@ -130,6 +130,7 @@ class MemberController extends Controller
             'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048|dimensions:min_width=400,min_height=400,max_width=4000,max_height=4000',
             'professional_titles' => 'nullable|array',
             'professional_titles.*' => 'nullable|string|max:120',
+            'locale' => ['sometimes', 'required', 'string', \Illuminate\Validation\Rule::in(array_keys(config('supported_locales')))],
             'employment_started_at' => 'nullable|date|before_or_equal:today',
             'date_birthday' => 'nullable|date|before:today',
         ];
@@ -151,6 +152,7 @@ class MemberController extends Controller
             'username' => $request->username,
             'phone' => $request->phone,
             'email' => $request->email,
+            'locale' => $request->input('locale', $member->locale ?? config('app.locale')),
             'role_id' => $request->role_id,
             'date_birthday' => $request->date_birthday,
             'employment_started_at' => $request->employment_started_at,

@@ -28,6 +28,7 @@ use App\Http\Controllers\Admin\RescheduleRequestController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\AdminMasterServiceController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\AdminGlobalSearchController;
 
 Route::get('/', [PageController::class, 'index'])->name('home');
 Route::get('/sitemap.xml', [PageController::class, 'sitemap'])->name('sitemap');
@@ -82,6 +83,7 @@ Route::middleware([
     'verified',
 ])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->middleware('permission:dashboard.view')->name('dashboard');
+    Route::get('admin/search', AdminGlobalSearchController::class)->middleware('throttle:60,1')->name('admin.search');
 
     Route::get('calendar/create', [AppointmentController::class, 'createAppointment'])->middleware('permission:appointments.create')->name('calendar.create');
     Route::post('calendar/availability', [AppointmentController::class, 'availability'])->middleware(['permission:appointments.create', 'throttle:60,1'])->name('calendar.availability');

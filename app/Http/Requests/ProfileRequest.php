@@ -45,6 +45,7 @@ class ProfileRequest extends FormRequest
             'profile_photo_path' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
             'professional_titles' => ['nullable', 'array'],
             'professional_titles.*' => ['nullable', 'string', 'max:120'],
+            'locale' => ['sometimes', 'required', 'string', Rule::in(array_keys(config('supported_locales')))],
             'password' => [
                 'required_with:oldPassword',
                 'nullable',

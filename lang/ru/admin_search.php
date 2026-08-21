@@ -1,0 +1,2 @@
+<?php
+return ['title'=>'Поиск в административной панели','subtitle'=>'Один поиск по услугам, клиентам и записям.','enter_more'=>'Введите не менее двух символов.','no_results'=>'Ничего не найдено.','active'=>'активна','inactive'=>'неактивна','unnamed_customer'=>'Клиент без имени','appointments_count'=>'{0} нет записей|{1} :count запись|[2,4] :count записи|[5,*] :count записей','types'=>['services'=>'Услуги','customers'=>'Клиенты','appointments'=>'Записи']];
