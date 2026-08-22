@@ -32,6 +32,7 @@ return [
     'rooms' => 'Rooms',
     'room_load' => 'Room workload',
     'activity_log' => 'Activity log',
+    'system_health' => 'System health',
     'roles' => 'Roles and permissions',
     'interface_language' => 'Administration language',
     'interface_language_hint' => 'The language is linked to your account and follows you across devices.',

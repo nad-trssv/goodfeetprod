@@ -9,6 +9,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\MaintenanceMode;
 use App\Http\Middleware\EnsurePermission;
 use App\Http\Middleware\EnsureAllAppointmentsScope;
+use App\Http\Middleware\EnsureSuperAdminRole;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -20,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'permission' => EnsurePermission::class,
             'scope.all' => EnsureAllAppointmentsScope::class,
+            'super-admin-role' => EnsureSuperAdminRole::class,
         ]);
         $middleware->append(MaintenanceMode::class);
         $middleware->web(append:[

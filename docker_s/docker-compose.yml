@@ -1,5 +1,6 @@
 services:
   app:
+    image: booking-app:local
     build:
       context: ..
       dockerfile: docker_s/Dockerfile
@@ -11,6 +12,22 @@ services:
       - vendor_data:/var/www/vendor
       - ./php.ini:/usr/local/etc/php/conf.d/custom.ini
     depends_on:
+      - db
+    networks:
+      - goodfeet
+
+  scheduler:
+    image: booking-app:local
+    container_name: goodfeet_scheduler
+    restart: unless-stopped
+    working_dir: /var/www
+    command: php artisan schedule:work
+    volumes:
+      - ..:/var/www
+      - vendor_data:/var/www/vendor
+      - ./php.ini:/usr/local/etc/php/conf.d/custom.ini
+    depends_on:
+      - app
       - db
     networks:
       - goodfeet

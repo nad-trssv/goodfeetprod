@@ -34,6 +34,7 @@ use App\Http\Controllers\PublicChatController;
 use App\Http\Controllers\Admin\CrmChatController;
 use App\Http\Controllers\Admin\CrmSettingsController;
 use App\Http\Controllers\Admin\CrmRatingController;
+use App\Http\Controllers\Admin\SystemHealthController;
 
 Route::get('/', [PageController::class, 'index'])->name('home');
 Route::get('/sitemap.xml', [PageController::class, 'sitemap'])->name('sitemap');
@@ -196,6 +197,12 @@ Route::middleware([
         'activity-logs',
         [ActivityLogController::class, 'index']
     )->middleware('permission:activity_logs.view')->name('admin.activity-logs.index');
+    Route::get('admin/system-health', [SystemHealthController::class, 'index'])
+        ->middleware('super-admin-role')
+        ->name('admin.system-health.index');
+    Route::post('admin/system-health/run', [SystemHealthController::class, 'run'])
+        ->middleware(['super-admin-role', 'throttle:6,1'])
+        ->name('admin.system-health.run');
     // Только для администратора (super-admin)
     Route::group([], function () {
         Route::resource('calendarAllMasters', AppointmentControllerAllMasters::class)->only(['index', 'show', 'edit'])->middleware(['permission:appointments.view', 'scope.all']);

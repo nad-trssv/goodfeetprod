@@ -32,6 +32,7 @@ return [
     'rooms' => 'Kabinetid',
     'room_load' => 'Kabineti koormus',
     'activity_log' => 'Tegevuslogi',
+    'system_health' => 'Süsteemi olek',
     'roles' => 'Rollid ja õigused',
     'interface_language' => 'Halduspaneeli keel',
     'interface_language_hint' => 'Keel on seotud teie kontoga ja kehtib pärast sisselogimist kõigis seadmetes.',

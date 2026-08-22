@@ -11,6 +11,18 @@
         <testsuite name="Feature">
             <directory>tests/Feature</directory>
         </testsuite>
+        <testsuite name="Critical">
+            <file>tests/Feature/ProductionSecurityTest.php</file>
+            <file>tests/Feature/AvailabilityConflictMatrixTest.php</file>
+            <file>tests/Feature/BookingCreatorTest.php</file>
+            <file>tests/Feature/AdminAppointmentCreationTest.php</file>
+            <file>tests/Feature/BusinessAppointmentCancellationTest.php</file>
+            <file>tests/Feature/CustomerAccountTest.php</file>
+            <file>tests/Feature/AppointmentManagementTest.php</file>
+            <file>tests/Feature/RolePermissionTest.php</file>
+            <file>tests/Feature/CrmFeatureTest.php</file>
+            <file>tests/Feature/SystemHealthTest.php</file>
+        </testsuite>
     </testsuites>
     <source>
         <include>

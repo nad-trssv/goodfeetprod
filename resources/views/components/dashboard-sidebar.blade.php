@@ -9,7 +9,7 @@
   $showAdministration = $staff->hasPermission('settings.view') || $staff->hasPermission('promo_codes.view') || $staff->hasPermission('rooms.view') || $staff->hasPermission('activity_logs.view') || $staff->hasPermission('roles.manage') || ($staff->hasAllAppointmentsScope() && ($staff->hasPermission('appointments.view') || $staff->hasPermission('schedules.view')));
   $managementOpen = request()->routeIs('service.*', 'languages.*', 'fixedtime.*', 'member.*', 'admin.masters.schedule', 'admin.master-services.*');
   $profileOpen = request()->routeIs('profile.*', 'master.schedule.*', 'master.services.*', 'master.time-off.*');
-  $administrationOpen = request()->routeIs('settings.*', 'promo-codes.*', 'admin.red-days.*', 'admin.appointments.*', 'admin.rooms.*', 'admin.activity-logs.*', 'admin.roles.*');
+  $administrationOpen = request()->routeIs('settings.*', 'promo-codes.*', 'admin.red-days.*', 'admin.appointments.*', 'admin.rooms.*', 'admin.activity-logs.*', 'admin.roles.*', 'admin.system-health.*');
 @endphp
 <nav class="navbar navbar-vertical navbar-expand-lg">
   <div class="collapse navbar-collapse" id="navbarVerticalCollapse">
@@ -88,6 +88,7 @@
               <x-admin-nav-link route="admin.rooms.today" icon="grid" :label="__('admin_nav.room_load')" />
             @endcan
             @can('activity_logs.view')<x-admin-nav-link route="admin.activity-logs.index" icon="activity" :label="__('admin_nav.activity_log')" />@endcan
+            @if($staff->role?->resolvedSlug() === 'super-admin')<x-admin-nav-link route="admin.system-health.index" icon="heart" :label="__('admin_nav.system_health')" />@endif
             @can('roles.manage')<x-admin-nav-link route="admin.roles.index" icon="shield" :label="__('admin_nav.roles')" />@endcan
           </x-admin-nav-group>
         @endif
