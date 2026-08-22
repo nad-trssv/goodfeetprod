@@ -51,7 +51,7 @@ class AppointmentManagementTest extends TestCase
         $this->actingAs($admin)->get(route('calendar.index'))->assertOk()
             ->assertSee('"id":'.$active->id, false)
             ->assertSee('"id":'.$cancelled->id, false);
-        $this->actingAs($admin)->get(route('dashboard'))->assertOk()->assertSee('На сегодня записаны 2');
+        $this->actingAs($admin)->get(route('dashboard'))->assertOk()->assertSee(__('admin_dashboard.today_clients', ['count' => 2]));
         $this->actingAs($admin)->get(route('appointments.today'))->assertOk()
             ->assertSee(route('calendar.show', $active))
             ->assertSee(route('calendar.show', $cancelled))

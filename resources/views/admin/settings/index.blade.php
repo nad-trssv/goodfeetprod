@@ -1,4 +1,4 @@
-@section('title', 'Settings')
+@section('title', __('admin_settings.title'))
 @push('styles')
 <link href="{{ asset('vendors/flatpickr/flatpickr.min.css') }}" rel="stylesheet" />
 <style>
@@ -41,19 +41,19 @@
   <div class="content">
     <nav class="mb-3" aria-label="breadcrumb">
       <ol class="breadcrumb mb-0">
-        <li class="breadcrumb-item active">Настройки</li>
+        <li class="breadcrumb-item active">{{ __('admin_settings.title') }}</li>
       </ol>
     </nav>
 
     <ul class="nav settings-tabs mb-4" id="settingsTabs" role="tablist">
       <li class="nav-item" role="presentation">
         <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-booking" type="button">
-          <span class="fas fa-lock me-1"></span>Бронирование
+          <span class="fas fa-lock me-1"></span>{{ __('admin_settings.booking') }}
         </button>
       </li>
       <li class="nav-item" role="presentation">
         <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-site" type="button">
-          <span class="fas fa-cog me-1"></span>Настройки сайта
+          <span class="fas fa-cog me-1"></span>{{ __('admin_settings.site') }}
         </button>
       </li>
     </ul>
@@ -65,18 +65,18 @@
         <div class="row g-4">
           <div class="col-12">
             <div class="card">
-              <div class="card-header"><h5 class="mb-0">Фиксированная запись на услуги</h5></div>
+              <div class="card-header"><h5 class="mb-0">{{ __('admin_settings.fixed_booking') }}</h5></div>
               <div class="card-body">
-                <p class="text-muted fs-9 mb-3">Если включено — клиенты смогут записываться только на указанные слоты. Это глобальная настройка для мастеров без персонального расписания.</p>
+                <p class="text-muted fs-9 mb-3">{{ __('admin_settings.fixed_booking_hint') }}</p>
                 <form id="fixHoursTable">
                   @csrf
                   <div class="form-check form-switch mb-3">
                     <input class="form-check-input" id="isFixed" type="checkbox">
-                    <label class="form-check-label" for="isFixed">Включить фиксированное время</label>
+                    <label class="form-check-label" for="isFixed">{{ __('admin_settings.enable_fixed') }}</label>
                   </div>
                   <div id="rows-container" class="disabled"></div>
                   <div class="text-end mt-3">
-                    <button class="btn btn-primary" type="submit">Сохранить</button>
+                    <button class="btn btn-primary" type="submit">{{ __('admin_staff.save') }}</button>
                   </div>
                 </form>
               </div>
@@ -85,13 +85,13 @@
 
           <div class="col-12">
             <div class="card">
-              <div class="card-header"><h5 class="mb-0">Лимит дней на бронирование</h5></div>
+              <div class="card-header"><h5 class="mb-0">{{ __('admin_settings.booking_limit') }}</h5></div>
               <div class="card-body">
                 <form id="bookingLimitDays">
                   @csrf
                   <div class="row g-3 align-items-end">
                     <div class="col-md-6">
-                      <label class="form-label">Количество дней вперёд для бронирования</label>
+                      <label class="form-label">{{ __('admin_settings.booking_limit_label') }}</label>
                       <input class="form-control"
                             type="number" id="bookingLimit_days"
                             value="{{ $bookingLimit['days'] }}"
@@ -99,7 +99,7 @@
                       <div class="invalid-feedback" id="bookingLimit-error"></div>
                     </div>
                     <div class="col-md-2">
-                      <button class="btn btn-primary w-100" type="submit">Сохранить</button>
+                      <button class="btn btn-primary w-100" type="submit">{{ __('admin_staff.save') }}</button>
                     </div>
                   </div>
                 </form>
@@ -112,53 +112,53 @@
       {{-- ТАБ 4: Настройки сайта --}}
       <div class="tab-pane" id="tab-site">
         <div class="card">
-          <div class="card-header"><h5 class="mb-0">Настройки сайта</h5></div>
+          <div class="card-header"><h5 class="mb-0">{{ __('admin_settings.site') }}</h5></div>
           <div class="card-body">
             <form id="updateSettingsTable" enctype="multipart/form-data">
               @csrf
-              <h6 class="mb-3">Компания</h6>
+              <h6 class="mb-3">{{ __('admin_settings.company') }}</h6>
               <div class="row g-3 mb-4">
                 <div class="col-md-6">
-                  <label class="form-label">Название</label>
+                  <label class="form-label">{{ __('admin_settings.company_name') }}</label>
                   <input class="form-control" id="company_name" type="text">
                   <div class="invalid-feedback" id="company_name-error"></div>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Email</label>
+                  <label class="form-label">{{ __('admin_staff.email') }}</label>
                   <input class="form-control" id="company_email" type="email">
                   <div class="invalid-feedback" id="company_email-error"></div>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Телефон</label>
+                  <label class="form-label">{{ __('admin_staff.phone') }}</label>
                   <input class="form-control" id="company_phone" type="text" pattern="^\+.*">
                   <div class="invalid-feedback" id="company_phone-error"></div>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Адрес</label>
+                  <label class="form-label">{{ __('admin_settings.address') }}</label>
                   <input class="form-control" id="company_address" type="text">
                   <div class="invalid-feedback" id="company_address-error"></div>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Регистрационный номер <span class="text-muted">(необязательно)</span></label>
+                  <label class="form-label">{{ __('admin_settings.registration_number') }} <span class="text-muted">({{ __('admin_settings.optional') }})</span></label>
                   <input class="form-control" id="company_registration_number" name="company_registration_number" type="text">
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Расчётный счёт <span class="text-muted">(необязательно)</span></label>
+                  <label class="form-label">{{ __('admin_settings.bank_account') }} <span class="text-muted">({{ __('admin_settings.optional') }})</span></label>
                   <input class="form-control" id="company_bank_account" name="company_bank_account" type="text">
                 </div>
               </div>
 
               <div class="card border mb-5">
                 <div class="card-body">
-                  <h6 class="mb-2">Основной акцентный цвет</h6>
-                  <p class="text-muted fs-9">Используется для кнопок, ссылок, выбранных элементов, календарей и других активных состояний на клиентской и административной части сайта.</p>
+                  <h6 class="mb-2">{{ __('admin_settings.accent_color') }}</h6>
+                  <p class="text-muted fs-9">{{ __('admin_settings.accent_hint') }}</p>
                   <div class="row g-3 align-items-end">
                     <div class="col-auto">
-                      <label class="form-label" for="primary_accent_color_picker">Выбрать цвет</label>
-                      <input class="form-control form-control-color" id="primary_accent_color_picker" type="color" value="#3874FF" title="Выбрать основной цвет">
+                      <label class="form-label" for="primary_accent_color_picker">{{ __('admin_settings.select_color') }}</label>
+                      <input class="form-control form-control-color" id="primary_accent_color_picker" type="color" value="#3874FF" title="{{ __('admin_settings.select_color') }}">
                     </div>
                     <div class="col-sm-5 col-lg-4">
-                      <label class="form-label" for="primary_accent_color">HEX-код</label>
+                      <label class="form-label" for="primary_accent_color">{{ __('admin_settings.hex') }}</label>
                       <input class="form-control text-uppercase" id="primary_accent_color" name="primary_accent_color" type="text" value="#3874FF" maxlength="7" pattern="^#[0-9A-Fa-f]{6}$" required>
                       <div class="invalid-feedback" id="primary_accent_color-error"></div>
                     </div>
@@ -166,68 +166,68 @@
                 </div>
               </div>
 
-              <h6 class="mb-3">Шаблон записи на услугу</h6>
-              <p class="text-muted fs-9">Выберите, как клиент будет проходить шаги услуги, мастера и времени.</p>
+              <h6 class="mb-3">{{ __('admin_settings.booking_template') }}</h6>
+              <p class="text-muted fs-9">{{ __('admin_settings.booking_template_hint') }}</p>
               <div class="row g-3 mb-4">
                 @foreach([
-                  'classic' => ['На одном экране', 'Услуга, мастер, календарь и время без переходов между этапами.'],
-                  'wizard' => ['Сначала специалист', 'Сначала клиент выбирает мастера, затем видит только его услуги и время.'],
-                  'compact' => ['Компактный', 'Плотная сетка для быстрого выбора на одном экране.'],
+                  'classic' => [__('admin_settings.templates.classic.title'), __('admin_settings.templates.classic.description')],
+                  'wizard' => [__('admin_settings.templates.wizard.title'), __('admin_settings.templates.wizard.description')],
+                  'compact' => [__('admin_settings.templates.compact.title'), __('admin_settings.templates.compact.description')],
                 ] as $template => [$title, $description])
                   <div class="col-md-4">
                     <input class="btn-check" type="radio" name="booking_template" id="booking_template_{{ $template }}" value="{{ $template }}" {{ $template === 'classic' ? 'checked' : '' }}>
                     <label class="booking-template-option card h-100 border cursor-pointer" for="booking_template_{{ $template }}">
-                      <span class="card-body"><span class="d-flex justify-content-between fw-semibold mb-2">{{ $title }} <span class="template-selected badge badge-phoenix badge-phoenix-primary">Выбран</span></span><span class="text-muted fs-9">{{ $description }}</span></span>
+                      <span class="card-body"><span class="d-flex justify-content-between fw-semibold mb-2">{{ $title }} <span class="template-selected badge badge-phoenix badge-phoenix-primary">{{ __('admin_settings.selected') }}</span></span><span class="text-muted fs-9">{{ $description }}</span></span>
                     </label>
                   </div>
                 @endforeach
                 <div class="invalid-feedback" id="booking_template-error"></div>
               </div>
               <div class="text-end mb-5">
-                <button class="btn btn-primary" type="submit"><span class="fas fa-check me-2"></span>Сохранить шаблон</button>
+                <button class="btn btn-primary" type="submit"><span class="fas fa-check me-2"></span>{{ __('admin_settings.save_template') }}</button>
               </div>
 
               <div class="card border mb-5">
                 <div class="card-body">
-                  <h6 class="mb-2">Правила отмены и переноса</h6>
-                  <p class="text-muted fs-9">Единый срок применяется к отмене записи и отправке запроса на перенос.</p>
+                  <h6 class="mb-2">{{ __('admin_settings.cancellation_rules') }}</h6>
+                  <p class="text-muted fs-9">{{ __('admin_settings.cancellation_rules_hint') }}</p>
                   <div class="form-check form-switch border rounded-3 p-3 ps-6 mb-3">
                     <input type="hidden" name="allow_customer_cancellation" value="0">
                     <input class="form-check-input" id="allow_customer_cancellation" name="allow_customer_cancellation" type="checkbox" value="1" checked>
-                    <label class="form-check-label fw-semibold" for="allow_customer_cancellation">Разрешить клиентам самостоятельно отменять записи</label>
-                    <div class="text-muted fs-9 mt-1">Если выключено, кнопка отмены исчезнет из аккаунта клиента, а сервер отклонит попытку отмены через прямой запрос.</div>
+                    <label class="form-check-label fw-semibold" for="allow_customer_cancellation">{{ __('admin_settings.allow_cancellation') }}</label>
+                    <div class="text-muted fs-9 mt-1">{{ __('admin_settings.allow_cancellation_hint') }}</div>
                   </div>
                   <div class="row g-3"><div class="col-md-6">
-                  <label class="form-label" for="cancellation_notice_hours">Минимальное время до отмены клиентом</label>
-                  <div class="input-group"><input class="form-control" id="cancellation_notice_hours" name="cancellation_notice_hours" type="number" min="0" max="8760" value="24" required><span class="input-group-text">часов</span></div>
-                  <div class="form-text">Например: 24 часа — одни сутки, 72 часа — трое суток. 0 разрешает отмену до начала записи.</div>
+                  <label class="form-label" for="cancellation_notice_hours">{{ __('admin_settings.cancellation_notice') }}</label>
+                  <div class="input-group"><input class="form-control" id="cancellation_notice_hours" name="cancellation_notice_hours" type="number" min="0" max="8760" value="24" required><span class="input-group-text">{{ __('admin_settings.hours') }}</span></div>
+                  <div class="form-text">{{ __('admin_settings.cancellation_notice_hint') }}</div>
                   <div class="invalid-feedback" id="cancellation_notice_hours-error"></div>
                   </div></div>
                 </div>
               </div>
 
-              <h6 class="mb-3">Изображения в каталоге и бронировании</h6>
+              <h6 class="mb-3">{{ __('admin_settings.catalog_images') }}</h6>
               <div class="row g-3 mb-5">
                 <div class="col-md-6">
                   <div class="form-check form-switch border rounded-3 p-3 ps-6 h-100">
                     <input type="hidden" name="show_service_images" value="0">
                     <input class="form-check-input" id="show_service_images" name="show_service_images" type="checkbox" value="1" checked>
-                    <label class="form-check-label fw-semibold" for="show_service_images">Показывать изображения услуг</label>
-                    <div class="text-muted fs-9 mt-1">На главной странице и во всех вариантах клиентского бронирования.</div>
+                    <label class="form-check-label fw-semibold" for="show_service_images">{{ __('admin_settings.show_service_images') }}</label>
+                    <div class="text-muted fs-9 mt-1">{{ __('admin_settings.show_service_images_hint') }}</div>
                   </div>
                 </div>
                 <div class="col-md-6">
                   <div class="form-check form-switch border rounded-3 p-3 ps-6 h-100">
                     <input type="hidden" name="show_master_images" value="0">
                     <input class="form-check-input" id="show_master_images" name="show_master_images" type="checkbox" value="1" checked>
-                    <label class="form-check-label fw-semibold" for="show_master_images">Показывать фотографии мастеров</label>
-                    <div class="text-muted fs-9 mt-1">Если фото отсутствует, используется локальная заглушка без внешних запросов.</div>
+                    <label class="form-check-label fw-semibold" for="show_master_images">{{ __('admin_settings.show_master_images') }}</label>
+                    <div class="text-muted fs-9 mt-1">{{ __('admin_settings.show_master_images_hint') }}</div>
                   </div>
                 </div>
               </div>
 
-              <h6 class="mb-3">Краткое описание компании</h6>
-              <p class="text-muted fs-9">Показывается в подвале сайта рядом с логотипом.</p>
+              <h6 class="mb-3">{{ __('admin_settings.company_description') }}</h6>
+              <p class="text-muted fs-9">{{ __('admin_settings.company_description_hint') }}</p>
               <ul class="nav nav-tabs mb-3" role="tablist">
                 @foreach($supportedLocales as $locale => $language)
                   <li class="nav-item" role="presentation"><button class="nav-link {{ $loop->first ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#description-{{ $locale }}" type="button">{{ $language }}</button></li>
@@ -242,14 +242,14 @@
                 @endforeach
               </div>
 
-              <h6 class="mb-3">Логотипы и favicon</h6>
+              <h6 class="mb-3">{{ __('admin_settings.logos') }}</h6>
               <div class="row g-3 mb-4">
-                <div class="col-md-4"><label class="form-label">Логотип в шапке</label><div class="border rounded p-2 mb-2 text-center"><img id="logo-preview" class="img-fluid" style="height:70px;display:none" alt="Установленный логотип"></div><input class="form-control" id="logo" name="logo" type="file" accept=".png,.jpg,.jpeg,.webp,.svg"><div class="invalid-feedback" id="logo-error"></div></div>
-                <div class="col-md-4"><label class="form-label">Логотип в подвале</label><div class="border rounded p-2 mb-2 text-center"><img id="footer_logo-preview" class="img-fluid" style="height:70px;display:none" alt="Установленный логотип подвала"></div><input class="form-control" id="footer_logo" name="footer_logo" type="file" accept=".png,.jpg,.jpeg,.webp,.svg"><div class="invalid-feedback" id="footer_logo-error"></div></div>
-                <div class="col-md-4"><label class="form-label">Favicon</label><div class="border rounded p-2 mb-2 text-center"><img id="favicon-preview" class="img-fluid" style="height:70px;display:none" alt="Установленный favicon"></div><input class="form-control" id="favicon" name="favicon" type="file" accept=".png,.ico,.svg"><div class="invalid-feedback" id="favicon-error"></div></div>
+                <div class="col-md-4"><label class="form-label">{{ __('admin_settings.header_logo') }}</label><div class="border rounded p-2 mb-2 text-center"><img id="logo-preview" class="img-fluid" style="height:70px;display:none" alt="{{ __('admin_settings.installed_logo') }}"></div><input class="form-control" id="logo" name="logo" type="file" accept=".png,.jpg,.jpeg,.webp,.svg"><div class="invalid-feedback" id="logo-error"></div></div>
+                <div class="col-md-4"><label class="form-label">{{ __('admin_settings.footer_logo') }}</label><div class="border rounded p-2 mb-2 text-center"><img id="footer_logo-preview" class="img-fluid" style="height:70px;display:none" alt="{{ __('admin_settings.installed_footer_logo') }}"></div><input class="form-control" id="footer_logo" name="footer_logo" type="file" accept=".png,.jpg,.jpeg,.webp,.svg"><div class="invalid-feedback" id="footer_logo-error"></div></div>
+                <div class="col-md-4"><label class="form-label">Favicon</label><div class="border rounded p-2 mb-2 text-center"><img id="favicon-preview" class="img-fluid" style="height:70px;display:none" alt="{{ __('admin_settings.installed_favicon') }}"></div><input class="form-control" id="favicon" name="favicon" type="file" accept=".png,.ico,.svg"><div class="invalid-feedback" id="favicon-error"></div></div>
               </div>
 
-              <h6 class="mb-3">Карта <small class="text-muted fw-normal">(вставьте iframe код)</small></h6>
+              <h6 class="mb-3">{{ __('admin_settings.map') }} <small class="text-muted fw-normal">({{ __('admin_settings.iframe_hint') }})</small></h6>
               <div class="row g-3 mb-4">
                 <div class="col-md-6">
                   <label class="form-label">Google Maps</label>
@@ -261,7 +261,7 @@
                 </div>
               </div>
 
-              <h6 class="mb-3">Социальные сети</h6>
+              <h6 class="mb-3">{{ __('admin_settings.social') }}</h6>
               <div class="row g-3 mb-4">
                 <div class="col-md-6">
                   <label class="form-label">Facebook</label>
@@ -282,7 +282,7 @@
               </div>
 
               <div class="text-end">
-                <button class="btn btn-primary" type="submit">Сохранить настройки</button>
+                <button class="btn btn-primary" type="submit">{{ __('admin_settings.save_settings') }}</button>
               </div>
             </form>
           </div>
@@ -295,49 +295,49 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Редактировать нерабочий день</h5>
+            <h5 class="modal-title">{{ __('admin_settings.edit_closed_day') }}</h5>
             <button class="btn btn-close p-1" type="button" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
             <input type="hidden" id="edit_rd_id">
             <div class="row g-3">
               <div class="col-12">
-                <label class="form-label">Название*</label>
+                <label class="form-label">{{ __('admin_staff.closure_name') }}*</label>
                 <input type="text" class="form-control" id="edit_rd_name">
               </div>
               <div class="col-12">
-                <label class="form-label">Дата*</label>
+                <label class="form-label">{{ __('admin_settings.date') }}*</label>
                 <input type="date" class="form-control" id="edit_rd_date">
               </div>
               <div class="col-12">
                 <div class="form-check">
                   <input class="form-check-input" type="checkbox" id="edit_rd_fullday">
-                  <label class="form-check-label" for="edit_rd_fullday">Весь день</label>
+                  <label class="form-check-label" for="edit_rd_fullday">{{ __('admin_staff.full_day') }}</label>
                 </div>
               </div>
               <div id="edit_rd_time_block" class="col-6">
-                <label class="form-label">Начало</label>
+                <label class="form-label">{{ __('admin_staff.start') }}</label>
                 <input type="time" class="form-control" id="edit_rd_start">
               </div>
               <div id="edit_rd_time_block2" class="col-6">
-                <label class="form-label">Конец</label>
+                <label class="form-label">{{ __('admin_staff.end') }}</label>
                 <input type="time" class="form-control" id="edit_rd_end">
               </div>
               <div class="col-12">
                 <div class="form-check">
                   <input class="form-check-input" type="checkbox" id="edit_rd_repeat">
-                  <label class="form-check-label" for="edit_rd_repeat">Повторять ежегодно</label>
+                  <label class="form-check-label" for="edit_rd_repeat">{{ __('admin_staff.repeat_yearly') }}</label>
                 </div>
               </div>
               <div class="col-12">
-                <label class="form-label">Описание</label>
+                <label class="form-label">{{ __('admin_staff.description') }}</label>
                 <input type="text" class="form-control" id="edit_rd_description">
               </div>
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Отмена</button>
-            <button class="btn btn-primary" type="button" id="saveEditRedDay">Сохранить</button>
+            <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">{{ __('admin_staff.cancel') }}</button>
+            <button class="btn btn-primary" type="button" id="saveEditRedDay">{{ __('admin_staff.save') }}</button>
           </div>
         </div>
       </div>
@@ -512,16 +512,16 @@
         let id = $(this).data("id");
         let row = $(this).closest("tr");
         Swal.fire({
-          title: "Вы уверены?", icon: "warning", showCancelButton: true,
+          title: @json(__('admin_settings.are_you_sure')), icon: "warning", showCancelButton: true,
           confirmButtonColor: "#d33", cancelButtonColor: "#3085d6",
-          confirmButtonText: "Удалить", cancelButtonText: "Отмена"
+          confirmButtonText: @json(__('admin_staff.delete')), cancelButtonText: @json(__('admin_staff.cancel'))
         }).then(result => {
           if (result.isConfirmed) {
             $.ajax({
               url: `{{ url('settings/red-days') }}/${id}`, type: "DELETE",
               headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
               success: () => { row.remove(); showSuccess(); },
-              error: () => Swal.fire("Ошибка!", "Не удалось удалить.", "error")
+              error: () => Swal.fire(@json(__('admin_settings.error')), @json(__('admin_settings.delete_failed')), "error")
             });
           }
         });
@@ -548,11 +548,11 @@
           const button = row.querySelector(".add-row-btn");
           if (!button) return;
           if (index === rows.length - 1) {
-            button.textContent = "Добавить слот";
+            button.textContent = @json(__('admin_settings.add_slot'));
             button.classList.replace("badge-phoenix-danger", "badge-phoenix-secondary");
             button.onclick = addRow;
           } else {
-            button.textContent = "Удалить";
+            button.textContent = @json(__('admin_staff.delete'));
             button.classList.replace("badge-phoenix-secondary", "badge-phoenix-danger");
             button.onclick = deleteRow;
           }
@@ -597,7 +597,7 @@
                   <input class="form-control form-control-sm datetimepicker fixedBookingTime" id="${index+1}_start" type="text" placeholder="HH:mm" value="${time}" readonly>
                 </div>
                 <div class="col-md-2 d-flex align-items-center">
-                  <button type="button" class="badge badge-phoenix badge-phoenix-danger add-row-btn mt-1">Удалить</button>
+                  <button type="button" class="badge badge-phoenix badge-phoenix-danger add-row-btn mt-1">{{ __('admin_staff.delete') }}</button>
                 </div>
               </div>`;
           });
@@ -672,14 +672,14 @@
           let tbody = $("#redDaysTable tbody");
           tbody.empty();
           if (!res.length) {
-              tbody.append('<tr><td colspan="5" class="text-center text-muted">Нет записей</td></tr>');
+              tbody.append(`<tr><td colspan="5" class="text-center text-muted">${@json(__('admin_settings.no_records'))}</td></tr>`);
               return;
           }
           res.forEach(day => {
               let timeStr = (day.start_time && day.end_time) ? `<span class="text-muted fs-10">(${day.start_time}–${day.end_time})</span>` : '';
               let masterBadge = day.user_id
                   ? `<span class="badge badge-phoenix badge-phoenix-primary fs-10">${day.master_name}</span>`
-                  : `<span class="badge badge-phoenix badge-phoenix-secondary fs-10">Общий</span>`;
+                  : `<span class="badge badge-phoenix badge-phoenix-secondary fs-10">${@json(__('admin_settings.global'))}</span>`;
               tbody.append(`
                   <tr id="rd_row_${day.id}">
                       <td class="ps-3 name">${day.name}</td>
@@ -709,10 +709,10 @@
       }
 
       function showSuccess() {
-        Swal.fire({ title: 'Отлично!', text: 'Данные успешно сохранены!', icon: 'success', confirmButtonText: 'OK' });
+        Swal.fire({ title: @json(__('admin_common.success')), text: @json(__('admin_common.saved')), icon: 'success', confirmButtonText: 'OK' });
       }
       function showError(xhr) {
-        Swal.fire({ title: 'Упс!', text: 'Что-то пошло не так.', icon: 'error', confirmButtonText: 'OK' });
+        Swal.fire({ title: @json(__('admin_common.oops')), text: @json(__('admin_common.something_wrong')), icon: 'error', confirmButtonText: 'OK' });
         if (xhr.status === 422) {
           $.each(xhr.responseJSON.errors, function(field, messages) {
             $('#'+field).addClass('is-invalid');
@@ -778,7 +778,7 @@
                   const timeStr = (day.start_time && day.end_time) ? `<span class="text-muted fs-10">(${day.start_time}–${day.end_time})</span>` : '';
                   const masterBadge = day.user_id
                       ? `<span class="badge badge-phoenix badge-phoenix-primary fs-10">${day.master_name}</span>`
-                      : `<span class="badge badge-phoenix badge-phoenix-secondary fs-10">Общий</span>`;
+                      : `<span class="badge badge-phoenix badge-phoenix-secondary fs-10">${@json(__('admin_settings.global'))}</span>`;
 
                   row.find('.name').text(day.name);
                   row.find('.date').html(`${day.date} ${timeStr}`);

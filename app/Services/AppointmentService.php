@@ -162,7 +162,7 @@ class AppointmentService
                 ->assign($request->user_id, $date, $startTime, $endTime);
 
             if ($roomId === null && \App\Models\User::with('rooms')->find($request->user_id)?->rooms->isNotEmpty()) {
-                throw new Exception('На это время нет свободных мест в кабинетах. Выберите другое время.');
+                throw new Exception(__('admin_appointment_create.errors.room_unavailable'));
             }
                         
             $events = Appointments::create(array_merge($request->validated(), ['room_id' => $roomId]));
@@ -189,7 +189,7 @@ class AppointmentService
                 ->assign($request->user_id, $date, $startTime, $endTime);
 
             if ($roomId === null && \App\Models\User::with('rooms')->find($request->user_id)?->rooms->isNotEmpty()) {
-                throw new Exception('На это время нет свободных мест в кабинетах. Выберите другое время.');
+                throw new Exception(__('admin_appointment_create.errors.room_unavailable'));
             }
             
             $appointment->update(array_merge($request->validated(), ['room_id' => $roomId]));

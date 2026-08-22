@@ -1,0 +1,2 @@
+<?php
+return ['service_enabled_own'=>'Услуга подключена','service_enabled_employee'=>'Услуга сотрудника подключена','service_disabled_own'=>'Услуга отключена','service_disabled_employee'=>'Услуга сотрудника отключена','settings_updated_own'=>'Индивидуальные настройки услуги изменены','settings_updated_employee'=>'Индивидуальные настройки услуги сотрудника изменены','toggle_failed'=>'Не удалось изменить состояние услуги сотрудника','settings_update_failed'=>'Не удалось изменить индивидуальные настройки услуги сотрудника'];

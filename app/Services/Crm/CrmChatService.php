@@ -140,6 +140,44 @@ class CrmChatService
         });
     }
 
+    public function restart(CrmConversation $conversation, string $token): array
+    {
+        $this->assertToken($conversation, $token);
+        $newToken = hash_hmac('sha256','restart:'.$conversation->id,$token);
+
+        $restarted = DB::transaction(function () use ($conversation, $newToken) {
+            $locked = CrmConversation::whereKey($conversation->id)->lockForUpdate()->firstOrFail();
+            abort_unless($locked->status === 'closed' && $locked->rating()->exists(),422,__('crm.restart_after_rating_only'));
+            if ($existing=$locked->nextConversation()->first()) return $existing;
+
+            $next = CrmConversation::create([
+                'access_token_hash'=>hash('sha256',$newToken),
+                'customer_id'=>$locked->customer_id,
+                'previous_conversation_id'=>$locked->id,
+                'visitor_name'=>$locked->visitor_name,
+                'visitor_email'=>$locked->visitor_email,
+                'visitor_phone'=>$locked->visitor_phone,
+                'assigned_to_user_id'=>$locked->assigned_to_user_id,
+                'status'=>'open',
+                'last_message_at'=>now(),
+            ]);
+            $next->messages()->create([
+                'sender_type'=>'system',
+                'event_type'=>'conversation_restarted',
+                'is_public'=>false,
+                'body'=>__('crm.conversation_restarted_internal'),
+            ]);
+
+            return $next;
+        });
+
+        if ($restarted->wasRecentlyCreated) {
+            $this->notifyStaff($restarted);
+        }
+
+        return ['conversation'=>$restarted,'token'=>$newToken];
+    }
+
     public function assertToken(CrmConversation $conversation, string $token): void
     {
         abort_unless(hash_equals($conversation->access_token_hash, hash('sha256',$token)), 403);

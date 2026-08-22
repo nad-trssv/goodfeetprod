@@ -29,9 +29,9 @@ class LunchHoursRequest extends FormRequest
     public function messages()
     {
         return [
-            'lunch_end.after' => 'Время окончания должно быть позже времени начала.',
-            'lunch_start.date_format' => 'Поле должно быть в формате ЧЧ:ММ.',
-            'lunch_end.date_format' => 'Поле должно быть в формате ЧЧ:ММ.',
+            'lunch_end.after' => __('admin_validation.end_after_start'),
+            'lunch_start.date_format' => __('admin_validation.time_format'),
+            'lunch_end.date_format' => __('admin_validation.time_format'),
         ];
     }
 }

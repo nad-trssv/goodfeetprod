@@ -40,7 +40,7 @@ class ServiceImageTest extends TestCase
 
         $this->actingAs($admin)->get(route('service.show', $service))
             ->assertOk()
-            ->assertSee('Можно загрузить изображение любых пропорций и разрешения');
+            ->assertSee(__('admin_services.image_hint'));
     }
 
     public function test_service_image_rejects_svg_uploads(): void

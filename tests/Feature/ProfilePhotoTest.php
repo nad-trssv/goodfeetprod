@@ -60,7 +60,7 @@ class ProfilePhotoTest extends TestCase
         $this->get(route('serviceBooking'))
             ->assertOk()
             ->assertSee(basename($user->profile_photo_path))
-            ->assertSee('Jalahoolduse spetsialist');
+            ->assertSee(json_encode('Мастер по педикюру PRO', JSON_THROW_ON_ERROR), false);
     }
 
     public function test_profile_cannot_use_another_users_phone_or_id(): void

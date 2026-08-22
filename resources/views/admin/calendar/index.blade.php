@@ -1,12 +1,13 @@
-@section('title', 'Calendar')
+@section('title', __('admin_staff.calendar'))
 @push('styles')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/locale/et.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/locale-all.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/et.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ru.js"></script>
     <style>
       #calendar .fc-day-header { padding: .65rem .25rem; font-weight: 700; text-transform: capitalize; }
       #calendar .fc-day-top { border: 1px solid var(--phoenix-border-color, #e3e6ed); padding: .35rem .45rem; }
@@ -27,16 +28,16 @@
             <span id="currentDate" class="calendar-date"></span></h4>
         </div>
         <div class="col-7 col-md-6 d-flex justify-content-end">
-          <a href="{{ route('calendar.create') }}" class="btn btn-primary btn-sm"><span class="fas fa-plus pe-2 fs-10"></span>Новая запись</a>
+          <a href="{{ route('calendar.create') }}" class="btn btn-primary btn-sm"><span class="fas fa-plus pe-2 fs-10"></span>{{ __('admin_appointments.new') }}</a>
         </div>
       </div>
         @isset($master)
           <div class="alert alert-subtle-primary d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-            <div><strong>{{ $master->name }}</strong> — персональный календарь</div>
-            <span>{{ count($appointments) }} записей</span>
+            <div><strong>{{ $master->name }}</strong> — {{ __('admin_appointments.personal_calendar') }}</div>
+            <span>{{ __('admin_appointments.count', ['count' => count($appointments)]) }}</span>
           </div>
           @if(count($appointments) === 0)
-            <div class="alert alert-subtle-secondary mb-3">У этого пользователя пока нет записей. Календарь ниже отображает его личное расписание.</div>
+            <div class="alert alert-subtle-secondary mb-3">{{ __('admin_appointments.no_personal_appointments') }}</div>
           @endif
         @endisset
         <div class="calendar-outline mt-6 mb-9 fc fc-media-screen fc-direction-ltr fc-theme-standard" id="calendar"></div>
@@ -56,13 +57,13 @@
                     <div>
                       <h5 id="modalTitle" class="mb-0 lh-sm text-body-highlight"></h5>
                     </div>
-                    <button class=" btn p-1 fs-10 text-body" type="button" data-bs-dismiss="modal" aria-label="Close">ЗАКРЫТЬ</button>
+                    <button class=" btn p-1 fs-10 text-body" type="button" data-bs-dismiss="modal" aria-label="{{ __('admin_appointments.close') }}">{{ mb_strtoupper(__('admin_appointments.close')) }}</button>
                   </div>
                 </div>
                 <div class="modal-body p-card py-0">
                   <div class="form-floating mb-5">
                     <select class="form-select" id="eventService">
-                      <option value="null">Выберите услугу</option>
+                      <option value="null">{{ __('admin_appointments.select_service') }}</option>
                       @foreach ($services as $service)
                         @php
                           $duration = $service->effective_duration_minutes ?? $service->duration_minutes;
@@ -72,16 +73,16 @@
                           data-duration="{{ $duration }}"
                           data-loop="{{ $loop->index }}"
                         >
-                          {{ $service->name }} ( {{ $duration }} мин.)
+                          {{ $service->name }} ({{ __('admin_appointments.minutes_short', ['count' => $duration]) }})
                         </option>
                       @endforeach
                     </select>                    
-                    <label for="eventLabel">Выберите услугу</label>
+                    <label for="eventLabel">{{ __('admin_appointments.select_service') }}</label>
                     <span id="serviceError" class="text-danger"></span>
                   </div>
                   <div class="form-floating mb-3">
-                    <input class="form-control" id="eventPrice" type="text" name="price" placeholder="Price" />
-                    <label for="eventPrice">Цена</label>
+                    <input class="form-control" id="eventPrice" type="text" name="price" placeholder="{{ __('admin_appointments.price') }}" />
+                    <label for="eventPrice">{{ __('admin_appointments.price') }}</label>
                     <span id="priceError" class="text-danger"></span>
                   </div>
 
@@ -89,7 +90,7 @@
                     <div class="form-floating">
                       <input class="form-control datetimepicker" id="eventStartDate" type="text" name="startDate" placeholder="yyyy/mm/dd HH:mm" data-options='{"disableMobile":true,"enableTime":"true","dateFormat":"Y-m-d H:i", "time_24hr":true}' />
                       <span class="uil uil-calendar-alt flatpickr-icon text-body-tertiary"></span>
-                      <label class="ps-6" for="eventStartDate">Начало</label>
+                      <label class="ps-6" for="eventStartDate">{{ __('admin_appointments.start') }}</label>
                       <span id="dateError" class="text-danger"></span>
                     </div>
                   </div>
@@ -97,42 +98,42 @@
                     <div class="form-floating">
                       <input class="form-control datetimepicker" id="eventEndDate" type="text" name="endDate" placeholder="yyyy/mm/dd HH:mm" data-options='{"disableMobile":true,"enableTime":"true","dateFormat":"Y-m-d H:i", "time_24hr":true}' />
                       <span class="uil uil-calendar-alt flatpickr-icon text-body-tertiary"></span>
-                      <label class="ps-6" for="eventEndDate">Окончание</label>
+                      <label class="ps-6" for="eventEndDate">{{ __('admin_appointments.end') }}</label>
                       <span id="dateError" class="text-danger"></span>
                     </div>
                   </div>
 
                   <div class="form-floating mb-5" id="userSelectWrapper">
                     <select class="form-select form-select-short" id="userSelect">
-                      <option value="null">Выберите мастера</option>
+                      <option value="null">{{ __('admin_appointments.select_employee') }}</option>
                     </select>
                   </div>
 
                   <div class="form-floating mb-3">
-                    <input class="form-control" id="client_name" type="text" name="client_name" placeholder="Name" />
-                    <label for="client_name">Имя</label>
+                    <input class="form-control" id="client_name" type="text" name="client_name" placeholder="{{ __('admin_staff.name') }}" />
+                    <label for="client_name">{{ __('admin_staff.name') }}</label>
                     <span id="nameError" class="text-danger"></span>
                   </div>
                   <div class="form-floating mb-3">
-                    <input class="form-control" id="client_lastname" type="text" name="client_lastname" placeholder="lastname" />
-                    <label for="client_lastname">Фамилия</label>
+                    <input class="form-control" id="client_lastname" type="text" name="client_lastname" placeholder="{{ __('admin_appointments.surname') }}" />
+                    <label for="client_lastname">{{ __('admin_appointments.surname') }}</label>
                     <span id="lastnameError" class="text-danger"></span>
                   </div>
                   <div class="form-floating mb-3">
                     <input class="form-control" id="phone" type="text" name="phone" placeholder="+372" />
-                    <label for="phone">Теелфон</label>
+                    <label for="phone">{{ __('admin_appointments.phone') }}</label>
                     <span id="phoneError" class="text-danger"></span>
                   </div>
                   <div class="form-floating my-5">
-                    <textarea class="form-control" id="eventDescription" placeholder="Leave a comment here" name="description" style="height: 128px"></textarea>
-                    <label for="eventDescription">Дополнение к записи *</label>
+                    <textarea class="form-control" id="eventDescription" placeholder="{{ __('admin_appointments.appointment_note') }}" name="description" style="height: 128px"></textarea>
+                    <label for="eventDescription">{{ __('admin_appointments.appointment_note') }} *</label>
                     <span id="descriptionError" class="text-danger"></span>
                   </div>
 
                   <div id="clientImages" class="row col-12 justify-content-end gap-2"></div>
                 </div>
                 <div class="modal-footer d-flex justify-content-between align-items-center border-0">
-                  <button class="btn btn-primary px-4" id="saveEvent" type="submit">Сохранить</button>
+                  <button class="btn btn-primary px-4" id="saveEvent" type="submit">{{ __('admin_appointments.save') }}</button>
                   <div id="eventDetailBtn" data-url="{{ route('calendar.show', ['appointment' => '__APPOINTMENT_ID__']) }}"></div>
                 </div>
               </form>
@@ -166,9 +167,10 @@
                 var currentEvent = null;
                 var serviceUsers = null;
 
-                $('#modalTitle').html("Добавить новую запись");
+                $('#modalTitle').text(@json(__('admin_appointments.add_new')));
                 
                 $('#calendar').fullCalendar({
+                  locale: @json(app()->getLocale()),
                   header:{
                     left:'today',
                     center:'prev, title, next',
@@ -271,7 +273,7 @@
                                         $('#calendar').fullCalendar('removeEvents', event._id);
                                     },
                                     error: function(err) {
-                                        console.log('Ошибка при удалении события:', err);
+                                        console.log(@json(__('admin_appointments.delete_log_error')), err);
                                     }
                                 });
                             } else {
@@ -371,7 +373,7 @@
                               Swal.fire({
                               position: "center",
                               icon: "warning",
-                              title: 'Это недоступная для записи дата. Это закрытое окошко, и оно редактируется в настройках.',
+                              title: @json(__('admin_appointments.closed_slot_hint')),
                               showConfirmButton: false,
                               iconColor: '#ff8100',
                               timerProgressBar: true,
@@ -382,7 +384,7 @@
 
                         modalStatus = 'UPDATE';
                         currentEvent = event;
-                        $('#modalTitle').html("Change event");
+                        $('#modalTitle').text(@json(__('admin_appointments.change_event')));
 
                         $('#clientImages').empty();
                         $('#eventDetailBtn').empty();
@@ -390,7 +392,7 @@
                         let appointmentId = event.id; 
                         let detailUrl = $('#eventDetailBtn').data('url').replace('__APPOINTMENT_ID__', appointmentId);
                         let detailBtnHtml = `
-                            <a href="${detailUrl}" class="btn btn-phoenix-primary me-2" id="eventDetail">Подробнее</a>
+                            <a href="${detailUrl}" class="btn btn-phoenix-primary me-2" id="eventDetail">${@json(__('admin_appointments.details'))}</a>
                         `;
                         $('#eventDetailBtn').append(detailBtnHtml);
                         
@@ -398,7 +400,7 @@
                             let imageUrl = `public//storage/${media.photo_path}`; 
                             let imageHtml = `
                                 <div class="col-6 col-md-4 col-lg-3 img-fluid rounded-2 d-block p-0 overflow-hidden" style="height:80px; width: 80px;">
-                                  <img class="object-fit-cover" src="${imageUrl}" alt="Изображение" style="height:80px; width: 80px;">
+                                  <img class="object-fit-cover" src="${imageUrl}" alt="${@json(__('admin_appointments.image_alt'))}" style="height:80px; width: 80px;">
                                 </div>
                             `;
                             $('#clientImages').append(imageHtml);
@@ -493,13 +495,13 @@
                           modalStatus = 'UPDATE';
                           currentEvent = event;
 
-                          $('#modalTitle').html("Change event");
+                          $('#modalTitle').text(@json(__('admin_appointments.change_event')));
                           $('#clientImages').empty();
                           $('#eventDetailBtn').empty();
 
                           let appointmentId = event.id; 
                           let detailUrl = $('#eventDetailBtn').data('url').replace('__APPOINTMENT_ID__', appointmentId);
-                          let detailBtnHtml = `<a href="${detailUrl}" class="btn btn-phoenix-primary me-2" id="eventDetail">Подробнее</a>`;
+                          let detailBtnHtml = `<a href="${detailUrl}" class="btn btn-phoenix-primary me-2" id="eventDetail">${@json(__('admin_appointments.details'))}</a>`;
                           $('#eventDetailBtn').append(detailBtnHtml);
 
                           $('#eventTitle').val(event.title);
@@ -680,7 +682,7 @@
                     Swal.fire({
                           position: "top",
                           icon: "info",
-                          title: 'Время в дате было изменено',
+                          title: @json(__('admin_appointments.time_changed')),
                           showConfirmButton: false,
                           iconColor: '#6da37d',
                           timerProgressBar: true,
@@ -691,7 +693,10 @@
                       Swal.fire({
                         position: "top",
                         icon: "info",
-                        title: `С ${moment(service.next_rule.valid_from).format('DD.MM.YYYY')} услуга будет изменена: ${service.next_rule.duration_minutes} мин, ${service.next_rule.price} €`,
+                        title: @json(__('admin_appointments.future_rule'))
+                          .replace(':date', moment(service.next_rule.valid_from).format('DD.MM.YYYY'))
+                          .replace(':duration', service.next_rule.duration_minutes)
+                          .replace(':price', service.next_rule.price),
                         showConfirmButton: false,
                         iconColor: '#6da37d',
                         timerProgressBar: true,
@@ -705,7 +710,7 @@
                     Swal.fire({
                           position: "top",
                           icon: "warning",
-                          title: 'Пожалуйста, выберите услугу',
+                          title: @json(__('admin_appointments.select_service_prompt')),
                           showConfirmButton: false,
                           iconColor: '#d37d17',
                           timerProgressBar: true,
@@ -737,7 +742,7 @@
                     dateFormat: "Y-m-d H:i",
                     time_24hr: true,
                     disableMobile: true,
-                    locale: "et",
+                    locale: @json(app()->getLocale()),
                     allowInput: true,
                     onClose: function(selectedDates, dateStr, instance) {
                         if (!dateStr) {

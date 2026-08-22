@@ -1,4 +1,4 @@
-@section('title', 'Моё расписание')
+@section('title', __('admin_schedule.my_schedule'))
 @push('styles')
     <link href="{{ asset('vendors/flatpickr/flatpickr.min.css') }}" rel="stylesheet" />
 @endpush
@@ -7,12 +7,12 @@
     <div class="content">
         <nav class="mb-3" aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item active">Моё расписание</li>
+                <li class="breadcrumb-item active">{{ __('admin_schedule.my_schedule') }}</li>
             </ol>
         </nav>
 
         <div id="successAlert" class="alert alert-success d-none" role="alert">
-            <span class="fas fa-check-circle me-2"></span>Данные успешно сохранены!
+            <span class="fas fa-check-circle me-2"></span>{{ __('admin_schedule.saved') }}
         </div>
         <div id="errorAlert" class="alert alert-danger d-none" role="alert">
             <span class="fas fa-times-circle me-2"></span><span id="errorText"></span>
@@ -22,10 +22,10 @@
             <div class="col-12">
                 <div class="sticky-top mb-4" style="margin-top:-72px;padding-top:72px">
                     <div class="nav flex-row gap-3">
-                        <a class="btn btn-outline-secondary btn-sm" href="#section-workhours">Рабочее время</a>
-                        <a class="btn btn-outline-secondary btn-sm" href="#section-lunch">Обед</a>
-                        <a class="btn btn-outline-secondary btn-sm" href="#section-fixed">Фиксированное время</a>
-                        <a class="btn btn-outline-secondary btn-sm" href="#section-limit">Лимит дней</a>
+                        <a class="btn btn-outline-secondary btn-sm" href="#section-workhours">{{ __('admin_schedule.working_hours') }}</a>
+                        <a class="btn btn-outline-secondary btn-sm" href="#section-lunch">{{ __('admin_schedule.lunch') }}</a>
+                        <a class="btn btn-outline-secondary btn-sm" href="#section-fixed">{{ __('admin_schedule.fixed_time') }}</a>
+                        <a class="btn btn-outline-secondary btn-sm" href="#section-limit">{{ __('admin_schedule.booking_limit') }}</a>
                     </div>
                 </div>
             </div>
@@ -34,7 +34,7 @@
         {{-- Рабочее время --}}
         <section id="section-workhours" class="card mb-4">
             <div class="card-header">
-                <h5 class="mb-0"><span class="fas fa-clock me-2"></span>Рабочее время</h5>
+                <h5 class="mb-0"><span class="fas fa-clock me-2"></span>{{ __('admin_schedule.working_hours') }}</h5>
             </div>
             <div class="card-body">
                 <form id="workHoursForm">
@@ -43,21 +43,21 @@
                         <table class="table table-sm align-middle">
                             <thead>
                                 <tr>
-                                    <th>День</th>
-                                    <th>Начало</th>
-                                    <th>Конец</th>
-                                    <th>Выходной</th>
+                                    <th>{{ __('admin_schedule.day') }}</th>
+                                    <th>{{ __('admin_schedule.start') }}</th>
+                                    <th>{{ __('admin_schedule.end') }}</th>
+                                    <th>{{ __('admin_schedule.day_off') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ([
-        'monday' => 'Понедельник',
-        'tuesday' => 'Вторник',
-        'wednesday' => 'Среда',
-        'thursday' => 'Четверг',
-        'friday' => 'Пятница',
-        'saturday' => 'Суббота',
-        'sunday' => 'Воскресенье',
+        'monday' => __('admin_schedule.days.monday'),
+        'tuesday' => __('admin_schedule.days.tuesday'),
+        'wednesday' => __('admin_schedule.days.wednesday'),
+        'thursday' => __('admin_schedule.days.thursday'),
+        'friday' => __('admin_schedule.days.friday'),
+        'saturday' => __('admin_schedule.days.saturday'),
+        'sunday' => __('admin_schedule.days.sunday'),
     ] as $day => $label)
                                     @php $isDayOff = !$schedule || !$schedule->{$day.'_start'} || !$schedule->{$day.'_end'}; @endphp
                                     <tr>
@@ -80,7 +80,7 @@
                                                     id="wh_{{ $day }}_off" data-day="{{ $day }}"
                                                     {{ $isDayOff ? 'checked' : '' }}>
                                                 <label class="form-check-label text-muted fs-10"
-                                                    for="wh_{{ $day }}_off">Выходной</label>
+                                                    for="wh_{{ $day }}_off">{{ __('admin_schedule.day_off') }}</label>
                                             </div>
                                         </td>
                                     </tr>
@@ -90,7 +90,7 @@
                     </div>
                     <div class="text-end mt-3">
                         <button type="submit" class="btn btn-primary">
-                            <span class="fas fa-save me-1"></span>Сохранить расписание
+                            <span class="fas fa-save me-1"></span>{{ __('admin_schedule.save_schedule') }}
                         </button>
                     </div>
                 </form>
@@ -100,19 +100,19 @@
         {{-- Обед --}}
         <section id="section-lunch" class="card mb-4">
             <div class="card-header">
-                <h5 class="mb-0"><span class="fas fa-utensils me-2"></span>Обеденный перерыв</h5>
+                <h5 class="mb-0"><span class="fas fa-utensils me-2"></span>{{ __('admin_schedule.lunch_break') }}</h5>
             </div>
             <div class="card-body">
                 <form id="lunchForm">
                     @csrf
                     <div class="row g-3 align-items-end">
                         <div class="col-sm-4">
-                            <label class="form-label">Начало обеда</label>
+                            <label class="form-label">{{ __('admin_schedule.lunch_start') }}</label>
                             <input type="time" class="form-control" id="lunch_start"
                                 value="{{ $schedule ? $schedule->lunch_start : '' }}">
                         </div>
                         <div class="col-sm-4">
-                            <label class="form-label">Конец обеда</label>
+                            <label class="form-label">{{ __('admin_schedule.lunch_end') }}</label>
                             <input type="time" class="form-control" id="lunch_end"
                                 value="{{ $schedule ? $schedule->lunch_end : '' }}">
                         </div>
@@ -120,13 +120,13 @@
                             <div class="form-check mb-2">
                                 <input class="form-check-input" type="checkbox" id="lunch_off"
                                     {{ !$schedule || !$schedule->lunch_start ? 'checked' : '' }}>
-                                <label class="form-check-label" for="lunch_off">Нет обеда</label>
+                                <label class="form-check-label" for="lunch_off">{{ __('admin_schedule.no_lunch') }}</label>
                             </div>
                         </div>
                     </div>
                     <div class="text-end mt-3">
                         <button type="submit" class="btn btn-primary">
-                            <span class="fas fa-save me-1"></span>Сохранить обед
+                            <span class="fas fa-save me-1"></span>{{ __('admin_schedule.save_lunch') }}
                         </button>
                     </div>
                 </form>
@@ -138,28 +138,28 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Редактировать день</h5>
+                        <h5 class="modal-title">{{ __('admin_schedule.edit_day') }}</h5>
                         <button class="btn btn-close p-1" type="button" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <input type="hidden" id="edit_rd_id">
                         <div class="row g-3">
                             <div class="col-12">
-                                <label class="form-label">Название*</label>
+                                <label class="form-label">{{ __('admin_schedule.name') }}*</label>
                                 <input type="text" class="form-control" id="edit_rd_name">
                             </div>
                             <div class="col-12">
-                                <label class="form-label">Дата*</label>
+                                <label class="form-label">{{ __('admin_schedule.date') }}*</label>
                                 <input type="date" class="form-control" id="edit_rd_date">
                             </div>
                             <div class="col-12">
-                                <label class="form-label">Дата до</label>
+                                <label class="form-label">{{ __('admin_schedule.date_to') }}</label>
                                 <input type="date" class="form-control" id="edit_rd_date_to">
                             </div>
                             <div class="col-12">
-                                <label class="form-label">Причина</label>
+                                <label class="form-label">{{ __('admin_schedule.reason') }}</label>
                                 <select class="form-select" id="edit_rd_type">
-                                    @foreach (\App\Models\RedDay::TYPES as $value => $label)
+                                    @foreach (\App\Models\RedDay::typeOptions() as $value => $label)
                                         <option value="{{ $value }}">{{ $label }}</option>
                                     @endforeach
                                 </select>
@@ -167,29 +167,29 @@
                             <div class="col-12">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="edit_rd_fullday">
-                                    <label class="form-check-label" for="edit_rd_fullday">Весь день</label>
+                                    <label class="form-check-label" for="edit_rd_fullday">{{ __('admin_schedule.full_day') }}</label>
                                 </div>
                             </div>
                             <div class="col-6" id="edit_rd_time1">
-                                <label class="form-label">Начало</label>
+                                <label class="form-label">{{ __('admin_schedule.start') }}</label>
                                 <input type="time" class="form-control" id="edit_rd_start">
                             </div>
                             <div class="col-6" id="edit_rd_time2">
-                                <label class="form-label">Конец</label>
+                                <label class="form-label">{{ __('admin_schedule.end') }}</label>
                                 <input type="time" class="form-control" id="edit_rd_end">
                             </div>
                             <div class="col-12">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="edit_rd_repeat">
-                                    <label class="form-check-label" for="edit_rd_repeat">Повторять ежегодно</label>
+                                    <label class="form-check-label" for="edit_rd_repeat">{{ __('admin_schedule.repeat_yearly') }}</label>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-outline-secondary" type="button"
-                            data-bs-dismiss="modal">Отмена</button>
-                        <button class="btn btn-primary" type="button" id="saveEditRd">Сохранить</button>
+                            data-bs-dismiss="modal">{{ __('admin_schedule.cancel') }}</button>
+                        <button class="btn btn-primary" type="button" id="saveEditRd">{{ __('admin_schedule.save') }}</button>
                     </div>
                 </div>
             </div>
@@ -198,22 +198,21 @@
         {{-- Фиксированное время --}}
         <section id="section-fixed" class="card mb-4">
             <div class="card-header">
-                <h5 class="mb-0"><span class="fas fa-lock me-2"></span>Фиксированное время записи</h5>
+                <h5 class="mb-0"><span class="fas fa-lock me-2"></span>{{ __('admin_schedule.fixed_booking') }}</h5>
             </div>
             <div class="card-body">
-                <p class="text-muted fs-9 mb-3">Если включено — клиенты смогут записываться только на указанные слоты
-                    времени.</p>
+                <p class="text-muted fs-9 mb-3">{{ __('admin_schedule.fixed_hint') }}</p>
                 <form id="fixedBookingForm">
                     @csrf
                     <div class="form-check form-switch mb-3">
                         <input class="form-check-input" type="checkbox" id="fixed_enabled"
                             {{ $schedule && $schedule->fixed_booking_enabled ? 'checked' : '' }}>
-                        <label class="form-check-label" for="fixed_enabled">Включить фиксированное время</label>
+                        <label class="form-check-label" for="fixed_enabled">{{ __('admin_schedule.enable_fixed') }}</label>
                     </div>
 
                     <div id="fixedSlotsContainer"
                         class="{{ $schedule && $schedule->fixed_booking_enabled ? '' : 'd-none' }}">
-                        <h6 class="mb-3">Временные слоты</h6>
+                        <h6 class="mb-3">{{ __('admin_schedule.time_slots') }}</h6>
                         <div id="fixedSlotsList">
                             @if ($schedule && $schedule->fixed_booking_slots)
                                 @foreach ($schedule->fixed_booking_slots as $slot)
@@ -233,13 +232,13 @@
                             @endif
                         </div>
                         <button type="button" class="btn btn-sm btn-outline-secondary mt-2" id="addSlot">
-                            <span class="fas fa-plus me-1"></span>Добавить слот
+                            <span class="fas fa-plus me-1"></span>{{ __('admin_schedule.add_slot') }}
                         </button>
                     </div>
 
                     <div class="text-end mt-3">
                         <button type="submit" class="btn btn-primary">
-                            <span class="fas fa-save me-1"></span>Сохранить
+                            <span class="fas fa-save me-1"></span>{{ __('admin_schedule.save') }}
                         </button>
                     </div>
                 </form>
@@ -249,13 +248,13 @@
         {{-- Лимит дней --}}
         <section id="section-limit" class="card mb-4">
             <div class="card-header">
-                <h5 class="mb-0"><span class="fas fa-calendar-alt me-2"></span>Лимит дней бронирования</h5>
+                <h5 class="mb-0"><span class="fas fa-calendar-alt me-2"></span>{{ __('admin_schedule.booking_limit_title') }}</h5>
             </div>
             <div class="card-body">
-                <p class="text-muted fs-9 mb-3">Глобальный лимит устанавливается администратором.</p>
+                <p class="text-muted fs-9 mb-3">{{ __('admin_schedule.global_limit_hint') }}</p>
                 <div class="alert alert-info fs-9">
                     <span class="fas fa-info-circle me-1"></span>
-                    Клиенты могут бронировать на <strong>{{ $bookingLimit['days'] }} дней</strong> вперёд.
+                    {{ __('admin_schedule.booking_days_hint', ['count' => $bookingLimit['days']]) }}
                 </div>
             </div>
         </section>
@@ -322,7 +321,7 @@
                             showSuccess();
                         },
                         error: function() {
-                            showError('Ошибка сохранения расписания');
+                            showError(@json(__('admin_schedule.save_schedule_failed')));
                         }
                     });
                 });
@@ -345,7 +344,7 @@
                             showSuccess();
                         },
                         error: function() {
-                            showError('Ошибка сохранения обеда');
+                            showError(@json(__('admin_schedule.save_lunch_failed')));
                         }
                     });
                 });
@@ -374,7 +373,7 @@
                         success: function(response) {
                             const rd = response.redDay;
                             const timeStr = rd.full_day ?
-                                '<span class="badge bg-secondary">Весь день</span>' :
+                                '<span class="badge bg-secondary">{{ __('admin_schedule.full_day') }}</span>' :
                                 (rd.start_time + ' - ' + rd.end_time);
                             const date = new Date(rd.date);
                             const dateStr = date.toLocaleDateString('ru-RU');
@@ -405,7 +404,7 @@
                             showSuccess();
                         },
                         error: function(xhr) {
-                            showError(xhr.responseJSON?.message || 'Ошибка сохранения');
+                            showError(xhr.responseJSON?.message || @json(__('admin_schedule.save_failed')));
                         }
                     });
                 });
@@ -413,7 +412,7 @@
                 // Удалить нерабочий день
                 $(document).on('click', '.delete-rd', function() {
                     const id = $(this).data('id');
-                    if (!confirm('Удалить этот день?')) return;
+                    if (!confirm(@json(__('admin_schedule.delete_day')))) return;
 
                     $.ajax({
                         url: '/master/schedule/redDay/' + id,
@@ -427,13 +426,13 @@
                             applyRdFilters();
                             if ($('#redDaysBody tr').length === 0) {
                                 $('#redDaysBody').append(
-                                    '<tr id="rd_empty"><td colspan="5" class="text-center text-muted">Нет нерабочих дней</td></tr>'
+                                    '<tr id="rd_empty"><td colspan="5" class="text-center text-muted">{{ __('admin_schedule.no_closed_days') }}</td></tr>'
                                 );
                             }
                             showSuccess();
                         },
                         error: function() {
-                            showError('Ошибка удаления');
+                            showError(@json(__('admin_schedule.delete_failed')));
                         }
                     });
                 });
@@ -502,7 +501,7 @@
                             showSuccess();
                         },
                         error: function() {
-                            showError('Ошибка сохранения');
+                            showError(@json(__('admin_schedule.save_failed')));
                         }
                     });
                 });
@@ -544,8 +543,9 @@
                     rdFilteredRows.slice(start, end).forEach(row => $(row).show());
 
                     const showing = Math.min(end, total);
-                    $('#rdPaginationInfo').text(total > 0 ? `Показано ${start + 1}–${showing} из ${total} записей` :
-                        'Нет записей');
+                    $('#rdPaginationInfo').text(total > 0
+                        ? @json(__('admin_schedule.shown')).replace(':from', start + 1).replace(':to', showing).replace(':total', total)
+                        : @json(__('admin_schedule.empty')));
 
                     let buttons = '';
                     if (totalPages > 1) {
@@ -626,7 +626,7 @@
                             const date = new Date(rd.date);
                             const dateStr = date.toLocaleDateString('ru-RU');
                             const timeStr = rd.full_day ?
-                                '<span class="badge bg-secondary fs-10">Весь день</span>' :
+                                '<span class="badge bg-secondary fs-10">{{ __('admin_schedule.full_day') }}</span>' :
                                 `${rd.start_time} – ${rd.end_time}`;
 
                             row.find('.rd-name').text(rd.name);
@@ -644,11 +644,11 @@
                                 .data('fullday', rd.full_day);
 
                             $('#editRdModal').modal('hide');
-                            showSuccess('Нерабочий день обновлён!');
+                            showSuccess(@json(__('admin_schedule.updated')));
                             applyRdFilters();
                         },
                         error: function() {
-                            showError('Ошибка сохранения');
+                            showError(@json(__('admin_schedule.save_failed')));
                         }
                     });
                 });

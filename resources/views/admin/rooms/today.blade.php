@@ -1,18 +1,18 @@
-@section('title', 'Нагрузка кабинетов')
+@section('title', __('admin_rooms.workload'))
 
 <x-dashboard-layout>
   <div class="content">
     <nav class="mb-3" aria-label="breadcrumb">
       <ol class="breadcrumb mb-0">
-        <li class="breadcrumb-item"><a href="{{ route('admin.rooms.index') }}">Кабинеты</a></li>
-        <li class="breadcrumb-item active">Загрузка</li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.rooms.index') }}">{{ __('admin_rooms.title') }}</a></li>
+        <li class="breadcrumb-item active">{{ __('admin_rooms.load') }}</li>
       </ol>
     </nav>
 
     <div class="row mb-4 align-items-center">
       <div class="col">
-        <h2 class="mb-0">Нагрузка кабинетов</h2>
-        <p class="text-muted fs-9 mt-1">{{ $today->locale('ru')->isoFormat('dddd, D MMMM YYYY') }}</p>
+        <h2 class="mb-0">{{ __('admin_rooms.workload') }}</h2>
+        <p class="text-muted fs-9 mt-1">{{ $today->locale(app()->getLocale())->isoFormat('dddd, D MMMM YYYY') }}</p>
       </div>
     </div>
 
@@ -22,15 +22,15 @@
         <div class="d-flex align-items-center gap-2 flex-wrap">
           <a href="{{ route('admin.rooms.today') }}"
              class="btn btn-sm {{ $today->isToday() ? 'btn-primary' : 'btn-outline-primary' }}">
-            Сегодня
+            {{ __('admin_rooms.today') }}
           </a>
           <a href="{{ route('admin.rooms.day', \Carbon\Carbon::now()->addDay()->format('Y-m-d')) }}"
              class="btn btn-sm {{ $today->isTomorrow() ? 'btn-primary' : 'btn-outline-secondary' }}">
-            Завтра
+            {{ __('admin_rooms.tomorrow') }}
           </a>
           <a href="{{ route('admin.rooms.day', \Carbon\Carbon::now()->subDay()->format('Y-m-d')) }}"
              class="btn btn-sm {{ $today->isYesterday() ? 'btn-primary' : 'btn-outline-secondary' }}">
-            Вчера
+            {{ __('admin_rooms.yesterday') }}
           </a>
           <div class="ms-auto d-flex align-items-center gap-2">
             <a href="{{ route('admin.rooms.day', $today->copy()->subDay()->format('Y-m-d')) }}"
@@ -54,7 +54,7 @@
       <div class="card">
         <div class="card-body text-center text-muted py-5">
           <span class="fas fa-door-open fs-3 mb-3 d-block"></span>
-          Нет активных кабинетов. <a href="{{ route('admin.rooms.index') }}">Добавить кабинет</a>
+          {{ __('admin_rooms.no_active') }} <a href="{{ route('admin.rooms.index') }}">{{ __('admin_rooms.add') }}</a>
         </div>
       </div>
     @else
@@ -71,10 +71,10 @@
             </div>
             <div class="d-flex align-items-center gap-2">
               <span class="badge bg-light text-dark fs-10">
-                <span class="fas fa-users me-1"></span>{{ $room['capacity'] }} мест
+                <span class="fas fa-users me-1"></span>{{ __('admin_rooms.seats', ['count' => $room['capacity']]) }}
               </span>
               @if($room['appointments_count'] > 0)
-                <span class="badge bg-primary fs-10">{{ $room['appointments_count'] }} записей</span>
+                <span class="badge bg-primary fs-10">{{ __('admin_rooms.appointment_count', ['count' => $room['appointments_count']]) }}</span>
               @endif
             </div>
           </div>
@@ -82,7 +82,7 @@
           <div class="card-body p-0">
             @if(empty($room['slot_groups']))
               <div class="text-center text-muted py-4 fs-9">
-                <span class="fas fa-calendar-check me-1"></span>Записей нет
+                <span class="fas fa-calendar-check me-1"></span>{{ __('admin_rooms.no_appointments') }}
               </div>
             @else
               @php $now = \Carbon\Carbon::now(); @endphp
@@ -105,12 +105,12 @@
                     <div class="flex-1">
                       <div class="d-flex align-items-center gap-1">
                         @if($slot['is_full'])
-                          <span class="badge bg-danger fs-10">Занято {{ count($slot['appointments']) }}/{{ $room['capacity'] }}</span>
+                          <span class="badge bg-danger fs-10">{{ __('admin_rooms.occupied',['used'=>count($slot['appointments']),'capacity'=>$room['capacity']]) }}</span>
                         @else
                           <span class="badge bg-success fs-10">{{ count($slot['appointments']) }}/{{ $room['capacity'] }}</span>
                         @endif
                         @if($isActive)
-                          <span class="badge bg-warning text-dark fs-10">Сейчас</span>
+                          <span class="badge bg-warning text-dark fs-10">{{ __('admin_rooms.now') }}</span>
                         @endif
                       </div>
                     </div>
@@ -129,7 +129,7 @@
                         {{ $apt->service->name }}
                         <span class="ms-1 text-primary">· {{ $apt->user->name }}</span>
                       </div>
-                      <a href="{{ route('calendar.show', $apt->id) }}" class="fs-10 text-primary">Подробнее →</a>
+                      <a href="{{ route('calendar.show', $apt->id) }}" class="fs-10 text-primary">{{ __('admin_rooms.details') }}</a>
                     </div>
                   </div>
                   @endforeach
@@ -141,7 +141,7 @@
 
           <div class="card-footer py-2">
             <a href="{{ route('admin.rooms.index') }}" class="btn btn-sm btn-outline-secondary w-100 fs-10">
-              <span class="fas fa-cog me-1"></span>Настройки кабинета
+              <span class="fas fa-cog me-1"></span>{{ __('admin_rooms.room_settings') }}
             </a>
           </div>
         </div>

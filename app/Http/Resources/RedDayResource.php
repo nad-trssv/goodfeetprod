@@ -18,7 +18,7 @@ class RedDayResource extends JsonResource
             'description' => $this->description,
             'repeat' => $this->repeat ? 'yes' : 'no',
             'user_id' => $this->user_id,
-            'master_name' => $this->user ? $this->user->name : 'Общий',
+            'master_name' => $this->user ? $this->user->name : __('admin_messages.general'),
             'created_at' => $this->created_at ? Carbon::parse($this->created_at)->toDateTimeString() : null,
             'updated_at' => $this->updated_at ? Carbon::parse($this->updated_at)->toDateTimeString() : null,
         ];

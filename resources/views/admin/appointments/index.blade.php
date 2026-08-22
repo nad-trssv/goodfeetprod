@@ -1,16 +1,16 @@
-@section('title', 'Все записи')
+@section('title', __('admin_appointments.all'))
 
 <x-dashboard-layout>
     <div class="content">
         <nav class="mb-3" aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item active">Все записи</li>
+                <li class="breadcrumb-item active">{{ __('admin_appointments.all') }}</li>
             </ol>
         </nav>
 
         <div class="row mb-4 align-items-center">
             <div class="col">
-                <h2 class="mb-0">Все записи
+                <h2 class="mb-0">{{ __('admin_appointments.all') }}
                     <span class="fw-normal text-body-tertiary ms-2 fs-5">({{ $appointments->total() }})</span>
                 </h2>
             </div>
@@ -22,11 +22,11 @@
                 <form method="GET" action="{{ route('admin.appointments.index') }}" class="row g-3">
                     <div class="col-md-3">
                         <input type="text" class="form-control form-control-sm" name="search"
-                            value="{{ request('search') }}" placeholder="Поиск по клиенту, телефону, email...">
+                            value="{{ request('search') }}" placeholder="{{ __('admin_appointments.search') }}">
                     </div>
                     <div class="col-md-2">
                         <select class="form-select form-select-sm" name="master_id">
-                            <option value="">Все мастера</option>
+                            <option value="">{{ __('admin_appointments.all_employees') }}</option>
                             @foreach ($masters as $master)
                                 <option value="{{ $master->id }}"
                                     {{ request('master_id') == $master->id ? 'selected' : '' }}>
@@ -37,7 +37,7 @@
                     </div>
                     <div class="col-md-2">
                         <select class="form-select form-select-sm" name="service_id">
-                            <option value="">Все услуги</option>
+                            <option value="">{{ __('admin_appointments.all_services') }}</option>
                             @foreach ($services as $service)
                                 <option value="{{ $service->id }}"
                                     {{ request('service_id') == $service->id ? 'selected' : '' }}>
@@ -56,11 +56,11 @@
                     </div>
                     <div class="col-md-2">
                         <input type="date" class="form-control form-control-sm" name="date_from"
-                            value="{{ request('date_from') }}" placeholder="От">
+                            value="{{ request('date_from') }}" placeholder="{{ __('admin_appointments.from') }}">
                     </div>
                     <div class="col-md-2">
                         <input type="date" class="form-control form-control-sm" name="date_to"
-                            value="{{ request('date_to') }}" placeholder="До">
+                            value="{{ request('date_to') }}" placeholder="{{ __('admin_appointments.to') }}">
                     </div>
                     <div class="col-md-1 d-flex gap-1">
                         <button class="btn btn-sm btn-primary" type="submit">
@@ -81,14 +81,14 @@
                         <thead class="bg-light">
                             <tr>
                                 <th class="ps-3">#</th>
-                                <th>Клиент</th>
-                                <th>Услуга</th>
-                                <th>Мастер</th>
-                                <th>Дата и время</th>
-                                <th>Цена</th>
+                                <th>{{ __('admin_appointments.client') }}</th>
+                                <th>{{ __('admin_appointments.service') }}</th>
+                                <th>{{ __('admin_appointments.employee') }}</th>
+                                <th>{{ __('admin_appointments.date_time') }}</th>
+                                <th>{{ __('admin_appointments.price') }}</th>
                                 <th>{{ __('appointment_statuses.status') }}</th>
-                                <th>Заметки</th>
-                                <th class="text-end pe-3">Действие</th>
+                                <th>{{ __('admin_appointments.notes') }}</th>
+                                <th class="text-end pe-3">{{ __('admin_appointments.action') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -110,7 +110,7 @@
                                                 style="width:8px;height:8px;background:{{ $apt->service->eventColor ?? '#007bff' }};display:inline-block;flex-shrink:0"></span>
                                             <span>{{ $apt->service->name }}</span>
                                         </div>
-                                        <div class="text-muted fs-10">{{ $apt->service->duration_minutes }} мин.</div>
+                                        <div class="text-muted fs-10">{{ __('admin_appointments.minutes',['count'=>$apt->service->duration_minutes]) }}</div>
                                     </td>
                                     <td>
                                         <div class="fw-semibold">{{ $apt->user->name }}</div>
@@ -126,7 +126,7 @@
                                     </td>
                                     <td>
                                         @if ($apt->service->price_can_change)
-                                            <span class="text-muted fs-10">от </span>
+                                            <span class="text-muted fs-10">{{ __('admin_appointments.from_price') }} </span>
                                         @endif
                                         <span class="fw-semibold">{{ $apt->price }} €</span>
                                     </td>
@@ -151,7 +151,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="text-center text-muted py-5">Записей не найдено</td>
+                                    <td colspan="8" class="text-center text-muted py-5">{{ __('admin_appointments.not_found') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -162,8 +162,7 @@
                 @if ($appointments->hasPages())
                     <div class="d-flex justify-content-between align-items-center px-3 py-3">
                         <div class="text-muted fs-9">
-                            Показано {{ $appointments->firstItem() }}–{{ $appointments->lastItem() }} из
-                            {{ $appointments->total() }}
+                            {{ __('admin_appointments.shown', ['from' => $appointments->firstItem(), 'to' => $appointments->lastItem(), 'total' => $appointments->total()]) }}
                         </div>
                         {{ $appointments->links() }}
                     </div>

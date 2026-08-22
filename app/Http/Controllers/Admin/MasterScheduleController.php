@@ -91,7 +91,7 @@ class MasterScheduleController extends Controller
             if (strtotime($endTime) <= strtotime($startTime)) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Время окончания должно быть позже времени начала'
+                    'message' => __('admin_messages.end_after_start')
                 ], 422);
             }
         }
@@ -169,7 +169,7 @@ class MasterScheduleController extends Controller
             if (strtotime($endTime) <= strtotime($startTime)) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Время окончания должно быть позже времени начала'
+                    'message' => __('admin_messages.end_after_start')
                 ], 422);
             }
         }
@@ -207,7 +207,7 @@ class MasterScheduleController extends Controller
                     'end_time' => $day->end_time ? substr($day->end_time, 0, 5) : null,
                     'full_day' => $day->full_day,
                     'repeat' => $day->repeat,
-                    'master_name' => $day->user ? $day->user->name : 'Общий',
+                    'master_name' => $day->user ? $day->user->name : __('admin_messages.general'),
                     'user_id' => $day->user_id,
                 ];
             });
@@ -229,8 +229,8 @@ class MasterScheduleController extends Controller
             'end_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
             'repeat' => 'nullable|boolean',
         ], [
-            'name.required' => 'Заполните название',
-            'date.required' => 'Заполните дату',
+            'name.required' => __('admin_messages.name_required'),
+            'date.required' => __('admin_messages.date_required'),
         ]);
 
         $fullDay = $request->has('full_day') && $request->full_day == '1';
@@ -240,11 +240,11 @@ class MasterScheduleController extends Controller
         if (!$fullDay) {
             if (!$startTime || !$endTime) {
                 return redirect()->route('admin.red-days.index')
-                    ->with('error', 'Укажите время начала и конца');
+                    ->with('error', __('admin_messages.time_required'));
             }
             if (strtotime($endTime) <= strtotime($startTime)) {
                 return redirect()->route('admin.red-days.index')
-                    ->with('error', 'Время окончания должно быть позже времени начала');
+                    ->with('error', __('admin_messages.end_after_start'));
             }
         }
 
@@ -261,7 +261,7 @@ class MasterScheduleController extends Controller
         ]);
 
         return redirect()->route('admin.red-days.index')
-            ->with('success', 'Запись добавлена!');
+            ->with('success', __('admin_messages.entry_added'));
     }
     public function timeOff(Request $request)
     {
@@ -299,8 +299,8 @@ class MasterScheduleController extends Controller
             'end_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
             'repeat' => 'nullable|boolean',
         ], [
-            'name.required' => 'Заполните название',
-            'date.required' => 'Заполните дату',
+            'name.required' => __('admin_messages.name_required'),
+            'date.required' => __('admin_messages.date_required'),
         ]);
 
         $fullDay = $request->has('full_day') && $request->full_day == '1';
@@ -310,11 +310,11 @@ class MasterScheduleController extends Controller
         if (!$fullDay) {
             if (!$startTime || !$endTime) {
                 return redirect()->route('master.time-off.index')
-                    ->with('error', 'Укажите время начала и конца');
+                    ->with('error', __('admin_messages.time_required'));
             }
             if (strtotime($endTime) <= strtotime($startTime)) {
                 return redirect()->route('master.time-off.index')
-                    ->with('error', 'Время окончания должно быть позже времени начала');
+                    ->with('error', __('admin_messages.end_after_start'));
             }
         }
 
@@ -331,7 +331,7 @@ class MasterScheduleController extends Controller
         ]);
 
         return redirect()->route('master.time-off.index')
-            ->with('success', 'Запись добавлена!');
+            ->with('success', __('admin_messages.entry_added'));
     }
 
     public function updateTimeOff(Request $request, string $id)
@@ -353,8 +353,8 @@ class MasterScheduleController extends Controller
             'end_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
             'repeat' => 'nullable|boolean',
         ], [
-            'name.required' => 'Заполните название',
-            'date.required' => 'Заполните дату',
+            'name.required' => __('admin_messages.name_required'),
+            'date.required' => __('admin_messages.date_required'),
         ]);
 
         $fullDay = $request->has('full_day') && $request->full_day == '1';
@@ -364,11 +364,11 @@ class MasterScheduleController extends Controller
         if (!$fullDay) {
             if (!$startTime || !$endTime) {
                 return redirect()->route('master.time-off.index')
-                    ->with('error', 'Укажите время начала и конца');
+                    ->with('error', __('admin_messages.time_required'));
             }
             if (strtotime($endTime) <= strtotime($startTime)) {
                 return redirect()->route('master.time-off.index')
-                    ->with('error', 'Время окончания должно быть позже времени начала');
+                    ->with('error', __('admin_messages.end_after_start'));
             }
         }
 
@@ -384,7 +384,7 @@ class MasterScheduleController extends Controller
         ]);
 
         return redirect()->route('master.time-off.index')
-            ->with('success', 'Запись обновлена!');
+            ->with('success', __('admin_messages.entry_updated'));
     }
 
     public function destroyTimeOff(string $id)
@@ -398,7 +398,7 @@ class MasterScheduleController extends Controller
         $redDay->delete();
 
         return redirect()->route('master.time-off.index')
-            ->with('success', 'Запись удалена!');
+            ->with('success', __('admin_messages.entry_deleted'));
     }
     public function updateRedDayForMaster(Request $request, string $id)
     {
@@ -414,8 +414,8 @@ class MasterScheduleController extends Controller
             'end_time' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
             'repeat' => 'nullable|boolean',
         ], [
-            'name.required' => 'Заполните название',
-            'date.required' => 'Заполните дату',
+            'name.required' => __('admin_messages.name_required'),
+            'date.required' => __('admin_messages.date_required'),
         ]);
 
         $fullDay = $request->has('full_day') && $request->full_day == '1';
@@ -425,11 +425,11 @@ class MasterScheduleController extends Controller
         if (!$fullDay) {
             if (!$startTime || !$endTime) {
                 return redirect()->route('admin.red-days.index')
-                    ->with('error', 'Укажите время начала и конца');
+                    ->with('error', __('admin_messages.time_required'));
             }
             if (strtotime($endTime) <= strtotime($startTime)) {
                 return redirect()->route('admin.red-days.index')
-                    ->with('error', 'Время окончания должно быть позже времени начала');
+                    ->with('error', __('admin_messages.end_after_start'));
             }
         }
 
@@ -445,7 +445,7 @@ class MasterScheduleController extends Controller
         ]);
 
         return redirect()->route('admin.red-days.index')
-            ->with('success', 'Запись обновлена!');
+            ->with('success', __('admin_messages.entry_updated'));
     }
 
     public function destroyRedDayForMaster(string $id)
@@ -454,7 +454,7 @@ class MasterScheduleController extends Controller
         $redDay->delete();
 
         return redirect()->route('admin.red-days.index')
-            ->with('success', 'Запись удалена!');
+            ->with('success', __('admin_messages.entry_deleted'));
     }
     public function mastersToday(Request $request, $date = null)
     {

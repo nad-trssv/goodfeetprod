@@ -24,7 +24,13 @@ class EmployeeCardService
             'average_check' => (float)$metrics->average_check,
             'employment_date' => $start,
             'employment_days' => $start->diffInDays(now()),
-            'employment_tenure' => collect([[$tenure->y,['год','года','лет']],[$tenure->m,['месяц','месяца','месяцев']],[$tenure->d,['день','дня','дней']]])->filter(fn($part)=>$part[0]>0)->map(fn($part)=>$this->countLabel($part[0],$part[1]))->implode(' ') ?: $this->countLabel(0,['день','дня','дней']),
+            'employment_tenure' => collect([
+                [$tenure->y, 'admin_staff.tenure_years'],
+                [$tenure->m, 'admin_staff.tenure_months'],
+                [$tenure->d, 'admin_staff.tenure_days'],
+            ])->filter(fn ($part) => $part[0] > 0)
+                ->map(fn ($part) => trans_choice($part[1], $part[0], ['count' => $part[0]]))
+                ->implode(' ') ?: trans_choice('admin_staff.tenure_days', 0, ['count' => 0]),
         ];
     }
     public function calendar(User $employee): array
@@ -49,10 +55,4 @@ class EmployeeCardService
         ];
     }
 
-    private function countLabel(int $number, array $forms): string
-    {
-        $mod100=$number%100; $mod10=$number%10;
-        $form=($mod100>=11&&$mod100<=14)?$forms[2]:($mod10===1?$forms[0]:($mod10>=2&&$mod10<=4?$forms[1]:$forms[2]));
-        return $number.' '.$form;
-    }
 }

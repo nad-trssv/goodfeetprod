@@ -8,6 +8,9 @@ use App\Models\Roles;
 use App\Models\Services;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Lang;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use Tests\TestCase;
 
 class AdminNavigationLocalizationSearchTest extends TestCase
@@ -55,6 +58,59 @@ class AdminNavigationLocalizationSearchTest extends TestCase
             'locale' => 'en',
         ])->assertOk();
         $this->assertSame('en', $master->fresh()->locale);
+    }
+
+    public function test_admin_translation_catalogs_have_the_same_keys_in_all_supported_languages(): void
+    {
+        $russianFiles = collect(glob(lang_path('ru/admin_*.php')))
+            ->map(fn (string $path) => basename($path))
+            ->sort()
+            ->values();
+
+        foreach ($russianFiles as $file) {
+            $russian = $this->translationKeys(require lang_path('ru/'.$file));
+
+            foreach (['en', 'et'] as $locale) {
+                $path = lang_path($locale.'/'.$file);
+                $this->assertFileExists($path, "Missing {$locale}/{$file}");
+                $this->assertSame($russian, $this->translationKeys(require $path), "Translation keys differ in {$locale}/{$file}");
+            }
+        }
+    }
+
+    public function test_new_staff_default_locale_is_russian(): void
+    {
+        $role = Roles::firstOrCreate(['name' => 'Master']);
+        $staff = User::factory()->create([
+            'role_id' => $role->id,
+            'phone' => '+372'.fake()->unique()->numerify('55######'),
+        ]);
+
+        $this->assertSame('ru', $staff->fresh()->locale);
+    }
+
+    public function test_static_admin_translation_references_exist_in_every_supported_language(): void
+    {
+        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(resource_path('views/admin')));
+        $keys = [];
+
+        foreach ($files as $file) {
+            if (! $file->isFile() || ! str_ends_with($file->getFilename(), '.blade.php')) {
+                continue;
+            }
+
+            preg_match_all("/__\\(\\s*['\"]([^'\"]+)['\"]/", file_get_contents($file->getPathname()), $matches);
+            array_push($keys, ...$matches[1]);
+        }
+
+        foreach (array_unique($keys) as $key) {
+            if (str_ends_with($key, '.') || str_ends_with($key, '_')) {
+                continue;
+            }
+            foreach (array_keys(config('supported_locales')) as $locale) {
+                $this->assertTrue(Lang::has($key, $locale, false), "Missing {$locale} translation: {$key}");
+            }
+        }
     }
 
     public function test_global_search_groups_results_and_keeps_master_inside_own_customer_scope(): void
@@ -113,5 +169,24 @@ class AdminNavigationLocalizationSearchTest extends TestCase
             'appointment_start' => $start,
             'appointment_end' => \Carbon\Carbon::parse($start)->addHour(),
         ]);
+    }
+
+    /** @return list<string> */
+    private function translationKeys(array $translations, string $prefix = ''): array
+    {
+        $keys = [];
+
+        foreach ($translations as $key => $value) {
+            $path = $prefix === '' ? (string) $key : $prefix.'.'.$key;
+            if (is_array($value)) {
+                array_push($keys, ...$this->translationKeys($value, $path));
+            } else {
+                $keys[] = $path;
+            }
+        }
+
+        sort($keys);
+
+        return $keys;
     }
 }

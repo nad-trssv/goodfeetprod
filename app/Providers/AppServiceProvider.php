@@ -55,6 +55,8 @@ class AppServiceProvider extends ServiceProvider
                     response()->json(['message'=>__('crm.too_many_messages')],429,$headers)));
         RateLimiter::for('chat-rating', fn (Request $request) =>
             Limit::perMinute(10)->by('chat-rating|'.$this->chatConversationKey($request).'|'.$request->ip()));
+        RateLimiter::for('chat-restart', fn (Request $request) =>
+            Limit::perMinute(5)->by('chat-restart|'.$this->chatConversationKey($request).'|'.$request->ip()));
 
         RateLimiter::for('admin-notifications-status', fn (Request $request) =>
             Limit::perMinute(30)->by('admin-notifications-status|'.$request->user()?->getAuthIdentifier()));

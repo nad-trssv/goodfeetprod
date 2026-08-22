@@ -23,7 +23,7 @@ class MemberResource extends JsonResource
             'phone'                 => $this->phone,
             'email'                 => $this->email,
             'role_id'               => $this->role_id,
-            'role_name'             => $this->role?->name,
+            'role_name'             => $this->role?->displayName(),
             'last_active'           => $this->last_active,
             'is_online'             => $this->isOnline(),
             'last_seen'             => $this->lastSeen(),

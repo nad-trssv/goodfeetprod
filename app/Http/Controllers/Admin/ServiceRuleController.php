@@ -53,7 +53,7 @@ class ServiceRuleController extends Controller
 
             return redirect()
                 ->route('service.rules.edit', $service->id)
-                ->with('success', 'Правило успешно сохранено!');
+                ->with('success', __('admin_messages.rule_saved'));
         } catch (\Throwable $e) {
             Log::error('Ошибка при сохранении правила услуги', [
                 'error' => $e->getMessage(),
@@ -61,7 +61,7 @@ class ServiceRuleController extends Controller
 
             return redirect()
                 ->route('service.rules.edit', $service->id)
-                ->with('error', 'Ошибка при сохранении правила. Обратитесь к администратору.');
+                ->with('error', __('admin_messages.rule_save_failed'));
         }
     }
 
@@ -77,7 +77,7 @@ class ServiceRuleController extends Controller
 
             return redirect()
                 ->route('service.rules.edit', $serviceId)
-                ->with('success', 'Правило удалено!');
+                ->with('success', __('admin_messages.rule_deleted'));
         } catch (\Throwable $e) {
             Log::error('Ошибка при удалении правила услуги', [
                 'rule_id' => $rule->id,
@@ -86,7 +86,7 @@ class ServiceRuleController extends Controller
 
             return redirect()
                 ->route('service.rules.edit', $serviceId)
-                ->with('error', 'Ошибка при удалении правила. Обратитесь к администратору.');
+                ->with('error', __('admin_messages.rule_delete_failed'));
         }
     }
 }

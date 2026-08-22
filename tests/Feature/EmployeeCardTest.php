@@ -42,7 +42,7 @@ class EmployeeCardTest extends TestCase
             ->assertSee('100,00 €')
             ->assertSee('2 года 2 месяца 5 дней')
             ->assertSee($service->name)
-            ->assertSee('services/employee-card.webp')
+            ->assertSee($service->image_url)
             ->assertSee('Отпуск');
 
         $this->actingAs($admin)->get(route('admin.master-services.index', ['master_id' => $member->id]))

@@ -6,9 +6,9 @@
     <div class="content">
       <nav class="mb-3" aria-label="breadcrumb">
         <ol class="breadcrumb mb-0">
-          <li class="breadcrumb-item"><a href="{{ route('service.index') }}">Услуги</a></li>
-          <li class="breadcrumb-item"><a href="{{ route('service.show', $service['id']) }}">Редактирование</a></li>
-          <li class="breadcrumb-item active">Локализация</li>
+          <li class="breadcrumb-item"><a href="{{ route('service.index') }}">{{ __('admin_services.title') }}</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('service.show', $service['id']) }}">{{ __('admin_services.edit') }}</a></li>
+          <li class="breadcrumb-item active">{{ __('admin_services.localization') }}</li>
         </ol>
       </nav>
       
@@ -16,7 +16,7 @@
         <script>
           document.addEventListener("DOMContentLoaded", function() {
               Swal.fire({
-                  title: 'Обновлено!',
+                  title: @json(__('admin_service_extra.updated')),
                   text: "{{ session('success') }}",
                   icon: 'success',
                   confirmButtonText: 'OK'
@@ -30,7 +30,7 @@
         @method('PUT') 
       <div class="row g-4">
         <div class="col-12 col-xl-10 order-1 order-xl-0">
-            @foreach(['ru' => 'Русский язык', 'et' => 'Eesti keel', 'en' => 'English'] as $locale => $language)
+            @foreach(__('admin_service_extra.languages') as $locale => $language)
                     <div class="card shadow-none border mb-4 mt-6" data-component-card="data-component-card">
                       <div class="card-header p-4 border-bottom bg-body">
                         <div class="row g-3 justify-content-between align-items-center">
@@ -45,20 +45,20 @@
                             <div class="col-12">
                                 <div class="col-12 mb-3">
                                   <div class="form-floating">
-                                    <input type="text" class="form-control" name="translations[{{ $locale }}][name]" placeholder="Название проекта" value="{{ $service->getTranslation($locale, 'name') }}" required>
-                                    <label for="name">Название проекта</label>
-                                    <div class="invalid-feedback">Это поле обязательное</div>
+                                    <input type="text" class="form-control" name="translations[{{ $locale }}][name]" placeholder="{{ __('admin_services.name') }}" value="{{ $service->getTranslation($locale, 'name') }}" required>
+                                    <label for="name">{{ __('admin_services.name') }}</label>
+                                    <div class="invalid-feedback">{{ __('admin_services.required') }}</div>
                                   </div>
                                 </div>
                               
                                 <div class="col-12 mb-3">
                                   <div class="form-floating">
-                                    <textarea class="form-control" id="short_description" name="translations[{{ $locale }}][short_description]" placeholder="Краткое Описание" style="height: 100px">{{ $service->getTranslation($locale, 'short_description') }}</textarea>
-                                    <label for="short_description">Краткое Описание</label>
+                                    <textarea class="form-control" id="short_description" name="translations[{{ $locale }}][short_description]" placeholder="{{ __('admin_services.short_description') }}" style="height: 100px">{{ $service->getTranslation($locale, 'short_description') }}</textarea>
+                                    <label for="short_description">{{ __('admin_services.short_description') }}</label>
                                   </div>
                                 </div>
                                 <div class="col-12 mb-3">
-                                  <label for="full_description">Описание</label>
+                                  <label for="full_description">{{ __('admin_services.description') }}</label>
                                   <div class="form-floating">
                                     <textarea class="tinyarea" name="translations[{{ $locale }}][full_description]" data-tinymce="{}">{{ $service->getTranslation($locale, 'full_description') }}</textarea>
                                   </div>
@@ -71,16 +71,16 @@
             @endforeach
             <div class="card shadow-none mb-4 mt-6">
                 <div class="col-auto">
-                  <button type="submit" class="btn btn-primary w-100 mt-2">Сохранить</button>
+                  <button type="submit" class="btn btn-primary w-100 mt-2">{{ __('admin_services.save') }}</button>
                 </div>
             </div>
         </div>
         <div class="col-12 col-xl-2">
           <div class="position-sticky mt-xl-4 h-[100vh]" style="top: 80px;">
-            <h5 class="lh-1">Поиск по странице</h5>
+            <h5 class="lh-1">{{ __('admin_services.search_page') }}</h5>
             <hr>
             <ul class="nav nav-vertical flex-column doc-nav" data-doc-nav="data-doc-nav">
-              <li class="nav-item"> <a class="nav-link" href="#lang-ru">Русский язык</a>
+              <li class="nav-item"> <a class="nav-link" href="#lang-ru">{{ __('admin_service_extra.languages.ru') }}</a>
               </li>
               <li class="nav-item"> <a class="nav-link" href="#lang-et">Eesti keel</a>
               </li>
@@ -90,10 +90,10 @@
             <hr>
             <ul class="nav nav-vertical flex-column doc-nav" data-doc-nav="data-doc-nav">
               <li class="nav-item">
-                <button type="submit" class="btn btn-primary w-100 my-2 py-1">Сохранить изменения</button>
+                <button type="submit" class="btn btn-primary w-100 my-2 py-1">{{ __('admin_services.save_changes') }}</button>
               </li>
               <li class="nav-item"> 
-                <a class="btn border border-secondary text-secondary w-100 my-2 py-1" href="{{ route('service.show', $service['id']) }}">Вернуться в редактирование</a>
+                <a class="btn border border-secondary text-secondary w-100 my-2 py-1" href="{{ route('service.show', $service['id']) }}">{{ __('admin_services.back_edit') }}</a>
               </li>
             </ul>
           </div>

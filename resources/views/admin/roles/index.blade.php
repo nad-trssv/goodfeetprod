@@ -27,7 +27,7 @@
         <div class="accordion-item mb-3 border rounded-3 overflow-hidden">
           <h2 class="accordion-header" id="role-heading-{{ $role->id }}">
             <button class="accordion-button {{ $loop->first ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#role-body-{{ $role->id }}" aria-expanded="{{ $loop->first ? 'true' : 'false' }}">
-              <span class="fw-bold me-2">{{ $role->name }}</span>
+              <span class="fw-bold me-2">{{ $role->displayName() }}</span>
               @if($role->is_system)<span class="badge badge-phoenix badge-phoenix-secondary me-2">{{ __('admin_roles.system') }}</span>@endif
               <span class="text-body-tertiary fs-9">{{ __('admin_roles.employees',['count'=>$role->users_count]) }}</span>
             </button>

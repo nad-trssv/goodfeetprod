@@ -67,6 +67,7 @@ Route::post('/chat/conversations', [PublicChatController::class, 'store'])->midd
 Route::get('/chat/conversations/{conversation}/poll', [PublicChatController::class, 'show'])->middleware('throttle:chat-poll')->name('chat.show');
 Route::post('/chat/conversations/{conversation}/messages', [PublicChatController::class, 'message'])->middleware('throttle:chat-message')->name('chat.messages.store');
 Route::post('/chat/conversations/{conversation}/rating', [PublicChatController::class, 'rating'])->middleware('throttle:chat-rating')->name('chat.rating.store');
+Route::post('/chat/conversations/{conversation}/restart', [PublicChatController::class, 'restart'])->middleware('throttle:chat-restart')->name('chat.restart');
 
 Route::middleware('guest:customer')->group(function () {
     Route::get('/account/login', [CustomerAuthController::class, 'showLogin'])->name('customer.login');

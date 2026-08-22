@@ -67,10 +67,10 @@ class ActivityLogEntry extends Model
     public function typeLabel(): string
     {
         return match ($this->type) {
-            self::TYPE_INFO => 'Информация',
-            self::TYPE_WARNING => 'Предупреждение',
-            self::TYPE_ERROR => 'Ошибка',
-            default => 'Неизвестный тип',
+            self::TYPE_INFO => __('admin_activity.types.info'),
+            self::TYPE_WARNING => __('admin_activity.types.warning'),
+            self::TYPE_ERROR => __('admin_activity.types.error'),
+            default => __('admin_activity.types.unknown'),
         };
     }
 
@@ -83,6 +83,21 @@ class ActivityLogEntry extends Model
             default => 'activity-log-type--unknown',
         };
     }
+    public function localizedMessage(): string
+    {
+        $isOwnAction = (int) $this->actor_id === (int) ($this->properties['target_master_id'] ?? 0);
+        $key = match ($this->event) {
+            'master_service.enabled' => $isOwnAction ? 'service_enabled_own' : 'service_enabled_employee',
+            'master_service.disabled' => $isOwnAction ? 'service_disabled_own' : 'service_disabled_employee',
+            'master_service.settings_updated' => $isOwnAction ? 'settings_updated_own' : 'settings_updated_employee',
+            'master_service.toggle_failed' => 'toggle_failed',
+            'master_service.settings_update_failed' => 'settings_update_failed',
+            default => null,
+        };
+
+        return $key ? __('admin_activity_events.'.$key) : $this->message;
+    }
+
     public function objectLabel(): string
     {
         if ($this->module === 'employees/services') {

@@ -172,6 +172,36 @@ class CrmFeatureTest extends TestCase
             'staff_name'=>'CRM Master',
             'rating'=>5,
         ]);
+
+        $restarted=$this->postJson(route('chat.restart',$conversation),['token'=>$created['token']])
+            ->assertCreated()
+            ->assertJsonStructure(['uuid','token'])
+            ->json();
+        $nextConversation=CrmConversation::where('public_uuid',$restarted['uuid'])->firstOrFail();
+        $this->assertSame($conversation->id,$nextConversation->previous_conversation_id);
+        $this->assertSame($master->id,$nextConversation->assigned_to_user_id);
+        $this->assertSame('open',$nextConversation->status);
+        $this->assertDatabaseHas('crm_messages',[
+            'conversation_id'=>$nextConversation->id,
+            'event_type'=>'conversation_restarted',
+            'is_public'=>false,
+        ]);
+        $this->postJson(route('chat.messages.store',$nextConversation),[
+            'token'=>$restarted['token'],
+            'message'=>'I need help with something else',
+        ])->assertCreated();
+        $this->actingAs($master)->get(route('crm.chat.show',$nextConversation))
+            ->assertOk()
+            ->assertSee('I will help you')
+            ->assertSee('I need help with something else')
+            ->assertSee(__('crm.client_started_new_chat'));
+
+        $retry=$this->postJson(route('chat.restart',$conversation),['token'=>$created['token']])
+            ->assertCreated()
+            ->json();
+        $this->assertSame($restarted['uuid'],$retry['uuid']);
+        $this->assertSame($restarted['token'],$retry['token']);
+        $this->assertDatabaseCount('crm_conversations',2);
         $this->actingAs($admin)->get(route('crm.ratings.index'))
             ->assertOk()
             ->assertSee('CRM Master')

@@ -31,12 +31,11 @@ class FixedBookingRequest extends FormRequest
     public function messages()
     {
         return [
-            'fixedBooking.required'    => 'Вы должны указать хотя бы одно время.',
-            'fixedBooking.array'       => 'Формат данных должен быть массивом.',
-            'fixedBooking.min'         => 'Нужно хотя бы одно время.',
-            'fixedBooking.*.required'  => 'Время не может быть пустым.',
-            'fixedBooking.*.string'    => 'Каждое время должно быть строкой.',
-            'fixedBooking.*.regex'     => 'Время должно быть в формате HH:MM.',
+            'fixedBooking.required'    => __('admin_validation.fixed.required'),
+            'fixedBooking.array'       => __('admin_validation.fixed.array'),
+            'fixedBooking.min'         => __('admin_validation.fixed.min'),
+            'fixedBooking.*.required'  => __('admin_validation.fixed.item_required'),
+            'fixedBooking.*.date_format' => __('admin_validation.time_format'),
         ];
     }
 }

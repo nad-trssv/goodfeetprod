@@ -14,11 +14,11 @@ class EmployeeScheduleManager
         foreach (self::DAYS as $day) {
             $off = (bool)($data[$day.'_off'] ?? false);
             $start = $data[$day.'_start'] ?? null; $end = $data[$day.'_end'] ?? null;
-            if (!$off && (!$start || !$end || $end <= $start)) throw ValidationException::withMessages([$day.'_end' => 'Время окончания должно быть позже времени начала.']);
+            if (!$off && (!$start || !$end || $end <= $start)) throw ValidationException::withMessages([$day.'_end' => __('admin_validation.end_after_start')]);
             $values[$day.'_start'] = $off ? null : $start; $values[$day.'_end'] = $off ? null : $end;
         }
         $lunchStart=$data['lunch_start']??null; $lunchEnd=$data['lunch_end']??null;
-        if (($lunchStart || $lunchEnd) && (!$lunchStart || !$lunchEnd || $lunchEnd <= $lunchStart)) throw ValidationException::withMessages(['lunch_end'=>'Проверьте время обеда.']);
+        if (($lunchStart || $lunchEnd) && (!$lunchStart || !$lunchEnd || $lunchEnd <= $lunchStart)) throw ValidationException::withMessages(['lunch_end'=>__('admin_validation.lunch_invalid')]);
         $values['lunch_start']=$lunchStart; $values['lunch_end']=$lunchEnd;
         return UserSchedule::updateOrCreate(['user_id'=>$employee->id],$values);
     }
@@ -26,7 +26,7 @@ class EmployeeScheduleManager
     {
         if ($closure && $closure->user_id !== $employee->id) abort(404);
         $fullDay=(bool)($data['full_day']??false); $start=$data['start_time']??null; $end=$data['end_time']??null;
-        if (!$fullDay && (!$start || !$end || $end <= $start)) throw ValidationException::withMessages(['end_time'=>'Время окончания должно быть позже времени начала.']);
+        if (!$fullDay && (!$start || !$end || $end <= $start)) throw ValidationException::withMessages(['end_time'=>__('admin_validation.end_after_start')]);
         $values=['user_id'=>$employee->id,'name'=>trim($data['name']),'type'=>$data['type']??'other','description'=>$data['description']??null,'date'=>$data['date'],'date_to'=>$data['date_to']??$data['date'],'full_day'=>$fullDay,'start_time'=>$fullDay?null:$start,'end_time'=>$fullDay?null:$end,'repeat'=>(bool)($data['repeat']??false)];
         if ($closure) {$closure->update($values); return $closure->refresh();}
         return RedDay::create($values);

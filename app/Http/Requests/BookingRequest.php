@@ -44,15 +44,15 @@ class BookingRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'client_name.required' => 'Пожалуйста, укажите Имя.',
-            'client_lastname.required' => 'Пожалуйста, укажите Фамилию.',
-            'client_phone.required' => 'Пожалуйста, укажите номер телефона.',
-            'client_phone.regex' => 'Номер телефона должен быть в правильном формате, например: +372 55555555.',
-            'client_phone.min' => 'Номер телефона должен содержать не менее 8 символов.',
-            'description.min' => 'Описание должно содержать не менее 8 символов.',
-            'appointment_end.after' => 'Время завершения должно быть позже времени начала.',
-            'service_id.required' => 'Пожалуйста, укажите услугу.',
-            'service_id.exists' => 'Выберите услугу из списка.',
+            'client_name.required' => __('admin_validation.appointment.name'),
+            'client_lastname.required' => __('admin_validation.appointment.lastname'),
+            'client_phone.required' => __('admin_validation.appointment.phone'),
+            'client_phone.regex' => __('admin_validation.appointment.phone_format'),
+            'client_phone.min' => __('admin_validation.appointment.phone_min'),
+            'description.min' => __('admin_validation.appointment.description_min'),
+            'appointment_end.after' => __('admin_validation.appointment.end_after'),
+            'service_id.required' => __('admin_validation.appointment.service_required'),
+            'service_id.exists' => __('admin_validation.appointment.service_exists'),
         ];
     }
 

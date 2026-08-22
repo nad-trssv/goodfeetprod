@@ -1,6 +1,11 @@
 <?php
 
 return [
+    'start_new_chat'=>'Начать новый чат',
+    'restart_failed'=>'Не удалось начать новый чат. Попробуйте ещё раз.',
+    'restart_after_rating_only'=>'Новый чат можно начать после завершения и оценки предыдущего диалога.',
+    'conversation_restarted_internal'=>'Клиент начал новый чат.',
+    'client_started_new_chat'=>'Клиент начал чат заново',
     'too_many_messages'=>'Слишком много сообщений подряд. Подождите немного и попробуйте снова.',
     'client_conversation_closed'=>'Диалог завершён. Спасибо, что написали нам.',
     'conversation_closed_by'=>'Диалог завершил(а) :name.',

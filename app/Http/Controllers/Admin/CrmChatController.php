@@ -14,6 +14,7 @@ use App\Services\Notifications\NotificationReadService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Support\Collection;
 
 class CrmChatController extends Controller
 {
@@ -30,9 +31,9 @@ class CrmChatController extends Controller
         abort_unless($access->canView($request->user(),$conversation),403);
         $access->markRead($request->user(),$conversation);
         $notifications->conversation($request->user(),$conversation);
-        $conversation->load(['customer','assignee:id,name,profile_photo_path','messages'=>fn($q)=>$q->with('staffSender:id,name,profile_photo_path')->orderBy('id')]);
+        $conversationHistory=$this->conversationHistory($conversation);
         $staff=User::with('role')->get()->filter->isStaff()->sortBy('name')->values();
-        return view('admin.crm.chat.show',compact('conversation','staff'));
+        return view('admin.crm.chat.show',compact('conversation','conversationHistory','staff'));
     }
 
     public function messages(Request $request, CrmConversation $conversation, CrmChatAccess $access, CrmChatMessagePresenter $presenter, NotificationReadService $notifications): JsonResponse
@@ -74,5 +75,27 @@ class CrmChatController extends Controller
     public function status(Request $request, CrmChatAccess $access): JsonResponse
     {
         return response()->json(['count'=>$access->unreadCount($request->user())]);
+    }
+
+    private function conversationHistory(CrmConversation $conversation): Collection
+    {
+        $history=collect();
+        $cursor=$conversation;
+        $seen=[];
+
+        while($cursor && count($seen)<20 && !in_array($cursor->id,$seen,true)){
+            $seen[]=$cursor->id;
+            $cursor->load([
+                'customer',
+                'assignee:id,name,profile_photo_path',
+                'messages'=>fn($query)=>$query->with('staffSender:id,name,profile_photo_path')->orderBy('id'),
+            ]);
+            $history->prepend($cursor);
+            $cursor=$cursor->previous_conversation_id
+                ? CrmConversation::find($cursor->previous_conversation_id)
+                : null;
+        }
+
+        return $history->values();
     }
 }

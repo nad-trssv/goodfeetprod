@@ -41,7 +41,7 @@ class ServiceRequest extends FormRequest
             foreach ((array) $this->input('masters', []) as $masterId) {
                 $master = \App\Models\User::find($masterId);
                 if (! $master || ! $master->isServiceProvider()) {
-                    $validator->errors()->add('masters', __('Выбранный мастер не существует.'));
+                    $validator->errors()->add('masters', __('admin_validation.masters.exists'));
                     break;
                 }
             }
@@ -51,9 +51,9 @@ class ServiceRequest extends FormRequest
     public function messages()
     {
         return [
-            'masters.required' => 'Пожалуйста, выберите хотя бы одного мастера.',
-            'masters.array' => 'Неверный формат данных для мастеров.',
-            'masters.*.exists' => 'Выбранный мастер не существует.',
+            'masters.required' => __('admin_validation.masters.required'),
+            'masters.array' => __('admin_validation.masters.array'),
+            'masters.*.exists' => __('admin_validation.masters.exists'),
         ];
     }
     

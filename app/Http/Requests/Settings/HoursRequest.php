@@ -36,9 +36,9 @@ class HoursRequest extends FormRequest
     $messages = [];
 
     foreach ($this->days as $day) {
-        $messages["{$day}_start.date_format"] = "Поле должно быть в формате ЧЧ:ММ.";
-        $messages["{$day}_end.date_format"] = "Поле должно быть в формате ЧЧ:ММ.";
-        $messages["{$day}_end.after"] = "Время окончания должно быть позже времени начала.";
+        $messages["{$day}_start.date_format"] = __('admin_validation.time_format');
+        $messages["{$day}_end.date_format"] = __('admin_validation.time_format');
+        $messages["{$day}_end.after"] = __('admin_validation.end_after_start');
     }
 
     return $messages;

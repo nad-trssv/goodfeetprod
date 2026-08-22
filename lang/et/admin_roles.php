@@ -20,4 +20,5 @@ return [
         'activity_logs'=>'Tegevuslogi','roles'=>'Rollid ja õigused','profile'=>'Oma profiil',
     ],
     'actions' => ['view'=>'Vaatamine','create'=>'Loomine','update'=>'Muutmine','delete'=>'Kustutamine / tühistamine','status'=>'Staatuse muutmine','message'=>'Sõnum kliendile','manage'=>'Täielik haldus'],
+    'system_roles' => ['super-admin'=>'Administraator','master'=>'Spetsialist','customer'=>'Klient','receptionist'=>'Administraator-reseptsionist'],
 ];

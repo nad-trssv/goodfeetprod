@@ -19,6 +19,10 @@ class User extends Authenticatable
     use Notifiable;
     use TwoFactorAuthenticatable;
 
+    protected $attributes = [
+        'locale' => 'ru',
+    ];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -225,30 +229,30 @@ class User extends Authenticatable
     public function lastSeen(): string
     {
         if (!$this->last_active) {
-            return 'Never active';
+            return __('admin_staff.never_active');
         }
 
         if ($this->last_active->isFuture()) {
-            return 'Invalid timestamp';
+            return __('admin_staff.invalid_timestamp');
         }
 
         if ($this->last_active->diffInMinutes(now()) < 5) {
-            return 'Online';
+            return __('admin_staff.online');
         }
 
         $diff = abs((int) now()->diffInMinutes($this->last_active));
 
         if ($diff < 60) {
-            return $diff . ' мин. назад';
+            return __('admin_staff.minutes_ago', ['count' => $diff]);
         }
 
         if ($diff < 1440) {
             $hours = abs((int) now()->diffInHours($this->last_active));
-            return $hours . ' ч. назад';
+            return __('admin_staff.hours_ago', ['count' => $hours]);
         }
 
         $days = abs((int) now()->diffInDays($this->last_active));
-        return $days . ' дн. назад';
+        return __('admin_staff.days_ago', ['count' => $days]);
     }
 
     public function schedule()

@@ -1,6 +1,11 @@
 <?php
 
 return [
+    'start_new_chat'=>'Start a new chat',
+    'restart_failed'=>'We could not start a new chat. Please try again.',
+    'restart_after_rating_only'=>'A new chat can be started after the previous conversation is closed and rated.',
+    'conversation_restarted_internal'=>'The client started a new chat.',
+    'client_started_new_chat'=>'The client started a new chat',
     'too_many_messages'=>'Too many messages were sent in a short time. Please wait a moment and try again.',
     'client_conversation_closed'=>'This conversation has been closed. Thank you for contacting us.',
     'conversation_closed_by'=>':name closed the conversation.',

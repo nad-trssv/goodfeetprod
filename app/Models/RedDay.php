@@ -19,7 +19,14 @@ class RedDay extends Model
         'other' => 'Другая причина',
     ];
 
-    public function typeLabel(): string { return self::TYPES[$this->type] ?? self::TYPES['other']; }
+    public static function typeOptions(): array
+    {
+        return collect(array_keys(self::TYPES))->mapWithKeys(fn (string $type) => [
+            $type => __('admin_staff.closure_types.'.$type),
+        ])->all();
+    }
+
+    public function typeLabel(): string { return __('admin_staff.closure_types.'.($this->type ?: 'other')); }
     public function endDate(): \Carbon\Carbon { return \Carbon\Carbon::parse($this->date_to ?: $this->date); }
 
     protected $fillable = [

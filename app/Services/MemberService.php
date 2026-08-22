@@ -95,11 +95,11 @@ class MemberService
     {
         $vacation = $member->currentVacation($now);
         if ($vacation) {
-            return ['code' => 'vacation', 'label' => 'В отпуске', 'detail' => $vacation->endDate()->format('d.m.Y')];
+            return ['code' => 'vacation', 'label' => __('admin_staff.state_vacation'), 'detail' => $vacation->endDate()->format('d.m.Y')];
         }
 
         if ($closures->contains(fn (RedDay $closure) => $closure->full_day)) {
-            return ['code' => 'not_working', 'label' => 'Сегодня не работает', 'detail' => 'Закрытый день'];
+            return ['code' => 'not_working', 'label' => __('admin_staff.state_closed_today'), 'detail' => __('admin_staff.closed_day')];
         }
 
         $day = strtolower($now->format('l'));
@@ -107,21 +107,21 @@ class MemberService
         $start = $schedule?->{$day.'_start'};
         $end = $schedule?->{$day.'_end'};
         if (! $start || ! $end) {
-            return ['code' => 'not_working', 'label' => 'Сегодня выходной', 'detail' => null];
+            return ['code' => 'not_working', 'label' => __('admin_staff.state_day_off'), 'detail' => null];
         }
 
         $workStart = Carbon::parse($now->toDateString().' '.$start);
         $workEnd = Carbon::parse($now->toDateString().' '.$end);
         $hours = substr($start, 0, 5).'–'.substr($end, 0, 5);
         if (! $now->betweenIncluded($workStart, $workEnd)) {
-            return ['code' => 'not_working', 'label' => $now->lt($workStart) ? 'Смена ещё не началась' : 'Смена завершена', 'detail' => $hours];
+            return ['code' => 'not_working', 'label' => $now->lt($workStart) ? __('admin_staff.shift_not_started') : __('admin_staff.shift_finished'), 'detail' => $hours];
         }
 
         if ($schedule?->lunch_start && $schedule?->lunch_end && $now->between(
             Carbon::parse($now->toDateString().' '.$schedule->lunch_start),
             Carbon::parse($now->toDateString().' '.$schedule->lunch_end)
         )) {
-            return ['code' => 'break', 'label' => 'Обеденный перерыв', 'detail' => $hours];
+            return ['code' => 'break', 'label' => __('admin_staff.lunch_break'), 'detail' => $hours];
         }
 
         if ($closures->contains(function (RedDay $closure) use ($now) {
@@ -131,14 +131,14 @@ class MemberService
                 Carbon::parse($now->toDateString().' '.$closure->end_time)
             );
         })) {
-            return ['code' => 'break', 'label' => 'Личное закрытое время', 'detail' => $hours];
+            return ['code' => 'break', 'label' => __('admin_staff.personal_closed_time'), 'detail' => $hours];
         }
 
         if ($member->currentAppointment) {
-            return ['code' => 'busy', 'label' => 'Сейчас с клиентом', 'detail' => $member->currentAppointment->appointment_end->format('H:i')];
+            return ['code' => 'busy', 'label' => __('admin_staff.with_client_now'), 'detail' => $member->currentAppointment->appointment_end->format('H:i')];
         }
 
-        return ['code' => 'available', 'label' => 'Работает, сейчас свободен', 'detail' => $hours];
+        return ['code' => 'available', 'label' => __('admin_staff.working_available'), 'detail' => $hours];
     }
 
     public function create()
@@ -164,6 +164,7 @@ class MemberService
                     'date_birthday' => $request['date_birthday'],
                     'role_id' => $request['role_id'],
                     'email' => $request['email'],
+                    'locale' => 'ru',
                     'password' => Hash::make($request['password']),
                     'profile_photo_path' => $request['profile_photo_path'],
                 ]);

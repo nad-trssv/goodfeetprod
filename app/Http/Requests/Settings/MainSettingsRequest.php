@@ -51,14 +51,14 @@ class MainSettingsRequest extends FormRequest
     public function messages()
     {
         return [
-            'company_name.required' => 'Название компании обязательно.',
-            'company_email.required' => 'Электронная почта компании обязательна.',
-            'google.iframe_google' => 'Iframe не верный.',
-            'waze.iframe_waze' => 'Iframe не верный.',
-            'social_media_facebook.facebook_url' => 'Некорректный URL для Facebook.',
-            'social_media_youtube.youtube_url' => 'Некорректный URL для YouTube.',
-            'social_media_instagram.instagram_url' => 'Некорректный URL для Instagram.',
-            'social_media_twitter.twitter_url' => 'Некорректный URL для Twitter.',
+            'company_name.required' => __('admin_validation.site.company_name'),
+            'company_email.required' => __('admin_validation.site.company_email'),
+            'google.iframe_google' => __('admin_validation.site.iframe'),
+            'waze.iframe_waze' => __('admin_validation.site.iframe'),
+            'social_media_facebook.facebook_url' => __('admin_validation.site.facebook'),
+            'social_media_youtube.youtube_url' => __('admin_validation.site.youtube'),
+            'social_media_instagram.instagram_url' => __('admin_validation.site.instagram'),
+            'social_media_twitter.twitter_url' => __('admin_validation.site.twitter'),
         ];
     }
 

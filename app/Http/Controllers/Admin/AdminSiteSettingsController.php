@@ -60,6 +60,6 @@ class AdminSiteSettingsController extends Controller
      */
     public function destroy(string $id)
     {
-        abort(403, 'Удаление настроек запрещено');
+        abort(403, __('admin_messages.forbidden_delete_settings'));
     }
 }

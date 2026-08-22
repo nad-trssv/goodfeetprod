@@ -1,6 +1,11 @@
 <?php
 
 return [
+    'start_new_chat'=>'Alusta uut vestlust',
+    'restart_failed'=>'Uue vestluse alustamine ebaõnnestus. Proovige uuesti.',
+    'restart_after_rating_only'=>'Uue vestluse saab alustada pärast eelmise vestluse lõpetamist ja hindamist.',
+    'conversation_restarted_internal'=>'Klient alustas uut vestlust.',
+    'client_started_new_chat'=>'Klient alustas vestlust uuesti',
     'too_many_messages'=>'Lühikese aja jooksul saadeti liiga palju sõnumeid. Palun oodake hetk ja proovige uuesti.',
     'client_conversation_closed'=>'Vestlus on lõpetatud. Täname, et meiega ühendust võtsite.',
     'conversation_closed_by'=>':name lõpetas vestluse.',

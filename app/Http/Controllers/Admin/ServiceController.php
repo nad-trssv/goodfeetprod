@@ -44,7 +44,7 @@ class ServiceController extends Controller
     public function store(ServiceRequest $request)
     {
         $this->serviceService->store($request);
-        return redirect()->route('service.create')->with('success', 'Сервис успешно добавлен!');
+        return redirect()->route('service.create')->with('success', __('admin_messages.service_added'));
     }
 
     /**
@@ -80,16 +80,16 @@ class ServiceController extends Controller
     {
         try {
             $this->serviceService->update($request, $service);
-            return redirect()->route('service.show', $service->id)->with('success', 'Сервис успешно добавлен!');
+            return redirect()->route('service.show', $service->id)->with('success', __('admin_messages.service_added'));
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Ошибка при обновлении'], 500);
+            return response()->json(['error' => __('admin_messages.service_update_failed')], 500);
         }
     }
 
     public function toggleStatus(Services $service)
     {
         $this->serviceService->toggleStatus($service);
-        return redirect()->back()->with('success', 'Статус обновлен!');
+        return redirect()->back()->with('success', __('admin_messages.status_updated'));
     }
 
     public function editLanguages(Services $service)
@@ -106,9 +106,9 @@ class ServiceController extends Controller
     {
         try {
             $this->serviceService->update($request, $service);
-            return redirect()->route('languages.edit', $service->id)->with('success', 'Перевод успешно добавлен!');
+            return redirect()->route('languages.edit', $service->id)->with('success', __('admin_messages.translation_added'));
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Ошибка при обновлении'], 500);
+            return response()->json(['error' => __('admin_messages.service_update_failed')], 500);
         }
     }
 
@@ -123,9 +123,9 @@ class ServiceController extends Controller
     {
         try {
             $this->serviceService->updateFixedTime($request, $service);
-            return redirect()->route('fixedtime.edit', $service)->with('success', 'Фиксированное время успешно обновлено!');
+            return redirect()->route('fixedtime.edit', $service)->with('success', __('admin_messages.fixed_time_updated'));
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Ошибка при обновлении'], 500);
+            return response()->json(['error' => __('admin_messages.service_update_failed')], 500);
         }
     }
 
@@ -136,9 +136,9 @@ class ServiceController extends Controller
     {
         try {
             $this->serviceService->destroy($id);
-            return redirect()->route('service.index')->with('success', 'Услуга удалена!');
+            return redirect()->route('service.index')->with('success', __('admin_messages.service_deleted'));
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Ошибка при удалении события'], 500);
+            return response()->json(['error' => __('admin_messages.event_delete_failed')], 500);
         }
     }
 }

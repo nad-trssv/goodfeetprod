@@ -6,16 +6,16 @@
     <div class="content">
       <nav class="mb-3" aria-label="breadcrumb">
         <ol class="breadcrumb mb-0">
-          <li class="breadcrumb-item active">Услуги</li>
+          <li class="breadcrumb-item active">{{ __('admin_services.title') }}</li>
         </ol>
       </nav>
       <div class="mb-9">
         <div id="projectSummary" data-list='{"valueNames":["servicename","assignees","price","duration","status"],"page":24,"pagination":true}'>
           <div class="row mb-4 gx-6 gy-3 align-items-center">
             <div class="col-auto">
-              <h2 class="mb-0">Услуги<span class="fw-normal text-body-tertiary ms-3">({{ $services->count() }})</span></h2>
+              <h2 class="mb-0">{{ __('admin_services.title') }}<span class="fw-normal text-body-tertiary ms-3">({{ $services->count() }})</span></h2>
             </div>
-            <div class="col-auto"><a class="btn btn-primary px-5" href="{{ route('service.create') }}"><i class="fa-solid fa-plus me-2"></i>Новая услуга</a></div>
+            <div class="col-auto"><a class="btn btn-primary px-5" href="{{ route('service.create') }}"><i class="fa-solid fa-plus me-2"></i>{{ __('admin_services.new') }}</a></div>
           </div>
           <div class="row g-3 justify-content-between align-items-end mb-4">
             <div class="col-12 col-sm-auto"></div>
@@ -23,7 +23,7 @@
               <div class="d-flex align-items-center">
                 <div class="search-box me-3">
                   <form class="position-relative">
-                    <input class="form-control search-input search" type="search" placeholder="Search" aria-label="Search" />
+                    <input class="form-control search-input search" type="search" placeholder="{{ __('admin_services.search') }}" aria-label="{{ __('admin_services.search') }}" />
                     <span class="fas fa-search search-box-icon"></span>
                   </form>
                 </div>
@@ -35,7 +35,7 @@
           <script>
             document.addEventListener("DOMContentLoaded", function() {
                 Swal.fire({
-                    title: 'Успешно!',
+                    title: @json(__('admin_service_extra.success')),
                     text: "{{ session('success') }}",
                     icon: 'success',
                     confirmButtonText: 'OK'
@@ -47,11 +47,11 @@
             <table class="table fs-9 mb-0 border-top border-translucent">
               <thead>
                 <tr>
-                  <th class="sort align-middle ps-0 text-uppercase" scope="col" data-sort="servicename" style="width:30%;">Название услуги</th>
-                  <th class="sort align-middle ps-3 text-uppercase" scope="col" data-sort="assignees" style="width:10%;">МАСТЕРА</th> {{-- ASSIGNEES --}}
-                  <th class="sort align-middle ps-3 text-uppercase" scope="col" data-sort="price" style="width:10%;">цена</th>
-                  <th class="sort align-middle ps-3 text-uppercase" scope="col" data-sort="duration" style="width:15%;">Продолжительность</th>
-                  <th class="sort align-middle ps-3 text-end text-uppercase" scope="col" data-sort="statuses" style="width:12%;">status</th>
+                  <th class="sort align-middle ps-0 text-uppercase" scope="col" data-sort="servicename" style="width:30%;">{{ __('admin_services.service_name') }}</th>
+                  <th class="sort align-middle ps-3 text-uppercase" scope="col" data-sort="assignees" style="width:10%;">{{ __('admin_services.employees') }}</th>
+                  <th class="sort align-middle ps-3 text-uppercase" scope="col" data-sort="price" style="width:10%;">{{ __('admin_services.price') }}</th>
+                  <th class="sort align-middle ps-3 text-uppercase" scope="col" data-sort="duration" style="width:15%;">{{ __('admin_services.duration') }}</th>
+                  <th class="sort align-middle ps-3 text-end text-uppercase" scope="col" data-sort="statuses" style="width:12%;">{{ __('admin_services.status') }}</th>
                   <th class="sort align-middle text-end text-uppercase" scope="col" style="width:10%;"></th>
                 </tr>
               </thead>
@@ -70,7 +70,7 @@
                         @if ($service->futureRules && $service->futureRules->isNotEmpty())
                           <br />
                           <span class="badge badge-phoenix fs-10 badge-phoenix-warning mt-1">
-                            Изменения с {{ \Carbon\Carbon::parse($service->futureRules->first()->valid_from)->format('d.m.Y') }}
+                            {{ __('admin_service_extra.future_changes', ['date' => \Carbon\Carbon::parse($service->futureRules->first()->valid_from)->format('d.m.Y')]) }}
                           </span>
                         @endif
                         <p class="mb-0 fs-9 text-body">
@@ -117,13 +117,13 @@
                                       <button class="btn btn-phoenix-secondary btn-icon btn-icon-lg"><span class="fa-solid fa-video"></span></button> --}}
                                     </div>
                                     @if ($user->email)
-                                      <a href="mailto:{{ $user->email }}"><button class="btn btn-phoenix-primary"><span class="fa-solid fa-envelope me-2"></span>Send Email</button></a>
+                                      <a href="mailto:{{ $user->email }}"><button class="btn btn-phoenix-primary"><span class="fa-solid fa-envelope me-2"></span>{{ __('admin_services.send_email') }}</button></a>
                                     @endif
                                   </div>
                                 </div>
                                 {{-- <ul class="nav d-flex flex-column py-3 border-bottom">
-                                  <li class="nav-item"><a class="nav-link px-3 d-flex flex-between-center" href="#!"> <span class="me-2 text-body d-inline-block" data-feather="clipboard"></span><span class="text-body-highlight flex-1">Assigned Projects</span><span class="fa-solid fa-chevron-right fs-11"></span></a></li>
-                                  <li class="nav-item"><a class="nav-link px-3 d-flex flex-between-center" href="#!"> <span class="me-2 text-body" data-feather="pie-chart"></span><span class="text-body-highlight flex-1">View activiy</span><span class="fa-solid fa-chevron-right fs-11"></span></a></li>
+                                  <li class="nav-item"><a class="nav-link px-3 d-flex flex-between-center" href="#!"> <span class="me-2 text-body d-inline-block" data-feather="clipboard"></span><span class="text-body-highlight flex-1">{{ __('admin_services.assigned_projects') }}</span><span class="fa-solid fa-chevron-right fs-11"></span></a></li>
+                                  <li class="nav-item"><a class="nav-link px-3 d-flex flex-between-center" href="#!"> <span class="me-2 text-body" data-feather="pie-chart"></span><span class="text-body-highlight flex-1">{{ __('admin_services.view_activity') }}</span><span class="fa-solid fa-chevron-right fs-11"></span></a></li>
                                 </ul> --}}
                               </div>
                               {{-- <div class="p-3 d-flex justify-content-between"><a class="btn btn-link p-0 text-decoration-none" href="#!">Details </a><a class="btn btn-link p-0 text-decoration-none text-danger" href="#!">Unassign </a></div> --}}
@@ -140,36 +140,36 @@
                     <td class="align-middle white-space-nowrap price ps-3 py-4">
                       <p class="mb-0 fs-9 text-body">
                         @if ($service['price_can_change'])
-                          <span>От </span>
+                          <span>{{ __('admin_services.from') }} </span>
                         @endif
                         {{ $service['effective_price'] }}
                         <span>&euro;</span>
                       </p>
                     </td>
                     <td class="align-middle white-space-nowrap duration ps-3 py-4">
-                      <p class="mb-0 fs-9 text-body">{{ $service['duration_minutes'] }} (мин.)</p>
+                      <p class="mb-0 fs-9 text-body">{{ __('admin_service_extra.minutes', ['count' => $service['duration_minutes']]) }}</p>
                     </td>
                     <td class="align-middle white-space-nowrap statuses text-end">
                       @if ($service['status'] === 1)
-                        <span class="badge badge-phoenix fs-10 badge-phoenix-success">Активно</span>
+                          <span class="badge badge-phoenix fs-10 badge-phoenix-success">{{ __('admin_services.active') }}</span>
                       @elseif($service['status'] === 0)
-                        <span class="badge badge-phoenix fs-10 badge-phoenix-secondary">Скрыто</span>
+                        <span class="badge badge-phoenix fs-10 badge-phoenix-secondary">{{ __('admin_services.hidden') }}</span>
                       @endif
                     </td>
                     <td class="align-middle text-end white-space-nowrap pe-0 action">
                       <div class="btn-reveal-trigger position-static">
                         <button class="btn btn-sm dropdown-toggle dropdown-caret-none transition-none btn-reveal fs-10" type="button" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false" data-bs-reference="parent"><span class="fas fa-ellipsis-h fs-10"></span></button>
                         <div class="dropdown-menu dropdown-menu-end py-2">
-                          <a class="dropdown-item" href="{{ route('service.show', $service['id']) }}">Редактирование</a>
-                          <a class="dropdown-item" href="{{ route('languages.edit', $service['id']) }}">Перевод</a>
-                          <a class="dropdown-item" href="{{ route('service.rules.edit', $service['id']) }}">Изменения по датам</a>
+                          <a class="dropdown-item" href="{{ route('service.show', $service['id']) }}">{{ __('admin_services.edit') }}</a>
+                          <a class="dropdown-item" href="{{ route('languages.edit', $service['id']) }}">{{ __('admin_services.translation') }}</a>
+                          <a class="dropdown-item" href="{{ route('service.rules.edit', $service['id']) }}">{{ __('admin_services.date_rules') }}</a>
                           <form method="POST" action="/service/{{ $service['id'] }}/toggle-status" style="display:inline;">
                             @csrf
                             @method('PATCH')
-                            <button type="submit" class="dropdown-item">Поменять статус</button>
+                            <button type="submit" class="dropdown-item">{{ __('admin_services.change_status') }}</button>
                           </form>
                           <div class="dropdown-divider"></div>
-                          <button class="dropdown-item text-danger service_destroy" data-item="{{ $service['name'] }}" data-id="{{ $service['id'] }}" type="button" data-bs-toggle="modal" data-bs-target="#verticallyCentered">Удалить</button>
+                          <button class="dropdown-item text-danger service_destroy" data-item="{{ $service['name'] }}" data-id="{{ $service['id'] }}" type="button" data-bs-toggle="modal" data-bs-target="#verticallyCentered">{{ __('admin_services.delete') }}</button>
                         </div>
                       </div>
                     </td>
@@ -180,7 +180,7 @@
           </div>
           <div class="d-flex flex-wrap align-items-center justify-content-between py-3 pe-0 fs-9 border-bottom border-translucent">
             <div class="d-flex">
-              <p class="mb-0 d-none d-sm-block me-3 fw-semibold text-body" data-list-info="data-list-info"></p><a class="fw-semibold" href="#!" data-list-view="*">View all<span class="fas fa-angle-right ms-1" data-fa-transform="down-1"></span></a><a class="fw-semibold d-none" href="#!" data-list-view="less">View Less<span class="fas fa-angle-right ms-1" data-fa-transform="down-1"></span></a>
+              <p class="mb-0 d-none d-sm-block me-3 fw-semibold text-body" data-list-info="data-list-info"></p><a class="fw-semibold" href="#!" data-list-view="*">{{ __('admin_services.view_all') }}<span class="fas fa-angle-right ms-1" data-fa-transform="down-1"></span></a><a class="fw-semibold d-none" href="#!" data-list-view="less">{{ __('admin_services.view_less') }}<span class="fas fa-angle-right ms-1" data-fa-transform="down-1"></span></a>
             </div>
             <div class="d-flex">
               <button class="page-link" data-list-pagination="prev"><span class="fas fa-chevron-left"></span></button>
@@ -195,18 +195,18 @@
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="verticallyCenteredModalLabel">Вы точно хотите удалить?</h5>
+              <h5 class="modal-title" id="verticallyCenteredModalLabel">{{ __('admin_services.delete_confirm') }}</h5>
               <button class="btn btn-close p-1" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-              <p class="text-body-tertiary lh-lg mb-0">Вы сейчас удаляете запись "<span id="removeItem"></span>".</p>
+              <p class="text-body-tertiary lh-lg mb-0">{!! str_replace('__SERVICE__','<span id="removeItem"></span>',e(__('admin_services.deleting',['name'=>'__SERVICE__']))) !!}</p>
             </div>
             <div class="modal-footer">
-              <button class="btn btn-outline-primary" type="button" data-bs-dismiss="modal">Отмена</button>
+              <button class="btn btn-outline-primary" type="button" data-bs-dismiss="modal">{{ __('admin_services.cancel') }}</button>
               <form method="POST" id="deleteForm">
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="btn btn-primary">Удалить</button>
+                <button type="submit" class="btn btn-primary">{{ __('admin_services.delete') }}</button>
               </form>
             </div>
           </div>

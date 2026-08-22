@@ -20,4 +20,5 @@ return [
         'activity_logs'=>'Activity log','roles'=>'Roles and permissions','profile'=>'Own profile',
     ],
     'actions' => ['view'=>'View','create'=>'Create','update'=>'Edit','delete'=>'Delete / cancel','status'=>'Change status','message'=>'Message customer','manage'=>'Full management'],
+    'system_roles' => ['super-admin'=>'Administrator','master'=>'Specialist','customer'=>'Customer','receptionist'=>'Receptionist'],
 ];

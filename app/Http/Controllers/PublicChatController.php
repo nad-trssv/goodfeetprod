@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PublicChatMessageRequest;
 use App\Http\Requests\PublicChatStartRequest;
 use App\Http\Requests\PublicChatRatingRequest;
+use App\Http\Requests\PublicChatRestartRequest;
 use App\Models\CrmConversation;
 use App\Services\Crm\CrmChatService;
 use App\Services\Crm\CrmChatMessagePresenter;
@@ -65,5 +66,15 @@ class PublicChatController extends Controller
         abort_unless($settings->all()['enabled'], 404);
         $rating=$chat->rate($conversation,$request->validated('token'),$request->integer('rating'));
         return response()->json(['rating'=>$rating->rating],$rating->wasRecentlyCreated ? 201 : 200);
+    }
+
+    public function restart(PublicChatRestartRequest $request, CrmConversation $conversation, CrmChatService $chat, CrmChatSettings $settings): JsonResponse
+    {
+        abort_unless($settings->all()['enabled'],404);
+        $result=$chat->restart($conversation,$request->validated('token'));
+        return response()->json([
+            'uuid'=>$result['conversation']->public_uuid,
+            'token'=>$result['token'],
+        ],201);
     }
 }

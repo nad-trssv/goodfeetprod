@@ -31,7 +31,7 @@ class CrmChatAccess
     {
         if (! $user->hasPermission('crm.chat.view')) return 0;
         return $this->visible($user)
-            ->whereRaw("COALESCE((SELECT MAX(cm.id) FROM crm_messages cm WHERE cm.conversation_id = crm_conversations.id AND cm.sender_type IN ('visitor','customer')), 0) > COALESCE((SELECT ccr.last_read_message_id FROM crm_conversation_reads ccr WHERE ccr.conversation_id = crm_conversations.id AND ccr.user_id = ? LIMIT 1), 0)", [$user->id])
+            ->whereRaw("COALESCE((SELECT MAX(cm.id) FROM crm_messages cm WHERE cm.conversation_id = crm_conversations.id AND (cm.sender_type IN ('visitor','customer') OR cm.event_type = 'conversation_restarted')), 0) > COALESCE((SELECT ccr.last_read_message_id FROM crm_conversation_reads ccr WHERE ccr.conversation_id = crm_conversations.id AND ccr.user_id = ? LIMIT 1), 0)", [$user->id])
             ->count();
     }
 

@@ -86,37 +86,37 @@ class UpdateMasterServiceSettingsRequest extends FormRequest
     {
         return [
             'price_override.required_if' =>
-                'Укажите индивидуальную цену.',
+                __('admin_validation.master_service.price_required'),
 
             'price_override.numeric' =>
-                'Цена должна быть числом.',
+                __('admin_validation.master_service.price_numeric'),
 
             'price_override.min' =>
-                'Цена не может быть отрицательной.',
+                __('admin_validation.master_service.price_min'),
 
             'duration_minutes_override.required_if' =>
-                'Укажите индивидуальную продолжительность.',
+                __('admin_validation.master_service.duration_required'),
 
             'duration_minutes_override.min' =>
-                'Продолжительность должна быть не меньше одной минуты.',
+                __('admin_validation.master_service.duration_min'),
 
             'duration_minutes_min_override.required_if' =>
-                'Укажите индивидуальную минимальную продолжительность.',
+                __('admin_validation.master_service.minimum_required'),
 
             'duration_minutes_min_override.min' =>
-                'Минимальная продолжительность должна быть не меньше одной минуты.',
+                __('admin_validation.master_service.minimum_min'),
 
             'buffer_before_minutes.required' =>
-                'Укажите техническое время до услуги.',
+                __('admin_validation.master_service.buffer_before_required'),
 
             'buffer_before_minutes.min' =>
-                'Техническое время до услуги не может быть отрицательным.',
+                __('admin_validation.master_service.buffer_before_min'),
 
             'buffer_after_minutes.required' =>
-                'Укажите техническое время после услуги.',
+                __('admin_validation.master_service.buffer_after_required'),
 
             'buffer_after_minutes.min' =>
-                'Техническое время после услуги не может быть отрицательным.',
+                __('admin_validation.master_service.buffer_after_min'),
         ];
     }
 
@@ -134,7 +134,7 @@ class UpdateMasterServiceSettingsRequest extends FormRequest
         ) {
             throw ValidationException::withMessages([
                 'service_form_id' =>
-                    'Выбранная услуга не совпадает с отправленной формой.',
+                    __('admin_validation.master_service.service_mismatch'),
             ]);
         }
 
@@ -179,7 +179,7 @@ class UpdateMasterServiceSettingsRequest extends FormRequest
         ) {
             throw ValidationException::withMessages([
                 'duration_minutes_min_override' =>
-                    'Минимальная продолжительность не может быть больше основной продолжительности.',
+                    __('admin_validation.master_service.minimum_exceeds_duration'),
             ]);
         }
 

@@ -30,8 +30,8 @@ class LimitDaysRequest extends FormRequest
     public function messages()
     {
         return [
-            'days.integer' => 'Поле "Дни" должно быть числом',
-            'days.required' => 'Поле "Дни" обязательно для заполнения',
+            'days.integer' => __('admin_validation.days.integer'),
+            'days.required' => __('admin_validation.days.required'),
         ];
     }
 }

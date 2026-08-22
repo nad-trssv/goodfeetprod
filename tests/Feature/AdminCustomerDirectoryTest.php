@@ -103,8 +103,9 @@ class AdminCustomerDirectoryTest extends TestCase
         $account = Customer::create(['first_name'=>'Account','last_name'=>'Owner','email'=>'account-label@example.test','phone'=>'+37250000010','password'=>'secret-pass','locale'=>'et']);
         $this->appointment($guest, $master, $service, '2030-01-10 09:00:00');
         $this->appointment($account, $master, $service, '2030-01-11 09:00:00');
+        $admin->update(['locale' => 'et']);
 
-        $this->actingAs($admin)->withSession(['locale'=>'et'])->get(route('admin.customers.index'))
+        $this->actingAs($admin)->get(route('admin.customers.index'))
             ->assertOk()->assertSee('Külaline')->assertSee('Klient')->assertSee('avatar-group avatar-group-dense', false);
     }
 

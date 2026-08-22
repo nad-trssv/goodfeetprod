@@ -78,4 +78,11 @@ class Roles extends Model
             default => $this->slug ?: 'custom',
         };
     }
+
+    public function displayName(): string
+    {
+        $key = 'admin_roles.system_roles.'.$this->resolvedSlug();
+
+        return trans()->has($key) ? __($key) : $this->name;
+    }
 }

@@ -1,4 +1,4 @@
-@section('title', 'Журнал действий')
+@section('title', __('admin_activity.title'))
 
 <x-dashboard-layout>
   <div class="content">
@@ -6,18 +6,17 @@
     <nav class="mb-3" aria-label="breadcrumb">
       <ol class="breadcrumb mb-0">
         <li class="breadcrumb-item active">
-          Журнал действий
+          {{ __('admin_activity.title') }}
         </li>
       </ol>
     </nav>
 
     <div class="row mb-4">
       <div class="col">
-        <h2 class="mb-1">Журнал действий</h2>
+        <h2 class="mb-1">{{ __('admin_activity.title') }}</h2>
 
         <p class="text-muted mb-0">
-          История изменений, выполненных мастерами
-          и администраторами.
+          {{ __('admin_activity.hint') }}
         </p>
       </div>
     </div>
@@ -32,7 +31,7 @@
         >
           <div class="col-12 col-xl-3">
             <label class="form-label" for="log_search">
-              Поиск
+              {{ __('admin_activity.search') }}
             </label>
 
             <input
@@ -41,13 +40,13 @@
               id="log_search"
               class="form-control"
               value="{{ $search }}"
-              placeholder="Мастер, действие или ID"
+              placeholder="{{ __('admin_activity.search_placeholder') }}"
             >
           </div>
 
           <div class="col-12 col-md-6 col-xl-2">
             <label class="form-label" for="log_actor">
-              Мастер
+              {{ __('admin_activity.employee') }}
             </label>
 
             <select
@@ -55,7 +54,7 @@
               id="log_actor"
               class="form-select"
             >
-              <option value="">Все мастера</option>
+              <option value="">{{ __('admin_activity.all_employees') }}</option>
 
               @foreach ($actors as $actor)
                 <option
@@ -70,7 +69,7 @@
 
           <div class="col-12 col-md-6 col-xl-2">
             <label class="form-label" for="log_module">
-              Раздел
+              {{ __('admin_activity.module') }}
             </label>
 
             <select
@@ -78,7 +77,7 @@
               id="log_module"
               class="form-select"
             >
-              <option value="">Все разделы</option>
+              <option value="">{{ __('admin_activity.all_modules') }}</option>
 
               @foreach ($modules as $moduleOption)
                 <option
@@ -93,7 +92,7 @@
 
           <div class="col-6 col-xl-2">
             <label class="form-label" for="date_from">
-              Дата от
+              {{ __('admin_activity.date_from') }}
             </label>
 
             <input
@@ -107,7 +106,7 @@
 
           <div class="col-6 col-xl-2">
             <label class="form-label" for="date_to">
-              Дата до
+              {{ __('admin_activity.date_to') }}
             </label>
 
             <input
@@ -124,7 +123,7 @@
               type="submit"
               class="btn btn-primary w-100"
             >
-              Найти
+              {{ __('admin_activity.find') }}
             </button>
           </div>
 
@@ -140,7 +139,7 @@
                 href="{{ route('admin.activity-logs.index') }}"
                 class="btn btn-outline-secondary btn-sm"
               >
-                Сбросить фильтры
+                {{ __('admin_activity.reset') }}
               </a>
             </div>
           @endif
@@ -161,27 +160,27 @@
                 </th>
 
                 <th class="activity-log-type-column">
-                Тип
+                {{ __('admin_activity.type') }}
                 </th>
 
                 <th>
-                Мастер
+                {{ __('admin_activity.employee') }}
                 </th>
 
                 <th>
-                Действие
+                {{ __('admin_activity.action') }}
                 </th>
 
                 <th>
-                Раздел
+                {{ __('admin_activity.module') }}
                 </th>
 
                 <th>
-                Объект
+                {{ __('admin_activity.object') }}
                 </th>
 
                 <th>
-                Дата
+                {{ __('admin_activity.date') }}
                 </th>
             </tr>
             </thead>
@@ -199,7 +198,7 @@
                 <td class="activity-log-type-column">
                     <span
                     class="activity-log-type {{ $log->typeCssClass() }}"
-                    title="Тип журнала: {{ $log->typeLabel() }}"
+                    title="{{ __('admin_activity.type_title',['type'=>$log->typeLabel()]) }}"
                     >
 
                     <span class="activity-log-type__text">
@@ -209,11 +208,11 @@
                 </td>
 
                 <td class="fw-semibold">
-                    {{ $log->actor_name ?? 'Система' }}
+                    {{ $log->actor_name ?? __('admin_activity.system') }}
                 </td>
 
                 <td>
-                    {{ $log->message }}
+                    {{ $log->localizedMessage() }}
                 </td>
 
                 <td>
@@ -234,7 +233,7 @@
                     colspan="7"
                     class="text-center text-muted py-5"
                 >
-                    Записи журнала не найдены.
+                    {{ __('admin_activity.empty') }}
                 </td>
                 </tr>
             @endforelse

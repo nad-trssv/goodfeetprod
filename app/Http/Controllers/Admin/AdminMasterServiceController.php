@@ -68,7 +68,7 @@ class AdminMasterServiceController extends Controller
             abort_unless(
                 $master instanceof User,
                 404,
-                'Мастер не найден.'
+                __('admin_messages.master_not_found')
             );
 
             $catalog = $this->catalog->get($master, $search, $filter);
@@ -106,23 +106,16 @@ class AdminMasterServiceController extends Controller
         } catch (Throwable) {
             return back()->with(
                 'error',
-                'Не удалось изменить состояние услуги мастера.'
+                __('admin_messages.master_service_toggle_failed')
             );
         }
 
         return back()->with(
             'success',
-            $isActive
-                ? 'Услуга «'
-                    . $service->name
-                    . '» подключена мастеру «'
-                    . $master->name
-                    . '».'
-                : 'Услуга «'
-                    . $service->name
-                    . '» отключена у мастера «'
-                    . $master->name
-                    . '».'
+            __($isActive ? 'admin_messages.master_service_connected' : 'admin_messages.master_service_disconnected', [
+                'service' => $service->name,
+                'master' => $master->name,
+            ])
         );
     }
 
@@ -151,26 +144,23 @@ class AdminMasterServiceController extends Controller
                 ->withInput()
                 ->with(
                     'error',
-                    'Не удалось сохранить настройки услуги мастера.'
+                    __('admin_messages.master_service_save_failed')
                 );
         }
 
         if (!$changed) {
             return back()->with(
                 'success',
-                'Настройки услуги «'
-                    . $service->name
-                    . '» не изменились.'
+                __('admin_messages.master_service_unchanged', ['service' => $service->name])
             );
         }
 
         return back()->with(
             'success',
-            'Настройки услуги «'
-                . $service->name
-                . '» для мастера «'
-                . $master->name
-                . '» сохранены.'
+            __('admin_messages.master_service_saved', [
+                'service' => $service->name,
+                'master' => $master->name,
+            ])
         );
     }
 
@@ -189,7 +179,7 @@ class AdminMasterServiceController extends Controller
         abort_unless(
             $master instanceof User,
             404,
-            'Мастер не найден.'
+            __('admin_messages.master_not_found')
         );
 
         return $master;
@@ -208,7 +198,7 @@ class AdminMasterServiceController extends Controller
         abort_unless(
             $service instanceof Services,
             404,
-            'Услуга не найдена.'
+            __('admin_messages.service_not_found')
         );
 
         return $service;

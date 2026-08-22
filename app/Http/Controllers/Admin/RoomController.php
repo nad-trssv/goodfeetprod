@@ -35,7 +35,7 @@ class RoomController extends Controller
             $room->users()->sync($request->user_ids);
         }
 
-        return redirect()->route('admin.rooms.index')->with('success', 'Кабинет добавлен!');
+        return redirect()->route('admin.rooms.index')->with('success', __('admin_messages.room_added'));
     }
 
     public function update(Request $request, string $id)
@@ -56,20 +56,20 @@ class RoomController extends Controller
 
         $room->users()->sync($request->user_ids ?? []);
 
-        return redirect()->route('admin.rooms.index')->with('success', 'Кабинет обновлён!');
+        return redirect()->route('admin.rooms.index')->with('success', __('admin_messages.room_updated'));
     }
 
     public function destroy(string $id)
     {
         Room::findOrFail($id)->delete();
-        return redirect()->route('admin.rooms.index')->with('success', 'Кабинет удалён!');
+        return redirect()->route('admin.rooms.index')->with('success', __('admin_messages.room_deleted'));
     }
 
     public function toggleActive(string $id)
     {
         $room = Room::findOrFail($id);
         $room->update(['is_active' => !$room->is_active]);
-        return redirect()->route('admin.rooms.index')->with('success', 'Статус обновлён!');
+        return redirect()->route('admin.rooms.index')->with('success', __('admin_messages.status_updated'));
     }
     
     public function today(Request $request, $date = null)

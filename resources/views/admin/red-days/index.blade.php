@@ -1,10 +1,10 @@
-@section('title', 'Нерабочее время')
+@section('title', __('admin_schedule.all_closed'))
 
 <x-dashboard-layout>
     <div class="content">
         <nav class="mb-3" aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item active">Нерабочее время</li>
+                <li class="breadcrumb-item active">{{ __('admin_schedule.all_closed') }}</li>
             </ol>
         </nav>
 
@@ -21,13 +21,13 @@
 
         <div class="row mb-4 align-items-center">
             <div class="col">
-                <h2 class="mb-0">Нерабочее время</h2>
-                <p class="text-muted fs-9 mt-1">Закрытые дни и часы всех мастеров</p>
+                <h2 class="mb-0">{{ __('admin_schedule.all_closed') }}</h2>
+                <p class="text-muted fs-9 mt-1">{{ __('admin_schedule.all_closed_hint') }}</p>
             </div>
             <div class="col-auto">
                 <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="collapse"
                     data-bs-target="#addForm">
-                    <span class="fas fa-plus me-1"></span>Добавить
+                    <span class="fas fa-plus me-1"></span>{{ __('admin_schedule.new') }}
                 </button>
             </div>
         </div>
@@ -35,36 +35,36 @@
         {{-- Форма добавления --}}
         <div class="collapse mb-4" id="addForm">
             <div class="card card-body bg-light">
-                <h6 class="mb-3">Новая запись</h6>
+                <h6 class="mb-3">{{ __('admin_schedule.new') }}</h6>
                 <form method="POST" action="{{ route('admin.red-days.store') }}">
                     @csrf
                     <div class="row g-3">
                         <div class="col-md-3">
-                            <label class="form-label">Мастер</label>
+                            <label class="form-label">{{ __('admin_schedule.employee') }}</label>
                             <select class="form-select form-select-sm" name="user_id">
-                                <option value="">Общий (для всех)</option>
+                                <option value="">{{ __('admin_schedule.global_all') }}</option>
                                 @foreach (\App\Models\User::whereHas('role', fn ($query) => $query->where('is_service_provider', true)->orWhereIn('id', [1, 2]))->orderBy('name')->get() as $master)
                                     <option value="{{ $master->id }}">{{ $master->name }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Название*</label>
+                            <label class="form-label">{{ __('admin_schedule.name') }}*</label>
                             <input type="text" class="form-control form-control-sm" name="name"
-                                placeholder="Например: Отпуск" required>
+                                placeholder="{{ __('admin_schedule.example_vacation') }}" required>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label">Дата*</label>
+                            <label class="form-label">{{ __('admin_schedule.date') }}*</label>
                             <input type="date" class="form-control form-control-sm" name="date" required>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label">Дата до</label>
+                            <label class="form-label">{{ __('admin_schedule.date_to') }}</label>
                             <input type="date" class="form-control form-control-sm" name="date_to">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Причина</label>
+                            <label class="form-label">{{ __('admin_schedule.reason') }}</label>
                             <select class="form-select form-select-sm" name="type">
-                                @foreach (\App\Models\RedDay::TYPES as $value => $label)
+                                @foreach (\App\Models\RedDay::typeOptions() as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>
                                 @endforeach
                             </select>
@@ -73,30 +73,30 @@
                             <div class="form-check mb-1">
                                 <input class="form-check-input" type="checkbox" name="full_day" id="new_full_day"
                                     value="1" checked>
-                                <label class="form-check-label" for="new_full_day">Весь день</label>
+                                <label class="form-check-label" for="new_full_day">{{ __('admin_schedule.full_day') }}</label>
                             </div>
                         </div>
                         <div class="col-md-2 d-flex align-items-end">
                             <div class="form-check mb-1">
                                 <input class="form-check-input" type="checkbox" name="repeat" value="1">
-                                <label class="form-check-label">Повтор</label>
+                                <label class="form-check-label">{{ __('admin_schedule.repeat') }}</label>
                             </div>
                         </div>
                     </div>
                     <div class="row g-3 mt-1" id="new_time_block" style="display:none">
                         <div class="col-md-2">
-                            <label class="form-label">Начало*</label>
+                            <label class="form-label">{{ __('admin_schedule.start') }}*</label>
                             <input type="time" class="form-control form-control-sm" name="start_time">
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label">Конец*</label>
+                            <label class="form-label">{{ __('admin_schedule.end') }}*</label>
                             <input type="time" class="form-control form-control-sm" name="end_time">
                         </div>
                     </div>
                     <div class="text-end mt-3">
                         <button class="btn btn-sm btn-outline-secondary me-2" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#addForm">Отмена</button>
-                        <button class="btn btn-sm btn-primary" type="submit">Сохранить</button>
+                            data-bs-target="#addForm">{{ __('admin_schedule.cancel') }}</button>
+                        <button class="btn btn-sm btn-primary" type="submit">{{ __('admin_schedule.save') }}</button>
                     </div>
                 </form>
             </div>
@@ -109,12 +109,12 @@
                     @csrf
                     <div class="col-md-3">
                         <input type="text" class="form-control form-control-sm" name="search"
-                            value="{{ request('search') }}" placeholder="Поиск по названию...">
+                            value="{{ request('search') }}" placeholder="{{ __('admin_schedule.search_name') }}">
                     </div>
                     <div class="col-md-2">
                         <select class="form-select form-select-sm" name="master">
-                            <option value="">Все мастера</option>
-                            <option value="common" {{ request('master') == 'common' ? 'selected' : '' }}>Общие</option>
+                            <option value="">{{ __('admin_schedule.all_employees') }}</option>
+                            <option value="common" {{ request('master') == 'common' ? 'selected' : '' }}>{{ __('admin_schedule.common') }}</option>
                             @foreach (\App\Models\User::whereHas('role', fn ($query) => $query->where('is_service_provider', true)->orWhereIn('id', [1, 2]))->orderBy('name')->get() as $master)
                                 <option value="{{ $master->id }}"
                                     {{ request('master') == $master->id ? 'selected' : '' }}>{{ $master->name }}
@@ -124,10 +124,10 @@
                     </div>
                     <div class="col-md-2">
                         <select class="form-select form-select-sm" name="type">
-                            <option value="">Все типы</option>
-                            <option value="full" {{ request('type') == 'full' ? 'selected' : '' }}>Весь день
+                            <option value="">{{ __('admin_schedule.all_types') }}</option>
+                            <option value="full" {{ request('type') == 'full' ? 'selected' : '' }}>{{ __('admin_schedule.full') }}
                             </option>
-                            <option value="partial" {{ request('type') == 'partial' ? 'selected' : '' }}>Частичные
+                            <option value="partial" {{ request('type') == 'partial' ? 'selected' : '' }}>{{ __('admin_schedule.partial') }}
                             </option>
                         </select>
                     </div>
@@ -180,12 +180,12 @@
                     <table class="table table-sm fs-9 mb-0">
                         <thead>
                             <tr>
-                                <th>Название</th>
-                                <th>Дата</th>
-                                <th>Время</th>
-                                <th>Мастер</th>
-                                <th>Повтор</th>
-                                <th class="text-end">Действие</th>
+                                <th>{{ __('admin_schedule.name') }}</th>
+                                <th>{{ __('admin_schedule.date') }}</th>
+                                <th>{{ __('admin_schedule.time') }}</th>
+                                <th>{{ __('admin_schedule.employee') }}</th>
+                                <th>{{ __('admin_schedule.repeat') }}</th>
+                                <th class="text-end">{{ __('admin_schedule.action') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -195,7 +195,7 @@
                                     <td>{{ \Carbon\Carbon::parse($day['date'])->format('d.m.Y') }}@if($day['date_to'] !== $day['date']) – {{ \Carbon\Carbon::parse($day['date_to'])->format('d.m.Y') }}@endif</td>
                                     <td>
                                         @if ($day['full_day'])
-                                            <span class="badge bg-secondary fs-10">Весь день</span>
+                                            <span class="badge bg-secondary fs-10">{{ __('admin_schedule.full_day') }}</span>
                                         @else
                                             {{ $day['start_time'] ? substr($day['start_time'], 0, 5) : '' }} –
                                             {{ $day['end_time'] ? substr($day['end_time'], 0, 5) : '' }}
@@ -207,7 +207,7 @@
                                                 class="badge badge-phoenix badge-phoenix-primary fs-10">{{ $day['master_name'] }}</span>
                                         @else
                                             <span
-                                                class="badge badge-phoenix badge-phoenix-secondary fs-10">Общий</span>
+                                                class="badge badge-phoenix badge-phoenix-secondary fs-10">{{ __('admin_schedule.common_badge') }}</span>
                                         @endif
                                     </td>
                                     <td>{{ $day['repeat'] ? '✅' : '❌' }}</td>
@@ -225,7 +225,7 @@
                                         </button>
                                         <form method="POST"
                                             action="{{ route('admin.red-days.destroy', $day['id']) }}"
-                                            style="display:inline" onsubmit="return confirm('Удалить запись?')">
+                                            style="display:inline" onsubmit='return confirm(@js(__('admin_schedule.delete_confirm')))'>
                                             @csrf
                                             <button class="btn btn-sm btn-outline-danger" type="submit">
                                                 <span class="fas fa-trash"></span>
@@ -235,14 +235,14 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted py-4">Нет записей</td>
+                                    <td colspan="6" class="text-center text-muted py-4">{{ __('admin_schedule.empty') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
 
-                <p class="text-muted fs-10 mt-3">Показано {{ $filtered->count() }} из {{ $redDays->count() }} записей
+                <p class="text-muted fs-10 mt-3">{{ __('admin_schedule.shown', ['from' => $filtered->isEmpty() ? 0 : 1, 'to' => $filtered->count(), 'total' => $redDays->count()]) }}
                 </p>
             </div>
         </div>
@@ -252,7 +252,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Редактировать</h5>
+                        <h5 class="modal-title">{{ __('admin_schedule.edit') }}</h5>
                         <button class="btn btn-close p-1" type="button" data-bs-dismiss="modal"></button>
                     </div>
                     <form method="POST" id="editForm" action="">
@@ -260,23 +260,23 @@
                         <div class="modal-body">
                             <div class="row g-3">
                                 <div class="col-12">
-                                    <label class="form-label">Название*</label>
+                                    <label class="form-label">{{ __('admin_schedule.name') }}*</label>
                                     <input type="text" class="form-control" name="name" id="edit_name"
                                         required>
                                 </div>
                                 <div class="col-12">
-                                    <label class="form-label">Дата*</label>
+                                    <label class="form-label">{{ __('admin_schedule.date') }}*</label>
                                     <input type="date" class="form-control" name="date" id="edit_date"
                                         required>
                                 </div>
                                 <div class="col-12">
-                                    <label class="form-label">Дата до</label>
+                                    <label class="form-label">{{ __('admin_schedule.date_to') }}</label>
                                     <input type="date" class="form-control" name="date_to" id="edit_date_to">
                                 </div>
                                 <div class="col-12">
-                                    <label class="form-label">Причина</label>
+                                    <label class="form-label">{{ __('admin_schedule.reason') }}</label>
                                     <select class="form-select" name="type" id="edit_type">
-                                        @foreach (\App\Models\RedDay::TYPES as $value => $label)
+                                        @foreach (\App\Models\RedDay::typeOptions() as $value => $label)
                                             <option value="{{ $value }}">{{ $label }}</option>
                                         @endforeach
                                     </select>
@@ -285,30 +285,30 @@
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="full_day"
                                             id="edit_fullday" value="1">
-                                        <label class="form-check-label" for="edit_fullday">Весь день</label>
+                                        <label class="form-check-label" for="edit_fullday">{{ __('admin_schedule.full_day') }}</label>
                                     </div>
                                 </div>
                                 <div class="col-6" id="edit_time1">
-                                    <label class="form-label">Начало*</label>
+                                    <label class="form-label">{{ __('admin_schedule.start') }}*</label>
                                     <input type="time" class="form-control" name="start_time" id="edit_start">
                                 </div>
                                 <div class="col-6" id="edit_time2">
-                                    <label class="form-label">Конец*</label>
+                                    <label class="form-label">{{ __('admin_schedule.end') }}*</label>
                                     <input type="time" class="form-control" name="end_time" id="edit_end">
                                 </div>
                                 <div class="col-12">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="repeat"
                                             id="edit_repeat" value="1">
-                                        <label class="form-check-label" for="edit_repeat">Повторять ежегодно</label>
+                                        <label class="form-check-label" for="edit_repeat">{{ __('admin_schedule.repeat_yearly') }}</label>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer">
                             <button class="btn btn-outline-secondary" type="button"
-                                data-bs-dismiss="modal">Отмена</button>
-                            <button class="btn btn-primary" type="submit">Сохранить</button>
+                                data-bs-dismiss="modal">{{ __('admin_schedule.cancel') }}</button>
+                            <button class="btn btn-primary" type="submit">{{ __('admin_schedule.save') }}</button>
                         </div>
                     </form>
                 </div>

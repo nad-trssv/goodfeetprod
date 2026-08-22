@@ -69,7 +69,7 @@ class AppointmentController extends Controller
         }
         return view('admin.calendar.list', [
             'appointments' => $data['appointments'],
-            'title' => 'Мои записи',
+            'title' => __('admin_messages.my_appointments'),
         ]);
     }
 
@@ -116,7 +116,7 @@ class AppointmentController extends Controller
 
         return view('admin.calendar.list', [
             'appointments' => $data['appointments'],
-            'title' => 'Записи мастера: ' . $master->name,
+            'title' => __('admin_messages.master_appointments', ['name' => $master->name]),
             'master' => $master,
         ]);
     }
@@ -153,7 +153,7 @@ class AppointmentController extends Controller
                 'redirect_url' => route('calendar.show', $event),
                 'created_count' => $events->count(),
                 'series_uuid' => $event->series_uuid,
-                'message' => 'Запись добавлена успешно!'
+                'message' => __('admin_messages.appointment_created')
             ], 200);
         } catch (Exception $exception) {
             if ($request->ajax() || $request->wantsJson()) {
@@ -223,7 +223,7 @@ class AppointmentController extends Controller
         $this->authorize('message', $appointment);
 
         if (!$appointment->client_email) {
-            return back()->withErrors(['message' => 'У записи не указан email клиента.']);
+            return back()->withErrors(['message' => __('admin_messages.client_email_missing')]);
         }
 
         $data = $request->validated();
@@ -239,7 +239,7 @@ class AppointmentController extends Controller
             'recipient' => $appointment->client_email,
         ]);
 
-        return back()->with('success', 'Сообщение клиенту отправлено.');
+        return back()->with('success', __('admin_messages.client_message_sent'));
     }
 
     /**
@@ -262,7 +262,7 @@ class AppointmentController extends Controller
                 'appointment' => $event,
                 'backgroundColor' => $event->service->eventColor,
                 'title' => $event->service->name,
-                'message' => 'Запись успешно обновлена!'
+                'message' => __('admin_messages.appointment_updated')
             ], 200);
         } catch (Exception $exception) {
             if ($request->ajax() || $request->wantsJson()) {
@@ -293,7 +293,7 @@ class AppointmentController extends Controller
 
         if ($appointment->appointment_end->isFuture() && in_array($request->validated('status'), ['completed', 'no_show'], true)) {
             throw \Illuminate\Validation\ValidationException::withMessages([
-                'status' => 'Результат можно отметить после окончания записи.',
+                'status' => __('admin_messages.appointment_result_too_early'),
             ]);
         }
 
@@ -301,7 +301,7 @@ class AppointmentController extends Controller
             && $request->validated('status') !== $appointment->status;
         if ($isCorrection && mb_strlen(trim((string) $request->validated('reason'))) < 3) {
             throw \Illuminate\Validation\ValidationException::withMessages([
-                'reason' => 'При исправлении результата укажите причину (минимум 3 символа).',
+                'reason' => __('admin_messages.appointment_correction_reason'),
             ]);
         }
 
@@ -315,7 +315,7 @@ class AppointmentController extends Controller
 
         return response()->json([
             'status' => $appointment->status,
-            'message' => 'Статус записи обновлён.',
+            'message' => __('admin_messages.appointment_status_updated'),
         ]);
     }
 

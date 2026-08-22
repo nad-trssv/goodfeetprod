@@ -39,7 +39,7 @@ class AppointmentStatusService
                 && in_array($appointment->status, ['completed', 'no_show'], true)
                 && $toStatus === 'confirmed';
             if (! $isCorrection && ! $isResultRestoration && ! in_array($toStatus, self::TRANSITIONS[$appointment->status] ?? [], true)) {
-                throw ValidationException::withMessages(['status' => "Переход {$appointment->status} → {$toStatus} запрещён."]);
+                throw ValidationException::withMessages(['status' => __('admin_messages.status_transition_forbidden', ['from' => $appointment->status, 'to' => $toStatus])]);
             }
 
             $appointment->update(['status' => $toStatus, 'status_changed_at' => now()]);

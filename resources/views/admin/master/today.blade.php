@@ -1,16 +1,16 @@
-@section('title', 'Записи мастеров')
+@section('title', __('admin_appointments.masters_today'))
 
 <x-dashboard-layout>
     <div class="content">
         <nav class="mb-3" aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item active">Записи мастеров</li>
+                <li class="breadcrumb-item active">{{ __('admin_staff.employee_appointments_title') }}</li>
             </ol>
         </nav>
 
         <div class="row mb-4 align-items-center">
             <div class="col">
-                <h2 class="mb-0">Нагрузка мастеров</h2>
+                <h2 class="mb-0">{{ __('admin_staff.employee_workload') }}</h2>
                 <p class="text-muted fs-9 mt-1">
                     {{ $today->locale('ru')->isoFormat('dddd, D MMMM YYYY') }}
                 </p>
@@ -23,15 +23,15 @@
                 <div class="d-flex align-items-center gap-2 flex-wrap">
                     <a href="{{ route('admin.masters.today') }}"
                         class="btn btn-sm {{ $today->isToday() ? 'btn-primary' : 'btn-outline-primary' }}">
-                        Сегодня
+                        {{ __('admin_appointments.today') }}
                     </a>
                     <a href="{{ route('admin.masters.day', \Carbon\Carbon::now()->addDay()->format('Y-m-d')) }}"
                         class="btn btn-sm {{ $today->isTomorrow() ? 'btn-primary' : 'btn-outline-secondary' }}">
-                        Завтра
+                        {{ __('admin_appointments.tomorrow') }}
                     </a>
                     <a href="{{ route('admin.masters.day', \Carbon\Carbon::now()->subDay()->format('Y-m-d')) }}"
                         class="btn btn-sm {{ $today->isYesterday() ? 'btn-primary' : 'btn-outline-secondary' }}">
-                        Вчера
+                        {{ __('admin_appointments.yesterday') }}
                     </a>
                     <div class="ms-auto d-flex align-items-center gap-2">
                         <a href="{{ route('admin.masters.day', $today->copy()->subDay()->format('Y-m-d')) }}"
@@ -73,16 +73,16 @@
                                 <div>
                                     <h6 class="mb-0 fw-semibold fs-9">{{ $master['name'] }}</h6>
                                     <span
-                                        class="fs-10 text-muted">{{ $isOnline ? 'Online' : ($master['last_active'] ? \Carbon\Carbon::parse($master['last_active'])->diffForHumans() : 'Не активен') }}</span>
+                                        class="fs-10 text-muted">{{ $isOnline ? __('admin_staff.online') : ($master['last_active'] ? \Carbon\Carbon::parse($master['last_active'])->locale(app()->getLocale())->diffForHumans() : __('admin_staff.never_active')) }}</span>
                                 </div>
                             </div>
                             <div>
                                 @if ($master['status'] === 'closed')
-                                    <span class="badge bg-danger fs-10">Недоступен</span>
+                                    <span class="badge bg-danger fs-10">{{ __('admin_staff.unavailable') }}</span>
                                 @elseif($master['status'] === 'dayoff')
-                                    <span class="badge bg-secondary fs-10">Выходной</span>
+                                    <span class="badge bg-secondary fs-10">{{ __('admin_staff.day_off') }}</span>
                                 @else
-                                    <span class="badge bg-success fs-10">Работает</span>
+                                    <span class="badge bg-success fs-10">{{ __('admin_staff.working') }}</span>
                                     @if ($master['work_start'])
                                         <span
                                             class="badge bg-light text-dark fs-10">{{ $master['work_start'] }}–{{ $master['work_end'] }}</span>
@@ -94,11 +94,11 @@
                         <div class="card-body p-0">
                             @if ($master['status'] === 'closed')
                                 <div class="text-center text-danger py-4 fs-9">
-                                    <span class="fas fa-ban me-1"></span>День недоступен
+                                    <span class="fas fa-ban me-1"></span>{{ __('admin_appointments.day_unavailable') }}
                                 </div>
                             @elseif($master['status'] === 'dayoff')
                                 <div class="text-center text-muted py-4 fs-9">
-                                    <span class="fas fa-couch me-1"></span>Нерабочий день
+                                    <span class="fas fa-couch me-1"></span>{{ __('admin_appointments.non_working_day') }}
                                 </div>
                             @else
                                 @php
@@ -146,7 +146,7 @@
 
                                 @if ($items->isEmpty())
                                     <div class="text-center text-muted py-4 fs-9">
-                                        <span class="fas fa-calendar-check me-1"></span>Записей нет
+                                        <span class="fas fa-calendar-check me-1"></span>{{ __('admin_appointments.no_appointments') }}
                                     </div>
                                 @else
                                     <div class="timeline-list" style="max-height:320px;overflow-y:auto;">
@@ -174,21 +174,21 @@
                                                                 class="fs-10 fw-semibold">{{ $apt->service->name }}</span>
                                                             @if ($isActive)
                                                                 <span
-                                                                    class="badge bg-warning text-dark fs-10">Сейчас</span>
+                                                                    class="badge bg-warning text-dark fs-10">{{ __('admin_staff.now') }}</span>
                                                             @endif
                                                         </div>
                                                         <div class="fs-10 text-muted">{{ $apt->client_name }}
                                                             {{ $apt->client_lastname }}</div>
                                                         <a href="{{ route('calendar.show', $apt->id) }}"
-                                                            class="fs-10 text-primary">Подробнее →</a>
+                                                            class="fs-10 text-primary">{{ __('admin_staff.more') }}</a>
                                                     @elseif($item['type'] === 'lunch')
                                                         <div class="d-flex align-items-center gap-1">
                                                             <span
                                                                 class="fas fa-utensils text-warning me-1 fs-10"></span>
-                                                            <span class="fs-10 fw-semibold text-warning">Обед</span>
+                                                            <span class="fs-10 fw-semibold text-warning">{{ __('admin_staff.lunch') }}</span>
                                                             @if ($isActive)
                                                                 <span
-                                                                    class="badge bg-warning text-dark fs-10 ms-1">Сейчас</span>
+                                                                    class="badge bg-warning text-dark fs-10 ms-1">{{ __('admin_staff.now') }}</span>
                                                             @endif
                                                         </div>
                                                     @elseif($item['type'] === 'closed')
@@ -197,7 +197,7 @@
                                                             <span
                                                                 class="fs-10 fw-semibold text-danger">{{ $item['data']->name }}</span>
                                                             @if ($isActive)
-                                                                <span class="badge bg-danger fs-10 ms-1">Сейчас</span>
+                                                                <span class="badge bg-danger fs-10 ms-1">{{ __('admin_staff.now') }}</span>
                                                             @endif
                                                         </div>
                                                     @endif
@@ -212,11 +212,11 @@
                         <div class="card-footer py-2 d-flex gap-2">
                             <a href="{{ route('master.calendar', $master['id']) }}"
                                 class="btn btn-sm btn-outline-primary flex-1 fs-10">
-                                <span class="fas fa-calendar me-1"></span>Календарь
+                                <span class="fas fa-calendar me-1"></span>{{ __('admin_appointments.calendar') }}
                             </a>
                             <a href="{{ route('master.calendar.list', $master['id']) }}"
                                 class="btn btn-sm btn-outline-secondary flex-1 fs-10">
-                                <span class="fas fa-list me-1"></span>Записи
+                                <span class="fas fa-list me-1"></span>{{ __('admin_appointments.list') }}
                             </a>
                         </div>
                     </div>

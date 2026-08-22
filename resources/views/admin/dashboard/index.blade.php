@@ -1,4 +1,4 @@
-@section('title', 'Dashboard')
+@section('title', __('admin_dashboard.title'))
 @push('styles')
 @endpush
 <x-dashboard-layout>
@@ -11,11 +11,11 @@
             </span>
             <div class="col">
                 <h3 class="mb-0 text-primary position-relative fw-bold">
-                    <span class="bg-body pe-2">Мои показатели в этом месяце</span>
+                    <span class="bg-body pe-2">{{ __('admin_dashboard.my_month') }}</span>
                     <span
                         class="border border-primary position-absolute top-50 translate-middle-y w-100 start-0 z-n1"></span>
                 </h3>
-                <p class="mb-0">Статистика по вашим записям</p>
+                <p class="mb-0">{{ __('admin_dashboard.my_stats_hint') }}</p>
             </div>
         </div>
         <div class="px-3 mb-5">
@@ -23,29 +23,29 @@
                 <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
                     <i class="fa-solid fa-users text-primary fs-5 lh-1"></i>
                     <h1 class="fs-5 pt-3">{{ $stats['clients'] }}</h1>
-                    <p class="fs-9 mb-0">Клиентов</p>
+                    <p class="fs-9 mb-0">{{ __('admin_dashboard.clients') }}</p>
                 </div>
                 <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
                     <i class="fa-solid fa-calendar-xmark text-warning fs-5 lh-1"></i>
                     <h1 class="fs-5 pt-3">{{ $stats['redDays'] }}</h1>
-                    <p class="fs-9 mb-0">Нерабочих дней</p>
+                    <p class="fs-9 mb-0">{{ __('admin_dashboard.closed_days') }}</p>
                 </div>
                 <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
                     <span class="uil uil-wallet text-success fs-5 lh-1"></span>
                     <h1 class="fs-5 pt-3">{{ $stats['salary'] }} &euro;</h1>
-                    <p class="fs-9 mb-0">Прибыль</p>
+                    <p class="fs-9 mb-0">{{ __('admin_dashboard.revenue') }}</p>
                 </div>
                 <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
                     <i class="uil fs-5 lh-1 uil-chart-growth text-primary"></i>
                     <h1 class="fs-5 pt-3 {{ $stats['clientsDifference'] > 0 ? 'text-success' : '' }}">
                         {{ $stats['clientsDifference'] }}</h1>
-                    <p class="fs-9 mb-0">Клиенты vs прошлый месяц</p>
+                    <p class="fs-9 mb-0">{{ __('admin_dashboard.clients_vs_last') }}</p>
                 </div>
                 <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
                     <i class="uil fs-5 lh-1 uil-chart-line text-primary"></i>
                     <h1 class="fs-5 pt-3 {{ $stats['salaryDifference'] > 0 ? 'text-success' : '' }}">
                         {{ $stats['salaryDifference'] }} &euro;</h1>
-                    <p class="fs-9 mb-0">Прибыль vs прошлый месяц</p>
+                    <p class="fs-9 mb-0">{{ __('admin_dashboard.revenue_vs_last') }}</p>
                 </div>
             </div>
         </div>
@@ -59,11 +59,11 @@
                 </span>
                 <div class="col">
                     <h3 class="mb-0 text-success position-relative fw-bold">
-                        <span class="bg-body pe-2">Общие показатели в этом месяце</span>
+                        <span class="bg-body pe-2">{{ __('admin_dashboard.all_month') }}</span>
                         <span
                             class="border border-success position-absolute top-50 translate-middle-y w-100 start-0 z-n1"></span>
                     </h3>
-                    <p class="mb-0">Статистика по всем мастерам</p>
+                    <p class="mb-0">{{ __('admin_dashboard.all_stats_hint') }}</p>
                 </div>
             </div>
             <div class="px-3 mb-5">
@@ -71,24 +71,24 @@
                     <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
                         <i class="fa-solid fa-users text-success fs-5 lh-1"></i>
                         <h1 class="fs-5 pt-3">{{ $stats['all_clients'] }}</h1>
-                        <p class="fs-9 mb-0">Всего клиентов</p>
+                        <p class="fs-9 mb-0">{{ __('admin_dashboard.all_clients') }}</p>
                     </div>
                     <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
                         <span class="uil uil-wallet text-success fs-5 lh-1"></span>
                         <h1 class="fs-5 pt-3">{{ $stats['all_salary'] }} &euro;</h1>
-                        <p class="fs-9 mb-0">Общая прибыль</p>
+                        <p class="fs-9 mb-0">{{ __('admin_dashboard.all_revenue') }}</p>
                     </div>
                     <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
                         <i class="uil fs-5 lh-1 uil-chart-growth text-success"></i>
                         <h1 class="fs-5 pt-3 {{ $stats['all_clientsDifference'] > 0 ? 'text-success' : '' }}">
                             {{ $stats['all_clientsDifference'] }}</h1>
-                        <p class="fs-9 mb-0">Клиенты vs прошлый месяц</p>
+                        <p class="fs-9 mb-0">{{ __('admin_dashboard.clients_vs_last') }}</p>
                     </div>
                     <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
                         <i class="uil fs-5 lh-1 uil-chart-line text-success"></i>
                         <h1 class="fs-5 pt-3 {{ $stats['all_salaryDifference'] > 0 ? 'text-success' : '' }}">
                             {{ $stats['all_salaryDifference'] }} &euro;</h1>
-                        <p class="fs-9 mb-0">Прибыль vs прошлый месяц</p>
+                        <p class="fs-9 mb-0">{{ __('admin_dashboard.revenue_vs_last') }}</p>
                     </div>
                 </div>
             </div>
@@ -99,11 +99,10 @@
                     <div class="card h-100">
                         <div class="card-body">
                             <div class="card-title mb-1">
-                                <h3 class="text-body-emphasis">Активность</h3>
+                                <h3 class="text-body-emphasis">{{ __('admin_dashboard.activity') }}</h3>
                             </div>
                             @if ($appointments)
-                                <p class="text-body-tertiary mb-4">На сегодня записаны {{ count($appointments) }}
-                                    клиентов</p>
+                                <p class="text-body-tertiary mb-4">{{ __('admin_dashboard.today_clients',['count'=>count($appointments)]) }}</p>
                             @endif
                             <div class="timeline-vertical timeline-with-details">
                                 @if ($appointments)
@@ -136,15 +135,15 @@
                                                         <h5 class="fs-9 lh-sm">{{ $event['title'] }} (
                                                             <span>{{ $event['price'] }} </span>&euro; )
                                                         </h5>
-                                                        <p class="fs-9 mb-0 event-item">Клиент: <a class="fw-semibold"
+                                                        <p class="fs-9 mb-0 event-item">{{ __('admin_dashboard.client') }}: <a class="fw-semibold"
                                                             href="{{ route('calendar.show', $event['id']) }}">{{ $event['client_lastname'] }},
                                                             {{ $event['client_name'] }}</a></p>
-                                                        <p class="fs-9 mb-0 event-item">Мастер: <a class="fw-semibold"
+                                                        <p class="fs-9 mb-0 event-item">{{ __('admin_dashboard.employee') }}: <a class="fw-semibold"
                                                             href="{{ route('profile.index') }}">{{ $event['master'] }}</a></p>
-                                                        <p class="fs-9 mb-0 event-item">Номер клиента: <a class="fw-semibold"
+                                                        <p class="fs-9 mb-0 event-item">{{ __('admin_dashboard.client_phone') }}: <a class="fw-semibold"
                                                             href="tel:{{ $event['client_phone'] }}">{{ $event['client_phone'] }}</a></p>
                                                         @if($event['room'])
-                                                            <p class="fs-9 mb-0 event-item">Кабинет: <a class="fw-semibold"
+                                                            <p class="fs-9 mb-0 event-item">{{ __('admin_dashboard.room') }}: <a class="fw-semibold"
                                                                 href="{{ route('admin.rooms.today') }}">{{ $event['room'] }}</a></p>
                                                         @endif
                                                         @if ($event['description'])
@@ -157,7 +156,7 @@
                                         </div>
                                     @endforeach
                                 @else
-                                    <p class="text-body-tertiary mb-4">На сегодня у вас 0 клиентов</p>
+                                    <p class="text-body-tertiary mb-4">{{ __('admin_dashboard.today_clients',['count'=>0]) }}</p>
                                 @endif
                             </div>
                         </div>
@@ -186,8 +185,8 @@
                     <div class="card h-100">
                         <div class="card-body">
                             <div class="card-title mb-1 d-flex pb-4 border-bottom border-dashed align-items-end">
-                                <h3 class="flex-1 mb-0">Мои события</h3>
-                                <a class="fw-bold fs-9" href="{{ route('master.time-off.index') }}">Все</a>
+                                <h3 class="flex-1 mb-0">{{ __('admin_dashboard.my_events') }}</h3>
+                                <a class="fw-bold fs-9" href="{{ route('master.time-off.index') }}">{{ __('admin_dashboard.all') }}</a>
                             </div>
                             @if ($events->isNotEmpty())
                                 @foreach ($events as $event)
@@ -229,7 +228,7 @@
                                     </div>
                                 @endforeach
                             @else
-                                <p class="text-body-tertiary my-4">На сегодня нет мероприятий!</p>
+                                <p class="text-body-tertiary my-4">{{ __('admin_dashboard.no_events') }}</p>
                             @endif
                         </div>
                     </div>
@@ -240,8 +239,8 @@
                         <div class="card h-100">
                             <div class="card-body">
                                 <div class="card-title mb-1 d-flex pb-4 border-bottom border-dashed align-items-end">
-                                    <h3 class="flex-1 mb-0">Все события</h3>
-                                    <a class="fw-bold fs-9" href="{{ route('calendarListAllMasters') }}">Все записи</a>
+                                    <h3 class="flex-1 mb-0">{{ __('admin_dashboard.all_events') }}</h3>
+                                    <a class="fw-bold fs-9" href="{{ route('calendarListAllMasters') }}">{{ __('admin_dashboard.all_appointments') }}</a>
                                 </div>
                                 @if ($allEvents->isNotEmpty())
                                     @foreach ($allEvents as $event)
@@ -272,7 +271,7 @@
                                                 <p class="fw-bold mb-1"><i
                                                         class="far fa-bell text-success me-1"></i>{{ $event['name'] }}</p>
                                                 @if ($event['organized_by'] && $event->organizer)
-                                                    <p class="text-body-secondary fs-9 mb-1">Организатор: <span
+                                                    <p class="text-body-secondary fs-9 mb-1">{{ __('admin_dashboard.organizer') }}: <span
                                                             class="fw-bold">{{ $event->organizer->name }}</span></p>
                                                 @endif
                                             @endif
@@ -282,7 +281,7 @@
                                         </div>
                                     @endforeach
                                 @else
-                                    <p class="text-body-tertiary my-4">На сегодня нет мероприятий!</p>
+                                    <p class="text-body-tertiary my-4">{{ __('admin_dashboard.no_events') }}</p>
                                 @endif
                             </div>
                         </div>
@@ -339,7 +338,7 @@
             var myChartByMonthSales = echarts.init(chartContainerByMonthSales);
             myChartByMonthSales.setOption({
                 title: {
-                    text: 'Мои продажи по месяцам',
+                    text: @json(__('admin_dashboard.my_sales_chart')),
                     left: 'center',
                     textStyle: {
                         color: `rgba(${primaryColor}, 1)`
@@ -349,7 +348,7 @@
                     trigger: 'axis'
                 },
                 legend: {
-                    data: ['Продажи'],
+                    data: [@json(__('admin_dashboard.sales'))],
                     top: '10%'
                 },
                 xAxis: {
@@ -358,13 +357,13 @@
                 },
                 yAxis: [{
                     type: 'value',
-                    name: 'Продажи',
+                    name: @json(__('admin_dashboard.sales')),
                     axisLabel: {
                         formatter: '{value} €'
                     }
                 }],
                 series: [{
-                    name: 'Продажи',
+                    name: @json(__('admin_dashboard.sales')),
                     type: 'line',
                     smooth: true,
                     data: chartDataByMonth.data,
@@ -393,7 +392,7 @@
             var myChartByMonthClients = echarts.init(chartContainerByMonthClients);
             myChartByMonthClients.setOption({
                 title: {
-                    text: 'Мои клиенты по месяцам',
+                    text: @json(__('admin_dashboard.my_clients_chart')),
                     left: 'center',
                     textStyle: {
                         color: `rgba(${primaryColor}, 1)`
@@ -403,7 +402,7 @@
                     trigger: 'axis'
                 },
                 legend: {
-                    data: ['Клиенты'],
+                    data: [@json(__('admin_dashboard.clients'))],
                     top: '10%'
                 },
                 xAxis: {
@@ -412,10 +411,10 @@
                 },
                 yAxis: [{
                     type: 'value',
-                    name: 'Клиенты'
+                    name: @json(__('admin_dashboard.clients'))
                 }],
                 series: [{
-                    name: 'Клиенты',
+                    name: @json(__('admin_dashboard.clients')),
                     type: 'bar',
                     data: chartDataByMonth.counts,
                     itemStyle: {
@@ -437,7 +436,7 @@
             var myChartGauge = echarts.init(chartGauge);
             myChartGauge.setOption({
                 title: {
-                    text: 'Активность на сегодняшний день',
+                    text: @json(__('admin_dashboard.activity_today')),
                     left: 'center',
                     textStyle: {
                         color: `rgba(${primaryColor}, 1)`
@@ -534,7 +533,7 @@
                     var myChartAllByMonthSales = echarts.init(chartContainerAllByMonthSales);
                     myChartAllByMonthSales.setOption({
                         title: {
-                            text: 'Все продажи по месяцам (все мастера)',
+                            text: @json(__('admin_dashboard.all_sales_chart')),
                             left: 'center',
                             textStyle: {
                                 color: `rgba(${primaryColor}, 1)`
@@ -544,7 +543,7 @@
                             trigger: 'axis'
                         },
                         legend: {
-                            data: ['Продажи'],
+                            data: [@json(__('admin_dashboard.sales'))],
                             top: '10%'
                         },
                         xAxis: {
@@ -553,13 +552,13 @@
                         },
                         yAxis: [{
                             type: 'value',
-                            name: 'Продажи',
+                            name: @json(__('admin_dashboard.sales')),
                             axisLabel: {
                                 formatter: '{value} €'
                             }
                         }],
                         series: [{
-                            name: 'Продажи',
+                            name: @json(__('admin_dashboard.sales')),
                             type: 'line',
                             smooth: true,
                             data: chartDataByMonth.all_data,
@@ -590,7 +589,7 @@
                     var myChartAllByMonthClients = echarts.init(chartContainerAllByMonthClients);
                     myChartAllByMonthClients.setOption({
                         title: {
-                            text: 'Все клиенты по месяцам (все мастера)',
+                            text: @json(__('admin_dashboard.all_clients_chart')),
                             left: 'center',
                             textStyle: {
                                 color: `rgba(${primaryColor}, 1)`
@@ -600,7 +599,7 @@
                             trigger: 'axis'
                         },
                         legend: {
-                            data: ['Клиенты'],
+                            data: [@json(__('admin_dashboard.clients'))],
                             top: '10%'
                         },
                         xAxis: {
@@ -609,10 +608,10 @@
                         },
                         yAxis: [{
                             type: 'value',
-                            name: 'Клиенты'
+                            name: @json(__('admin_dashboard.clients'))
                         }],
                         series: [{
-                            name: 'Клиенты',
+                            name: @json(__('admin_dashboard.clients')),
                             type: 'bar',
                             data: chartDataByMonth.all_counts,
                             itemStyle: {

@@ -1,0 +1,2 @@
+<?php
+return ['service_enabled_own'=>'Service enabled','service_enabled_employee'=>'Employee service enabled','service_disabled_own'=>'Service disabled','service_disabled_employee'=>'Employee service disabled','settings_updated_own'=>'Individual service settings updated','settings_updated_employee'=>'Employee service settings updated','toggle_failed'=>'Could not change the employee service state','settings_update_failed'=>'Could not change the employee service settings'];

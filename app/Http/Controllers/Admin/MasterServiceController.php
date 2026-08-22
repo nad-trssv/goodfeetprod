@@ -110,19 +110,15 @@ class MasterServiceController extends Controller
         } catch (Throwable) {
             return back()->with(
                 'error',
-                'Не удалось подключить или отключить услугу.'
+                __('admin_staff.service_toggle_failed')
             );
         }
 
         return back()->with(
             'success',
             $isActive
-                ? 'Услуга «'
-                    . $service->name
-                    . '» подключена.'
-                : 'Услуга «'
-                    . $service->name
-                    . '» отключена.'
+                ? __('admin_staff.service_connected', ['name' => $service->name])
+                : __('admin_staff.service_disconnected', ['name' => $service->name])
         );
     }
 
@@ -153,24 +149,20 @@ class MasterServiceController extends Controller
                 ->withInput()
                 ->with(
                     'error',
-                    'Не удалось сохранить настройки услуги.'
+                    __('admin_staff.service_settings_failed')
                 );
         }
 
         if (!$changed) {
             return back()->with(
                 'success',
-                'Настройки услуги «'
-                    . $service->name
-                    . '» не изменились.'
+                __('admin_staff.service_settings_unchanged', ['name' => $service->name])
             );
         }
 
         return back()->with(
             'success',
-            'Настройки услуги «'
-                . $service->name
-                . '» сохранены.'
+            __('admin_staff.service_settings_saved', ['name' => $service->name])
         );
     }
 

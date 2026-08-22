@@ -302,7 +302,7 @@ class MasterServiceManager
 
         if (!$masterService instanceof UserServices) {
             throw new RuntimeException(
-                'Не удалось получить настройки услуги мастера.'
+                __('admin_messages.master_service_save_failed')
             );
         }
 

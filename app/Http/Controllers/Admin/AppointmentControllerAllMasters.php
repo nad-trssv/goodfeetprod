@@ -43,7 +43,7 @@ class AppointmentControllerAllMasters extends Controller
         $data = $this->appointmentService->list('superAdmin');
         return view('admin.calendar.list', [
             'appointments' => $data['appointments'],
-            'title' => 'Записи всех мастеров',
+            'title' => __('admin_messages.all_appointments'),
         ]);
     }
     /**
@@ -75,7 +75,7 @@ class AppointmentControllerAllMasters extends Controller
                     'appointment_start' => $event->appointment_start,
                     'appointment_end' => $event->appointment_end,
                     'backgroundColor' => $event->service->eventColor,
-                    'message' => 'Запись добавлена успешно!'
+                    'message' => __('admin_messages.appointment_created')
                 ], 200);
         } catch (Exception $exception) {
             return redirect()
@@ -113,7 +113,7 @@ class AppointmentControllerAllMasters extends Controller
                 'appointment' => $event,
                 'backgroundColor' => $event->service->eventColor,
                 'title' => $event->service->name,
-                'message' => 'Запись успешно обновлена!'
+                'message' => __('admin_messages.appointment_updated')
             ], 200);
         } catch (Exception $exception) {
             return redirect()

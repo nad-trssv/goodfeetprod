@@ -1,15 +1,15 @@
-@section('title', 'Расписание мастеров')
+@section('title', __('admin_staff.employee_schedules'))
 
 <x-dashboard-layout>
   <div class="content">
     <nav class="mb-3" aria-label="breadcrumb">
       <ol class="breadcrumb mb-0">
-        <li class="breadcrumb-item"><a href="{{ route('member.index') }}">Мастера</a></li>
-        <li class="breadcrumb-item active">Расписание</li>
+        <li class="breadcrumb-item"><a href="{{ route('member.index') }}">{{ __('admin_staff.employees') }}</a></li>
+        <li class="breadcrumb-item active">{{ __('admin_staff.schedule') }}</li>
       </ol>
     </nav>
 
-    <h2 class="mb-4">Расписание мастеров</h2>
+    <h2 class="mb-4">{{ __('admin_staff.employee_schedules') }}</h2>
 
     <div class="card">
       <div class="card-body p-0">
@@ -17,16 +17,10 @@
           <table class="table table-sm table-bordered fs-9 mb-0 align-middle">
             <thead class="bg-light">
               <tr>
-                <th class="ps-3" style="min-width:150px">Мастер</th>
-                <th class="text-center">Пн</th>
-                <th class="text-center">Вт</th>
-                <th class="text-center">Ср</th>
-                <th class="text-center">Чт</th>
-                <th class="text-center">Пт</th>
-                <th class="text-center">Сб</th>
-                <th class="text-center">Вс</th>
-                <th class="text-center">Обед</th>
-                <th class="text-center">Услуги</th>
+                <th class="ps-3" style="min-width:150px">{{ __('admin_staff.employee_label') }}</th>
+                @foreach(['monday','tuesday','wednesday','thursday','friday','saturday','sunday'] as $day)<th class="text-center">{{ mb_substr(__('admin_staff.'.$day),0,2) }}</th>@endforeach
+                <th class="text-center">{{ __('admin_staff.lunch') }}</th>
+                <th class="text-center">{{ __('admin_staff.services') }}</th>
                 <th class="text-center"></th>
               </tr>
             </thead>
@@ -39,7 +33,7 @@
                     <x-ui.avatar :user="$master" :size="32" />
                     <div>
                       <div class="fw-semibold">{{ $master->name }}</div>
-                      <div class="text-muted fs-10">{{ $master->role->name }}</div>
+                      <div class="text-muted fs-10">{{ $master->role->displayName() }}</div>
                     </div>
                   </div>
                 </td>

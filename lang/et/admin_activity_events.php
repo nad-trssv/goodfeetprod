@@ -1,0 +1,2 @@
+<?php
+return ['service_enabled_own'=>'Teenus on lubatud','service_enabled_employee'=>'Töötaja teenus on lubatud','service_disabled_own'=>'Teenus on keelatud','service_disabled_employee'=>'Töötaja teenus on keelatud','settings_updated_own'=>'Teenuse individuaalsed seaded on uuendatud','settings_updated_employee'=>'Töötaja teenuse seaded on uuendatud','toggle_failed'=>'Töötaja teenuse oleku muutmine ebaõnnestus','settings_update_failed'=>'Töötaja teenuse seadete muutmine ebaõnnestus'];

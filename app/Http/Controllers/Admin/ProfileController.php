@@ -70,7 +70,7 @@ class ProfileController extends Controller
         return response()->json([
             'profile' => $data,
             'status' => 'success',
-            'message' => 'Данные обновились успешно'
+            'message' => __('admin_staff.profile_updated')
         ], 200);
     }
 

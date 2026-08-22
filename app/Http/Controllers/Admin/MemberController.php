@@ -79,7 +79,7 @@ class MemberController extends Controller
                 ]);
             }
             return response()->json([
-                'message' => 'Мастер успешно создан',
+                'message' => __('admin_staff.employee_created'),
                 'token' => $data['token']
             ], 200);
         }
@@ -152,7 +152,7 @@ class MemberController extends Controller
             'username' => $request->username,
             'phone' => $request->phone,
             'email' => $request->email,
-            'locale' => $request->input('locale', $member->locale ?? config('app.locale')),
+            'locale' => $request->input('locale', $member->locale ?? 'ru'),
             'role_id' => $request->role_id,
             'date_birthday' => $request->date_birthday,
             'employment_started_at' => $request->employment_started_at,
@@ -173,14 +173,14 @@ class MemberController extends Controller
 
         // Обновляем услуги
         // Обновляем расписание
-        return response()->json(['message' => 'Данные мастера обновлены'], 200);
+            return response()->json(['message' => __('admin_staff.employee_updated')], 200);
     }
 
     public function destroy(string $id)
     {
         $member = User::findOrFail($id);
         $member->delete();
-        return response()->json(['message' => 'Мастер удалён'], 200);
+        return response()->json(['message' => __('admin_staff.employee_deleted')], 200);
     }
     public function allSchedules()
     {
@@ -217,6 +217,6 @@ class MemberController extends Controller
         }
         
         return redirect()->route('member.edit', $id)
-            ->with('success', 'Настройки уведомлений обновлены!');
+            ->with('success', __('admin_staff.notification_recipients_updated'));
     }
 }

@@ -1,4 +1,4 @@
-@section('title', 'Добавить мастера')
+@section('title', __('admin_staff.add_employee_title'))
 @push('styles')
   <link href="{{ asset('vendors/choices/choices.min.css') }}" rel="stylesheet" />
 @endpush
@@ -7,20 +7,20 @@
   <div class="content">
     <nav class="mb-3" aria-label="breadcrumb">
       <ol class="breadcrumb mb-0">
-        <li class="breadcrumb-item"><a href="{{ route('member.index') }}">Мастера</a></li>
-        <li class="breadcrumb-item active">Добавление мастера</li>
+        <li class="breadcrumb-item"><a href="{{ route('member.index') }}">{{ __('admin_staff.employees') }}</a></li>
+        <li class="breadcrumb-item active">{{ __('admin_staff.add_employee_title') }}</li>
       </ol>
     </nav>
 
     @if (session('success'))
       <div class="alert alert-outline-success d-flex align-items-center" role="alert">
         <span class="fas fa-check-circle text-success fs-5 me-3"></span>
-        <p class="mb-0 flex-1">Новый мастер успешно добавлен!</p>
+        <p class="mb-0 flex-1">{{ __('admin_staff.employee_created') }}</p>
         <button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
     @endif
 
-    <h2 class="mb-4">Создание нового мастера</h2>
+    <h2 class="mb-4">{{ __('admin_staff.create_employee') }}</h2>
 
     <div class="card theme-wizard mb-5" data-theme-wizard="data-theme-wizard">
       <div class="card-body pt-4 pb-0">
@@ -34,7 +34,7 @@
                   <a id="stepFirst" class="nav-link active py-0 py-md-3" href="#wizard-tab1" data-bs-toggle="tab" data-wizard-step="1" role="tab">
                     <div class="text-center d-inline-block d-md-flex align-items-center gap-3">
                       <span class="nav-item-circle-parent"><span class="nav-item-circle"><span class="fa-solid fa-user nav-item-icon"></span><span class="fa-solid fa-check check-icon"></span></span></span>
-                      <span class="nav-item-title fs-9 fs-xl-8">Основное</span>
+                      <span class="nav-item-title fs-9 fs-xl-8">{{ __('admin_staff.main') }}</span>
                     </div>
                   </a>
                 </li>
@@ -42,7 +42,7 @@
                   <a id="stepSec" class="nav-link py-0 py-md-3" href="#wizard-tab2" data-bs-toggle="tab" data-wizard-step="2" role="tab">
                     <div class="text-center d-inline-block d-md-flex align-items-center gap-3">
                       <span class="nav-item-circle-parent"><span class="nav-item-circle"><span class="fa-solid fa-lock nav-item-icon"></span><span class="fa-solid fa-check check-icon"></span></span></span>
-                      <span class="nav-item-title fs-9 fs-xl-8">Доступ</span>
+                      <span class="nav-item-title fs-9 fs-xl-8">{{ __('admin_staff.access') }}</span>
                     </div>
                   </a>
                 </li>
@@ -50,7 +50,7 @@
                   <a id="stepThird" class="nav-link py-0 py-md-3" href="#wizard-tab3" data-bs-toggle="tab" data-wizard-step="3" role="tab">
                     <div class="text-center d-inline-block d-md-flex align-items-center gap-3">
                       <span class="nav-item-circle-parent"><span class="nav-item-circle"><span class="fa-solid fa-clipboard nav-item-icon"></span><span class="fa-solid fa-check check-icon"></span></span></span>
-                      <span class="nav-item-title fs-9 fs-xl-8">Услуги</span>
+                      <span class="nav-item-title fs-9 fs-xl-8">{{ __('admin_staff.services') }}</span>
                     </div>
                   </a>
                 </li>
@@ -58,7 +58,7 @@
                   <a id="stepFourth" class="nav-link py-0 py-md-3" href="#wizard-tab4" data-bs-toggle="tab" data-wizard-step="4" role="tab">
                     <div class="text-center d-inline-block d-md-flex align-items-center gap-3">
                       <span class="nav-item-circle-parent"><span class="nav-item-circle"><span class="fa-solid fa-clock nav-item-icon"></span><span class="fa-solid fa-check check-icon"></span></span></span>
-                      <span class="nav-item-title fs-9 fs-xl-8">Расписание</span>
+                      <span class="nav-item-title fs-9 fs-xl-8">{{ __('admin_staff.schedule') }}</span>
                     </div>
                   </a>
                 </li>
@@ -66,7 +66,7 @@
                   <a href="#wizard-tab5" class="nav-link py-0 py-md-3" data-bs-toggle="tab" data-wizard-step="5">
                     <div class="text-center d-inline-block d-md-flex align-items-center gap-3">
                       <span class="nav-item-circle-parent"><span class="nav-item-circle"><span class="fa-solid fa-check nav-item-icon"></span><span class="fa-solid fa-check check-icon"></span></span></span>
-                      <span class="nav-item-title fs-9 fs-xl-8">Готово</span>
+                      <span class="nav-item-title fs-9 fs-xl-8">{{ __('admin_staff.ready') }}</span>
                     </div>
                   </a>
                 </li>
@@ -93,19 +93,19 @@
                   <div class="col-md">
                     <div class="dz-message dropzone-area px-2 py-3" data-dz-message="data-dz-message">
                       <div class="text-center text-body-emphasis">
-                        <h5 class="mb-2"><span class="fa-solid fa-upload me-2"></span>Фото профиля</h5>
-                        <p class="mb-0 fs-9 text-body-tertiary lh-sm">JPG 300x300, макс. 400KB</p>
+                        <h5 class="mb-2"><span class="fa-solid fa-upload me-2"></span>{{ __('admin_staff.photo') }}</h5>
+                        <p class="mb-0 fs-9 text-body-tertiary lh-sm">{{ __('admin_staff.photo_hint') }}</p>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div class="mb-2">
-                  <label class="form-label text-body">Имя*</label>
-                  <input class="form-control" type="text" name="name" id="name" placeholder="Иван Иванов">
+                  <label class="form-label text-body">{{ __('admin_staff.name') }}*</label>
+                  <input class="form-control" type="text" name="name" id="name" placeholder="{{ __('admin_common.name_placeholder') }}">
                   <div class="invalid-feedback" id="name-error"></div>
                 </div>
                 <div class="mb-2">
-                  <label class="form-label text-body">Никнейм*</label>
+                  <label class="form-label text-body">{{ __('admin_staff.nickname') }}*</label>
                   <div class="input-group">
                     <span class="input-group-text">@</span>
                     <input class="form-control" type="text" name="username" id="username" placeholder="ivan">
@@ -113,15 +113,15 @@
                   </div>
                 </div>
                 <div class="mb-2">
-                  <label class="form-label text-body">Роль*</label>
+                  <label class="form-label text-body">{{ __('admin_staff.role') }}*</label>
                   <select class="form-select" id="role_id" name="role_id" data-choices="data-choices">
                     @foreach ($roles as $role)
-                      <option value="{{ $role->id }}">{{ $role->name }}</option>
+                      <option value="{{ $role->id }}">{{ $role->displayName() }}</option>
                     @endforeach
                   </select>
                 </div>
                 <div class="mb-2">
-                  <label class="form-label text-body">Телефон</label>
+                  <label class="form-label text-body">{{ __('admin_staff.phone') }}</label>
                   <input class="form-control" type="text" id="phone" name="phone" placeholder="+372 55 555 555">
                   <div class="invalid-feedback" id="phone-error"></div>
                 </div>
@@ -129,7 +129,7 @@
                   <div class="form-floating">
                     <input class="form-control datetimepicker" id="date_birthday" type="text" name="date_birthday" placeholder="yyyy-mm-dd" data-options='{"disableMobile":true,"dateFormat":"Y-m-d"}' />
                     <span class="uil uil-calendar-alt flatpickr-icon text-body-tertiary"></span>
-                    <label class="ps-6" for="date_birthday">Дата рождения</label>
+                    <label class="ps-6" for="date_birthday">{{ __('admin_staff.birthday') }}</label>
                   </div>
                 </div>
               </div>
@@ -137,27 +137,27 @@
               {{-- Шаг 2: Email и пароль --}}
               <div class="tab-pane" role="tabpanel" id="wizard-tab2">
                 <div class="mb-2">
-                  <label class="form-label">Email*</label>
+                  <label class="form-label">{{ __('admin_staff.email') }}*</label>
                   <input class="form-control" type="email" name="email" id="email" placeholder="email@example.com">
                   <div class="invalid-feedback" id="email-error"></div>
                 </div>
                 <div class="row g-3 mb-3">
                   <div class="col-sm-6">
-                    <label class="form-label text-body">Пароль*</label>
-                    <input class="form-control" type="password" name="password" id="password" placeholder="Пароль">
+                    <label class="form-label text-body">{{ __('admin_staff.password') }}*</label>
+                    <input class="form-control" type="password" name="password" id="password" placeholder="{{ __('admin_staff.password') }}">
                     <div class="invalid-feedback" id="password-error"></div>
                   </div>
                   <div class="col-sm-6">
-                    <label class="form-label text-body">Повторите пароль*</label>
-                    <input class="form-control" type="password" name="password_confirmation" id="password_confirmation" placeholder="Повторите пароль">
+                    <label class="form-label text-body">{{ __('admin_staff.repeat_password') }}*</label>
+                    <input class="form-control" type="password" name="password_confirmation" id="password_confirmation" placeholder="{{ __('admin_staff.repeat_password') }}">
                   </div>
                 </div>
               </div>
 
               {{-- Шаг 3: Услуги --}}
               <div class="tab-pane" role="tabpanel" id="wizard-tab3">
-                <h5 class="mb-3">Выберите услуги мастера</h5>
-                <p class="text-muted fs-9 mb-3">Отметьте услуги которые оказывает этот мастер</p>
+                <h5 class="mb-3">{{ __('admin_staff.select_employee_services') }}</h5>
+                <p class="text-muted fs-9 mb-3">{{ __('admin_staff.select_employee_services_hint') }}</p>
                 <div class="row g-2">
                   @foreach ($services as $service)
                     <div class="col-12">
@@ -166,7 +166,7 @@
                         <label class="form-check-label d-flex align-items-center gap-2" for="service_{{ $service->id }}">
                           <span>{{ $service->name }}</span>
                           <span class="badge bg-primary fs-10">{{ $service->price }} €</span>
-                          <span class="text-muted fs-10">{{ $service->duration_minutes }} мин</span>
+                          <span class="text-muted fs-10">{{ __('admin_staff.minutes',['count'=>$service->duration_minutes]) }}</span>
                         </label>
                       </div>
                     </div>
@@ -176,25 +176,25 @@
 
               {{-- Шаг 4: Расписание --}}
               <div class="tab-pane" role="tabpanel" id="wizard-tab4">
-                <h5 class="mb-3">Рабочее время</h5>
+                <h5 class="mb-3">{{ __('admin_staff.working_hours') }}</h5>
                 <div class="table-responsive">
                   <table class="table table-sm align-middle">
                     <thead>
                       <tr>
-                        <th>День</th>
-                        <th>Начало</th>
-                        <th>Конец</th>
+                        <th>{{ __('admin_staff.day') }}</th>
+                        <th>{{ __('admin_staff.start') }}</th>
+                        <th>{{ __('admin_staff.end') }}</th>
                       </tr>
                     </thead>
                     <tbody>
                       @foreach ([
-                        'monday' => 'Понедельник',
-                        'tuesday' => 'Вторник',
-                        'wednesday' => 'Среда',
-                        'thursday' => 'Четверг',
-                        'friday' => 'Пятница',
-                        'saturday' => 'Суббота',
-                        'sunday' => 'Воскресенье',
+                        'monday' => __('admin_staff.monday'),
+                        'tuesday' => __('admin_staff.tuesday'),
+                        'wednesday' => __('admin_staff.wednesday'),
+                        'thursday' => __('admin_staff.thursday'),
+                        'friday' => __('admin_staff.friday'),
+                        'saturday' => __('admin_staff.saturday'),
+                        'sunday' => __('admin_staff.sunday'),
                       ] as $day => $label)
                       <tr>
                         <td><strong>{{ $label }}</strong></td>
@@ -210,14 +210,14 @@
                   </table>
                 </div>
 
-                <h5 class="mt-4 mb-3">Обеденный перерыв</h5>
+                <h5 class="mt-4 mb-3">{{ __('admin_staff.lunch_break_title') }}</h5>
                 <div class="row g-3">
                   <div class="col-sm-4">
-                    <label class="form-label">Начало обеда</label>
+                    <label class="form-label">{{ __('admin_staff.lunch_start') }}</label>
                     <input type="time" class="form-control" name="lunch_start" id="lunch_start">
                   </div>
                   <div class="col-sm-4">
-                    <label class="form-label">Конец обеда</label>
+                    <label class="form-label">{{ __('admin_staff.lunch_end') }}</label>
                     <input type="time" class="form-control" name="lunch_end" id="lunch_end">
                   </div>
                 </div>
@@ -228,9 +228,9 @@
                 <div class="row flex-center pb-8 pt-4 gx-3 gy-4">
                   <div class="col-12 col-sm-auto">
                     <div class="text-center text-sm-start">
-                      <h5 class="mb-3">Мастер успешно создан!</h5>
-                      <p class="text-body-emphasis fs-9">Мастер добавлен в систему и может приступать к работе</p>
-                      <a class="btn btn-primary px-6" href="{{ route('member.index') }}">Список мастеров</a>
+                      <h5 class="mb-3">{{ __('admin_staff.employee_created_title') }}</h5>
+                      <p class="text-body-emphasis fs-9">{{ __('admin_staff.employee_created_hint') }}</p>
+                      <a class="btn btn-primary px-6" href="{{ route('member.index') }}">{{ __('admin_staff.employee_list') }}</a>
                     </div>
                   </div>
                 </div>
@@ -244,11 +244,11 @@
       <div class="card-footer border-top-0" id="wizardFooter">
         <div class="d-flex pager wizard list-inline mb-0">
           <button class="btn btn-link ps-0 d-none" type="button" id="prevBtn">
-            <span class="fas fa-chevron-left me-1"></span>Назад
+            <span class="fas fa-chevron-left me-1"></span>{{ __('admin_staff.back') }}
           </button>
           <div class="flex-1 text-end">
             <button class="btn btn-primary px-6" type="button" id="nextBtn">
-              Далее <span class="fas fa-chevron-right ms-1"></span>
+              {{ __('admin_staff.next') }} <span class="fas fa-chevron-right ms-1"></span>
             </button>
           </div>
         </div>
