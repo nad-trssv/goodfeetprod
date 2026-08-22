@@ -12,7 +12,7 @@ class MainSettingController extends Controller
     public function mainSettings()
     {
         $data = SiteSettings::orderByDesc('id')
-            ->whereIn('group', ['company', 'map', 'social_media', 'license', 'branding', 'booking'])
+            ->whereIn('group', ['company', 'map', 'social_media', 'license', 'branding', 'admin_branding', 'booking'])
             ->get();
             
         $collection = MainSettingResource::collection($data);

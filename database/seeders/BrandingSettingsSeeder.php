@@ -44,7 +44,7 @@ class BrandingSettingsSeeder extends Seeder
 
         SiteSettings::firstOrCreate(
             ['key' => 'primary_accent_color'],
-            ['group' => 'branding', 'payload' => json_encode('#3874FF')]
+            ['group' => 'admin_branding', 'payload' => json_encode('#3874FF')]
         );
 
         foreach (['show_service_images', 'show_master_images', 'allow_customer_cancellation'] as $key) {

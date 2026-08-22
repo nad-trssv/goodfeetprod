@@ -35,6 +35,7 @@ use App\Http\Controllers\Admin\CrmChatController;
 use App\Http\Controllers\Admin\CrmSettingsController;
 use App\Http\Controllers\Admin\CrmRatingController;
 use App\Http\Controllers\Admin\SystemHealthController;
+use App\Http\Controllers\Admin\MessagingIntegrationController;
 
 Route::get('/', [PageController::class, 'index'])->name('home');
 Route::get('/sitemap.xml', [PageController::class, 'sitemap'])->name('sitemap');
@@ -234,6 +235,10 @@ Route::middleware([
         Route::post('settings/storeRedDay', [SettingsController::class, 'storeRedDay'])->middleware('permission:settings.update');
         Route::post('settings/updateFixedBooking', [SettingsController::class, 'updateFixedBooking'])->middleware('permission:settings.update');
         Route::post('settings/updateMainSettings', [SettingsController::class, 'updateMainSettings'])->middleware('permission:settings.update')->name('settings.main.update');
+        Route::put('settings/messaging/{provider}', [MessagingIntegrationController::class, 'update'])
+            ->middleware(['permission:settings.update', 'super-admin-role', 'throttle:10,1'])
+            ->whereIn('provider', array_keys(config('messaging_integrations.providers')))
+            ->name('settings.messaging.update');
         Route::get('settings/red-days', [AjaxRedDayController::class, 'getRedDays'])->middleware('permission:settings.view')->name('settings.red-days.index');
         Route::delete('settings/red-days/{id}', [AjaxRedDayController::class, 'destroy'])->middleware('permission:settings.update')->name('settings.red-days.destroy');
         Route::put('settings/red-days/{id}', [AjaxRedDayController::class, 'update'])->middleware('permission:settings.update')->name('settings.red-days.update');

@@ -12,7 +12,7 @@ class BrandThemeTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_super_admin_can_change_the_global_accent_color(): void
+    public function test_super_admin_can_change_the_admin_accent_without_changing_public_frontend(): void
     {
         $admin = $this->superAdmin();
 
@@ -23,11 +23,20 @@ class BrandThemeTest extends TestCase
             '#A12BC3',
             json_decode(SiteSettings::where('key', 'primary_accent_color')->value('payload'), true)
         );
+        $this->assertDatabaseHas('site_settings', [
+            'key' => 'primary_accent_color',
+            'group' => 'admin_branding',
+        ]);
 
-        $this->get(route('serviceBooking'))
+        $this->actingAs($admin)->get(route('settings.index'))
             ->assertOk()
             ->assertSee('--brand-accent: #A12BC3;', false)
             ->assertSee('--brand-accent-contrast: #FFFFFF;', false);
+
+        $this->get(route('serviceBooking'))
+            ->assertOk()
+            ->assertDontSee('--brand-accent: #A12BC3;', false)
+            ->assertDontSee('id="brand-theme"', false);
     }
 
     public function test_accent_color_must_be_a_six_digit_hex_value(): void
@@ -49,11 +58,12 @@ class BrandThemeTest extends TestCase
             'payload' => json_encode('#112233'),
         ]);
 
-        $this->get(route('serviceBooking'))->assertSee('--brand-accent: #112233;', false);
+        $admin = $this->superAdmin();
+        $this->actingAs($admin)->get(route('settings.index'))->assertSee('--brand-accent: #112233;', false);
 
         SiteSettings::where('key', 'primary_accent_color')->update(['payload' => json_encode('#F2D544')]);
 
-        $this->get(route('serviceBooking'))
+        $this->actingAs($admin)->get(route('settings.index'))
             ->assertSee('--brand-accent: #F2D544;', false)
             ->assertSee('--brand-accent-contrast: #111111;', false);
     }

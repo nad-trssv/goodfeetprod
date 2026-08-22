@@ -22,6 +22,7 @@
             <file>tests/Feature/RolePermissionTest.php</file>
             <file>tests/Feature/CrmFeatureTest.php</file>
             <file>tests/Feature/SystemHealthTest.php</file>
+            <file>tests/Feature/MessagingIntegrationSettingsTest.php</file>
         </testsuite>
     </testsuites>
     <source>

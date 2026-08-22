@@ -1,4 +1,5 @@
 @section('title', __('admin_settings.title'))
+@php($activeSettingsTab = session('settings_tab', old('settings_tab', 'booking')))
 @push('styles')
 <link href="{{ asset('vendors/flatpickr/flatpickr.min.css') }}" rel="stylesheet" />
 <style>
@@ -47,21 +48,28 @@
 
     <ul class="nav settings-tabs mb-4" id="settingsTabs" role="tablist">
       <li class="nav-item" role="presentation">
-        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-booking" type="button">
+        <button class="nav-link {{ $activeSettingsTab === 'booking' ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#tab-booking" type="button">
           <span class="fas fa-lock me-1"></span>{{ __('admin_settings.booking') }}
         </button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-site" type="button">
+        <button class="nav-link {{ $activeSettingsTab === 'site' ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#tab-site" type="button">
           <span class="fas fa-cog me-1"></span>{{ __('admin_settings.site') }}
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link {{ $activeSettingsTab === 'integrations' ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#tab-integrations" type="button">
+          <span class="fas fa-paper-plane me-1"></span>{{ __('admin_messaging.title') }}
         </button>
       </li>
     </ul>
 
+    @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
+
     <div class="tab-content">
 
       {{-- ТАБ 3: Бронирование --}}
-      <div class="tab-pane active" id="tab-booking">
+      <div class="tab-pane {{ $activeSettingsTab === 'booking' ? 'active' : '' }}" id="tab-booking">
         <div class="row g-4">
           <div class="col-12">
             <div class="card">
@@ -110,7 +118,7 @@
       </div>
 
       {{-- ТАБ 4: Настройки сайта --}}
-      <div class="tab-pane" id="tab-site">
+      <div class="tab-pane {{ $activeSettingsTab === 'site' ? 'active' : '' }}" id="tab-site">
         <div class="card">
           <div class="card-header"><h5 class="mb-0">{{ __('admin_settings.site') }}</h5></div>
           <div class="card-body">
@@ -150,8 +158,8 @@
 
               <div class="card border mb-5">
                 <div class="card-body">
-                  <h6 class="mb-2">{{ __('admin_settings.accent_color') }}</h6>
-                  <p class="text-muted fs-9">{{ __('admin_settings.accent_hint') }}</p>
+                  <h6 class="mb-2">{{ __('admin_messaging.admin_accent_color') }}</h6>
+                  <p class="text-muted fs-9">{{ __('admin_messaging.admin_accent_hint') }}</p>
                   <div class="row g-3 align-items-end">
                     <div class="col-auto">
                       <label class="form-label" for="primary_accent_color_picker">{{ __('admin_settings.select_color') }}</label>
@@ -287,6 +295,10 @@
             </form>
           </div>
         </div>
+      </div>
+
+      <div class="tab-pane {{ $activeSettingsTab === 'integrations' ? 'active' : '' }}" id="tab-integrations">
+        @include('admin.settings.partials.messaging-integrations')
       </div>
 
     </div>

@@ -26,7 +26,6 @@
     @endphp
     <link rel="stylesheet" href="{{ asset('build/' . $manifest['resources/css/homepage.css']['file']) }}">
     <script type="module" src="{{ asset('build/' . $manifest['resources/js/app.js']['file']) }}"></script>
-    <x-brand-theme />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     @stack('styles')
   </head>

@@ -10,40 +10,23 @@ class SettingService
 {
     public $setting;
 
-    public function list(){
-        function getWorkHours(){
-            $siteSettings = SiteSettings::where('group', 'hours')
-            ->where('key', 'work_hours')
-            ->first();
-    
-            if ($siteSettings) {
-                return json_decode($siteSettings->payload, true);
-            }
-        }
-        function getLunchHours(){
-            $siteSettings = SiteSettings::where('group', 'hours')
-            ->where('key', 'lunch_hours')
-            ->first();
-    
-            if ($siteSettings) {
-                return json_decode($siteSettings->payload, true);
-            }
-        }
-        function getBookingLimit() {
-            $siteSettings = SiteSettings::where('group', 'hours')
-            ->where('key', 'booking_date_limit')
-            ->first();
-    
-            if ($siteSettings) {
-                return json_decode($siteSettings->payload, true);
-            }
-        }
-
-        return[
-            'workHours' => getWorkHours(),
-            'lunchHours' => getLunchHours(),
-            'bookingLimit' => getBookingLimit(),
+    public function list(): array
+    {
+        return [
+            'workHours' => $this->decodedSetting('hours', 'work_hours'),
+            'lunchHours' => $this->decodedSetting('hours', 'lunch_hours'),
+            'bookingLimit' => $this->decodedSetting('hours', 'booking_date_limit'),
         ];
+    }
+
+    private function decodedSetting(string $group, string $key): mixed
+    {
+        $payload = SiteSettings::query()
+            ->where('group', $group)
+            ->where('key', $key)
+            ->value('payload');
+
+        return is_string($payload) ? json_decode($payload, true) : null;
     }
     public function updateHours($request)
     {
@@ -128,7 +111,7 @@ class SettingService
             'social_media_facebook' => 'social_media', 'social_media_youtube' => 'social_media',
             'social_media_instagram' => 'social_media', 'social_media_twitter' => 'social_media',
             'logo' => 'branding', 'footer_logo' => 'branding', 'favicon' => 'branding',
-            'primary_accent_color' => 'branding',
+            'primary_accent_color' => 'admin_branding',
             'booking_template' => 'booking',
             'show_service_images' => 'booking', 'show_master_images' => 'booking',
             'cancellation_notice_hours' => 'booking',

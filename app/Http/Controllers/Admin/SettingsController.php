@@ -11,6 +11,7 @@ use App\Http\Requests\Settings\MainSettingsRequest;
 use App\Http\Resources\RedDayResource;
 use App\Http\Resources\SettingWorkhoursResource;
 use App\Models\RedDay;
+use App\Models\MessagingIntegration;
 use App\Services\SettingService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -28,12 +29,12 @@ class SettingsController extends Controller
     {
         $this->authorize('is-superadmin', Auth::user());
         $data = $this->settingService->list();
+        $sortedWorkHours = [];
         
         if ($data['workHours']) {
             $daysOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
             $workHours =  new SettingWorkhoursResource($data['workHours']);
             $workHoursArray = $workHours->resource;
-            $sortedWorkHours = [];
             foreach ($daysOrder as $day) {
                 if (isset($workHoursArray[$day])) {
                     $sortedWorkHours[$day] = $workHoursArray[$day];
@@ -43,9 +44,10 @@ class SettingsController extends Controller
         
         return view('admin.settings.index',[
             'workHours'     => $sortedWorkHours,
-            'lunchHours'    => $data['lunchHours'],
-            'bookingLimit'    => $data['bookingLimit'],
+            'lunchHours'    => $data['lunchHours'] ?? ['start' => null, 'end' => null],
+            'bookingLimit'  => $data['bookingLimit'] ?? ['days' => 180, 'active' => false],
             'supportedLocales' => config('supported_locales'),
+            'messagingIntegrations' => MessagingIntegration::query()->get()->keyBy('provider'),
         ]);
     }
 
