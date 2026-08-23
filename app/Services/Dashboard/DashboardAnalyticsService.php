@@ -164,12 +164,14 @@ class DashboardAnalyticsService
         $rows = Appointments::query()
             ->when($userId, fn (Builder $query) => $query->where('user_id', $userId))
             ->whereBetween('appointment_start', [$period->start, $period->end])
-            ->where('status', '!=', 'rescheduled')
+            ->where(fn (Builder $query) => $query->whereNull('status')->orWhere('status', '!=', 'rescheduled'))
             ->selectRaw("DATE(appointment_start) as report_date,
                 SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
                 SUM(CASE WHEN status = 'no_show' THEN 1 ELSE 0 END) as no_show,
                 SUM(CASE WHEN status IN ('cancelled_by_client','cancelled_by_business') THEN 1 ELSE 0 END) as cancelled,
+                SUM(CASE WHEN (status IS NULL OR status IN ('pending','confirmed','checked_in','in_progress')) AND appointment_end < ? THEN 1 ELSE 0 END) as unresolved,
                 COALESCE(SUM(CASE WHEN status = 'completed' THEN price ELSE 0 END), 0) as revenue")
+            ->addBinding(now(), 'select')
             ->groupByRaw('DATE(appointment_start)')
             ->orderBy('report_date')
             ->get()
@@ -183,6 +185,7 @@ class DashboardAnalyticsService
                 'completed' => (int) ($row?->completed ?? 0),
                 'no_show' => (int) ($row?->no_show ?? 0),
                 'cancelled' => (int) ($row?->cancelled ?? 0),
+                'unresolved' => (int) ($row?->unresolved ?? 0),
                 'revenue' => (float) ($row?->revenue ?? 0),
             ];
         }
@@ -200,12 +203,14 @@ class DashboardAnalyticsService
         $rows = Appointments::query()
             ->when($userId, fn (Builder $query) => $query->where('user_id', $userId))
             ->whereBetween('appointment_start', [$start, $end])
-            ->where('status', '!=', 'rescheduled')
+            ->where(fn (Builder $query) => $query->whereNull('status')->orWhere('status', '!=', 'rescheduled'))
             ->selectRaw("{$monthExpression} as report_month,
                 SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
                 SUM(CASE WHEN status = 'no_show' THEN 1 ELSE 0 END) as no_show,
                 SUM(CASE WHEN status IN ('cancelled_by_client','cancelled_by_business') THEN 1 ELSE 0 END) as cancelled,
+                SUM(CASE WHEN (status IS NULL OR status IN ('pending','confirmed','checked_in','in_progress')) AND appointment_end < ? THEN 1 ELSE 0 END) as unresolved,
                 COALESCE(SUM(CASE WHEN status = 'completed' THEN price ELSE 0 END), 0) as revenue")
+            ->addBinding(now(), 'select')
             ->groupByRaw($monthExpression)
             ->orderBy('report_month')
             ->get()
@@ -219,6 +224,7 @@ class DashboardAnalyticsService
                 'completed' => (int) ($row?->completed ?? 0),
                 'no_show' => (int) ($row?->no_show ?? 0),
                 'cancelled' => (int) ($row?->cancelled ?? 0),
+                'unresolved' => (int) ($row?->unresolved ?? 0),
                 'revenue' => (float) ($row?->revenue ?? 0),
             ];
         }

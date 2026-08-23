@@ -39,7 +39,8 @@
     <div class="row g-3 mb-5">
       <div class="col-12 col-xxl-8">
         <div class="card h-100">
-          <div class="card-body p-3 p-lg-4"><div id="dashboard-performance-chart" style="height:350px" role="img" aria-label="{{ __('admin_dashboard.performance_chart') }}"></div></div>
+          <div class="card-header d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-2"><h4 class="mb-0">{{ __('admin_dashboard.performance_chart') }}</h4><x-dashboard-chart-status-filter target="dashboard-performance-chart" /></div>
+          <div class="card-body p-3 p-lg-4"><div id="dashboard-performance-chart" style="height:320px" role="img" aria-label="{{ __('admin_dashboard.performance_chart') }}"></div></div>
         </div>
       </div>
       <div class="col-12 col-xxl-4">
@@ -59,7 +60,7 @@
       </div>
     </div>
 
-    <div class="card mb-5"><div class="card-body p-3 p-lg-4"><div id="dashboard-monthly-chart" style="height:380px" role="img" aria-label="{{ __('admin_dashboard.monthly_chart') }}"></div></div></div>
+    <div class="card mb-5"><div class="card-header d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-2"><h4 class="mb-0">{{ __('admin_dashboard.monthly_chart') }}</h4><x-dashboard-chart-status-filter target="dashboard-monthly-chart" /></div><div class="card-body p-3 p-lg-4"><div id="dashboard-monthly-chart" style="height:340px" role="img" aria-label="{{ __('admin_dashboard.monthly_chart') }}"></div></div></div>
 
     <div class="row g-3 mb-5">
       <div class="col-12 col-xl-5">
@@ -86,33 +87,33 @@
   @push('scripts')
     <script>
       (() => {
-        const container = document.getElementById('dashboard-performance-chart');
-        if (!container || typeof echarts === 'undefined') return;
-        const rows = @json($daily);
-        const chart = echarts.init(container);
-        chart.setOption({
-          title: { text: @json(__('admin_dashboard.performance_chart')) },
-          tooltip: { trigger: 'axis' },
-          legend: { top: 30, data: [@json(__('admin_dashboard.revenue')), @json(__('admin_dashboard.completed')), @json(__('admin_dashboard.no_show')), @json(__('admin_dashboard.cancelled'))] },
-          grid: { left: 45, right: 50, top: 80, bottom: 40 },
-          xAxis: { type: 'category', data: rows.map(row => row.date), axisLabel: { hideOverlap: true } },
-          yAxis: [{ type: 'value', name: '€' }, { type: 'value', minInterval: 1 }],
-          series: [
-            { name: @json(__('admin_dashboard.revenue')), type: 'line', smooth: true, data: rows.map(row => row.revenue), itemStyle: { color: 'var(--phoenix-success)' } },
-            { name: @json(__('admin_dashboard.completed')), type: 'bar', yAxisIndex: 1, stack: 'appointments', data: rows.map(row => row.completed) },
-            { name: @json(__('admin_dashboard.no_show')), type: 'bar', yAxisIndex: 1, stack: 'appointments', data: rows.map(row => row.no_show), itemStyle: { color: 'var(--phoenix-danger)' } },
-            { name: @json(__('admin_dashboard.cancelled')), type: 'bar', yAxisIndex: 1, stack: 'appointments', data: rows.map(row => row.cancelled), itemStyle: { color: 'var(--phoenix-warning)' } }
-          ]
-        });
-        window.addEventListener('resize', () => chart.resize(), { passive: true });
-
-        const monthlyContainer = document.getElementById('dashboard-monthly-chart');
-        if (monthlyContainer) {
-          const monthlyRows = @json($monthly);
-          const monthlyChart = echarts.init(monthlyContainer);
-          monthlyChart.setOption({title:{text:@json(__('admin_dashboard.monthly_chart'))},tooltip:{trigger:'axis'},legend:{top:30,data:[@json(__('admin_dashboard.revenue')),@json(__('admin_dashboard.completed')),@json(__('admin_dashboard.no_show')),@json(__('admin_dashboard.cancelled'))]},grid:{left:50,right:55,top:80,bottom:45},xAxis:{type:'category',data:monthlyRows.map(row=>row.month)},yAxis:[{type:'value',name:'€'},{type:'value',minInterval:1}],series:[{name:@json(__('admin_dashboard.revenue')),type:'line',smooth:true,data:monthlyRows.map(row=>row.revenue),itemStyle:{color:'var(--phoenix-success)'}},{name:@json(__('admin_dashboard.completed')),type:'bar',yAxisIndex:1,stack:'appointments',data:monthlyRows.map(row=>row.completed)},{name:@json(__('admin_dashboard.no_show')),type:'bar',yAxisIndex:1,stack:'appointments',data:monthlyRows.map(row=>row.no_show),itemStyle:{color:'var(--phoenix-danger)'}},{name:@json(__('admin_dashboard.cancelled')),type:'bar',yAxisIndex:1,stack:'appointments',data:monthlyRows.map(row=>row.cancelled),itemStyle:{color:'var(--phoenix-warning)'}}]});
-          window.addEventListener('resize', () => monthlyChart.resize(), { passive: true });
-        }
+        if (typeof echarts === 'undefined') return;
+        const labels = {revenue:@json(__('admin_dashboard.revenue')),completed:@json(__('admin_dashboard.chart_completed')),unresolved:@json(__('admin_dashboard.chart_unresolved')),no_show:@json(__('admin_dashboard.chart_no_show')),cancelled:@json(__('admin_dashboard.chart_cancelled')),empty:@json(__('admin_dashboard.chart_empty'))};
+        const colors = {completed:'var(--phoenix-success)',unresolved:'var(--phoenix-warning)',no_show:'var(--phoenix-danger)',cancelled:'var(--phoenix-secondary-color)'};
+        const render = (id, rows, category) => {
+          const container = document.getElementById(id);
+          if (!container) return;
+          const chart = echarts.init(container);
+          const selected = new Set(['completed']);
+          const update = () => {
+            const hasData = rows.some(row => [...selected].some(status => Number(row[status] || 0) > 0));
+            const series = [...selected].map(status => ({name:labels[status],type:'bar',stack:'appointments',data:rows.map(row=>row[status]),itemStyle:{color:colors[status]}}));
+            if (selected.has('completed')) series.unshift({name:labels.revenue,type:'line',smooth:true,yAxisIndex:1,data:rows.map(row=>row.revenue),itemStyle:{color:'var(--phoenix-primary)'}});
+            chart.setOption({tooltip:{trigger:'axis'},legend:{show:false},grid:{left:45,right:50,top:hasData?20:55,bottom:40},xAxis:{type:'category',data:rows.map(row=>row[category]),axisLabel:{hideOverlap:true}},yAxis:[{type:'value',minInterval:1},{type:'value',name:'€'}],series,graphic:hasData?[]:[{type:'text',left:'center',top:18,style:{text:labels.empty,fill:'var(--phoenix-secondary-color)',fontSize:13}}]},true);
+          };
+          document.querySelectorAll(`[data-dashboard-status-filter="${id}"] [data-status]`).forEach(button => button.addEventListener('click', () => {
+            const status = button.dataset.status;
+            if (selected.has(status) && selected.size === 1) return;
+            selected.has(status) ? selected.delete(status) : selected.add(status);
+            button.setAttribute('aria-pressed', selected.has(status) ? 'true' : 'false');
+            button.classList.toggle('active', selected.has(status));
+            update();
+          }));
+          update();
+          window.addEventListener('resize',()=>chart.resize(),{passive:true});
+        };
+        render('dashboard-performance-chart', @json($daily), 'date');
+        render('dashboard-monthly-chart', @json($monthly), 'month');
       })();
     </script>
   @endpush

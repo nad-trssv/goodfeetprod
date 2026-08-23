@@ -99,6 +99,41 @@ class DashboardReportingTest extends TestCase
             ->assertOk()->assertSee('Other Master')->assertSee(route('calendar.show', $otherUnresolved), false);
     }
 
+    public function test_dashboard_charts_separate_final_and_unresolved_statuses(): void
+    {
+        Carbon::setTestNow('2026-08-23 12:00:00');
+        [$admin, $master, $service] = $this->staffAndService();
+        $customer = $this->customer('chart', 31);
+
+        $this->appointment($customer, $master, $service, '2026-08-22 09:00:00', 'completed', 100);
+        $this->appointment($customer, $master, $service, '2026-08-21 09:00:00', 'confirmed', 80);
+        $this->appointment($customer, $master, $service, '2026-08-20 09:00:00', null, 70);
+        $this->appointment($customer, $master, $service, '2026-08-19 09:00:00', 'no_show', 60);
+        $this->appointment($customer, $master, $service, '2026-08-18 09:00:00', 'cancelled_by_client', 50);
+        $this->appointment($customer, $master, $service, '2026-08-23 15:00:00', 'confirmed', 90);
+
+        $week = collect(app(DashboardAnalyticsService::class)->personalCharts($master->id)['week'])->keyBy('date');
+
+        $this->assertSame(1, $week['22.08']['completed']);
+        $this->assertSame(100.0, $week['22.08']['revenue']);
+        $this->assertSame(1, $week['21.08']['unresolved']);
+        $this->assertSame(1, $week['20.08']['unresolved']);
+        $this->assertSame(1, $week['19.08']['no_show']);
+        $this->assertSame(1, $week['18.08']['cancelled']);
+        $this->assertSame(0, $week['23.08']['unresolved']);
+
+        $this->actingAs($admin)->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee(__('admin_dashboard.chart_completed'))
+            ->assertSee(__('admin_dashboard.chart_unresolved'))
+            ->assertSee('dashboard-personal-week-chart');
+
+        $this->actingAs($admin)->get(route('admin.dashboard.full'))
+            ->assertOk()
+            ->assertSee(__('admin_dashboard.chart_no_show'))
+            ->assertSee(__('admin_dashboard.chart_cancelled'));
+    }
+
     private function staffAndService(): array
     {
         $adminRole = Roles::create(['name' => 'Administrator', 'slug' => 'super-admin', 'appointment_scope' => 'all', 'is_service_provider' => false]);
@@ -119,7 +154,7 @@ class DashboardReportingTest extends TestCase
         ]);
     }
 
-    private function appointment(Customer $customer, User $master, Services $service, string $start, string $status, float $price): Appointments
+    private function appointment(Customer $customer, User $master, Services $service, string $start, ?string $status, float $price): Appointments
     {
         return Appointments::create([
             'customer_id' => $customer->id,

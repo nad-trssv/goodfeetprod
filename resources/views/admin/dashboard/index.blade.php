@@ -104,8 +104,8 @@
     <div class="card border-warning-subtle mb-5"><div class="card-body d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3"><div class="d-flex align-items-center gap-3"><span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-warning-subtle text-warning" style="width:2.75rem;height:2.75rem"><span data-feather="alert-circle"></span></span><div><div class="fs-5 fw-bold">{{ $action_required }}</div><div>{{ __('admin_dashboard.unresolved_my_count') }}</div></div></div><a class="btn btn-warning" href="{{ route('dashboard.appointments.unresolved', ['scope'=>'own']) }}">{{ __('admin_dashboard.open_unresolved') }}</a></div></div>
 
     <div class="row g-3 mb-5">
-      <div class="col-12 col-xl-6"><div class="card"><div class="card-body"><div id="dashboard-personal-week-chart" style="height:320px" role="img" aria-label="{{ __('admin_dashboard.last_week_chart') }}"></div></div></div></div>
-      <div class="col-12 col-xl-6"><div class="card"><div class="card-body"><div id="dashboard-personal-month-chart" style="height:320px" role="img" aria-label="{{ __('admin_dashboard.current_month_chart') }}"></div></div></div></div>
+      <div class="col-12 col-xl-6"><div class="card h-100"><div class="card-header d-flex flex-column align-items-start gap-2"><h4 class="mb-0">{{ __('admin_dashboard.last_week_chart') }}</h4><x-dashboard-chart-status-filter target="dashboard-personal-week-chart" /></div><div class="card-body"><div id="dashboard-personal-week-chart" style="height:300px" role="img" aria-label="{{ __('admin_dashboard.last_week_chart') }}"></div></div></div></div>
+      <div class="col-12 col-xl-6"><div class="card h-100"><div class="card-header d-flex flex-column align-items-start gap-2"><h4 class="mb-0">{{ __('admin_dashboard.current_month_chart') }}</h4><x-dashboard-chart-status-filter target="dashboard-personal-month-chart" /></div><div class="card-body"><div id="dashboard-personal-month-chart" style="height:300px" role="img" aria-label="{{ __('admin_dashboard.current_month_chart') }}"></div></div></div></div>
     </div>
     <x-dashboard-footer />
   </div>
@@ -113,15 +113,39 @@
     <script>
       (() => {
         if (typeof echarts === 'undefined') return;
-        const render = (id, rows, title) => {
+        const labels = {
+          revenue: @json(__('admin_dashboard.revenue')),
+          completed: @json(__('admin_dashboard.chart_completed')),
+          unresolved: @json(__('admin_dashboard.chart_unresolved')),
+          no_show: @json(__('admin_dashboard.chart_no_show')),
+          cancelled: @json(__('admin_dashboard.chart_cancelled')),
+          empty: @json(__('admin_dashboard.chart_empty'))
+        };
+        const colors = {completed:'var(--phoenix-success)',unresolved:'var(--phoenix-warning)',no_show:'var(--phoenix-danger)',cancelled:'var(--phoenix-secondary-color)'};
+        const render = (id, rows) => {
           const container = document.getElementById(id);
           if (!container) return;
           const chart = echarts.init(container);
-          chart.setOption({title:{text:title},tooltip:{trigger:'axis'},legend:{top:30,data:[@json(__('admin_dashboard.revenue')),@json(__('admin_dashboard.completed'))]},grid:{left:45,right:45,top:75,bottom:35},xAxis:{type:'category',data:rows.map(row=>row.date),axisLabel:{hideOverlap:true}},yAxis:[{type:'value',name:'€'},{type:'value',minInterval:1}],series:[{name:@json(__('admin_dashboard.revenue')),type:'line',smooth:true,data:rows.map(row=>row.revenue),itemStyle:{color:'var(--phoenix-success)'}},{name:@json(__('admin_dashboard.completed')),type:'bar',yAxisIndex:1,data:rows.map(row=>row.completed)}]});
+          const selected = new Set(['completed']);
+          const update = () => {
+            const hasData = rows.some(row => [...selected].some(status => Number(row[status] || 0) > 0));
+            const series = [...selected].map(status => ({name:labels[status],type:'bar',stack:'appointments',data:rows.map(row=>row[status]),itemStyle:{color:colors[status]}}));
+            if (selected.has('completed')) series.unshift({name:labels.revenue,type:'line',smooth:true,yAxisIndex:1,data:rows.map(row=>row.revenue),itemStyle:{color:'var(--phoenix-primary)'}});
+            chart.setOption({tooltip:{trigger:'axis'},legend:{show:false},grid:{left:42,right:48,top:hasData?20:55,bottom:35},xAxis:{type:'category',data:rows.map(row=>row.date),axisLabel:{hideOverlap:true}},yAxis:[{type:'value',minInterval:1},{type:'value',name:'€'}],series,graphic:hasData?[]:[{type:'text',left:'center',top:18,style:{text:labels.empty,fill:'var(--phoenix-secondary-color)',fontSize:13}}]},true);
+          };
+          document.querySelectorAll(`[data-dashboard-status-filter="${id}"] [data-status]`).forEach(button => button.addEventListener('click', () => {
+            const status = button.dataset.status;
+            if (selected.has(status) && selected.size === 1) return;
+            selected.has(status) ? selected.delete(status) : selected.add(status);
+            button.setAttribute('aria-pressed', selected.has(status) ? 'true' : 'false');
+            button.classList.toggle('active', selected.has(status));
+            update();
+          }));
+          update();
           window.addEventListener('resize',()=>chart.resize(),{passive:true});
         };
-        render('dashboard-personal-week-chart', @json($personal_charts['week']), @json(__('admin_dashboard.last_week_chart')));
-        render('dashboard-personal-month-chart', @json($personal_charts['month']), @json(__('admin_dashboard.current_month_chart')));
+        render('dashboard-personal-week-chart', @json($personal_charts['week']));
+        render('dashboard-personal-month-chart', @json($personal_charts['month']));
       })();
     </script>
   @endpush
