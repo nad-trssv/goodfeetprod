@@ -12,7 +12,7 @@ class Customer extends Authenticatable
 
     protected $fillable = [
         'first_name', 'last_name', 'email', 'phone', 'password', 'account_registered_at', 'locale',
-        'email_verified_at', 'phone_verified_at', 'marketing_consent',
+        'email_verified_at', 'phone_verified_at', 'marketing_consent', 'messaging_contacts',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -25,6 +25,7 @@ class Customer extends Authenticatable
             'email_verified_at' => 'datetime',
             'phone_verified_at' => 'datetime',
             'marketing_consent' => 'boolean',
+            'messaging_contacts' => 'array',
         ];
     }
 

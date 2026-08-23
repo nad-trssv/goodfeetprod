@@ -18,6 +18,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->validateCsrfTokens(except: [
+            'webhooks/messaging/whatsapp',
+            'webhooks/messaging/viber',
+        ]);
         $middleware->alias([
             'permission' => EnsurePermission::class,
             'scope.all' => EnsureAllAppointmentsScope::class,

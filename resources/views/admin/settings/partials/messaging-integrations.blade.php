@@ -1,3 +1,5 @@
+@include('admin.settings.partials.trigger-automations')
+
 <div class="alert alert-subtle-info border d-flex gap-3 align-items-start">
   <span data-feather="info" class="flex-shrink-0 mt-1"></span>
   <div><strong>{{ __('admin_messaging.future_title') }}</strong><div>{{ __('admin_messaging.future_hint') }}</div></div>
@@ -41,7 +43,11 @@
               @foreach($definition['settings'] as $key => $type)
                 <div class="col-12 col-lg-6">
                   <label class="form-label" for="{{ $provider }}_{{ $key }}">{{ __('admin_messaging.providers.'.$provider.'.fields.'.$key.'.label') }}</label>
-                  <input class="form-control {{ $submittedProvider && $errors->has('settings.'.$key) ? 'is-invalid' : '' }}" id="{{ $provider }}_{{ $key }}" name="settings[{{ $key }}]" type="{{ $type === 'url' ? 'url' : 'text' }}" value="{{ $submittedProvider ? old('settings.'.$key) : ($providerSettings[$key] ?? '') }}" maxlength="{{ $type === 'url' ? 2048 : 255 }}">
+                  @if($type === 'json')
+                    <textarea class="form-control font-monospace {{ $submittedProvider && $errors->has('settings.'.$key) ? 'is-invalid' : '' }}" id="{{ $provider }}_{{ $key }}" name="settings[{{ $key }}]" rows="3" maxlength="4000">{{ $submittedProvider ? old('settings.'.$key) : ($providerSettings[$key] ?? '') }}</textarea>
+                  @else
+                    <input class="form-control {{ $submittedProvider && $errors->has('settings.'.$key) ? 'is-invalid' : '' }}" id="{{ $provider }}_{{ $key }}" name="settings[{{ $key }}]" type="{{ $type === 'url' ? 'url' : 'text' }}" value="{{ $submittedProvider ? old('settings.'.$key) : ($providerSettings[$key] ?? '') }}" maxlength="{{ $type === 'url' ? 2048 : 255 }}">
+                  @endif
                   <div class="form-text">{{ __('admin_messaging.providers.'.$provider.'.fields.'.$key.'.hint') }}</div>
                   @if($submittedProvider && $errors->has('settings.'.$key))<div class="invalid-feedback">{{ $errors->first('settings.'.$key) }}</div>@endif
                 </div>

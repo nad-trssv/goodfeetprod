@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
+use App\Services\Localization\SiteLocaleRegistry;
 
 class AppointmentScheduler
 {
@@ -62,6 +63,7 @@ class AppointmentScheduler
                 'slot_hold_token', 'repeat_count', 'repeat_interval_weeks', 'price',
             ]);
             $basePayload['client_lastname'] = (string) ($basePayload['client_lastname'] ?? '');
+            $basePayload['client_locale'] = ($basePayload['client_locale'] ?? null) ?: ($customer?->locale ?: app(SiteLocaleRegistry::class)->defaultCode());
             $basePayload['customer_identity_verified'] = false;
             if ($customer) {
                 $basePayload['customer_id'] = $customer->id;

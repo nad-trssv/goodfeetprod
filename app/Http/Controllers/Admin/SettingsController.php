@@ -12,6 +12,7 @@ use App\Http\Resources\RedDayResource;
 use App\Http\Resources\SettingWorkhoursResource;
 use App\Models\RedDay;
 use App\Models\MessagingIntegration;
+use App\Models\MessagingTriggerSetting;
 use App\Services\SettingService;
 use App\Services\Localization\FrontendTranslationCatalog;
 use App\Services\Localization\SiteLocaleRegistry;
@@ -52,6 +53,7 @@ class SettingsController extends Controller
             'bookingLimit'  => $data['bookingLimit'] ?? ['days' => 180, 'active' => false],
             'supportedLocales' => $siteLocales->installedLabels(),
             'messagingIntegrations' => MessagingIntegration::query()->get()->keyBy('provider'),
+            'messagingTriggerSettings' => MessagingTriggerSetting::query()->get()->keyBy('trigger'),
             'siteLocales' => $installedSiteLocales,
             'availableSiteLocales' => $siteLocales->available(),
             'defaultSiteLocale' => $siteLocales->defaultCode(),

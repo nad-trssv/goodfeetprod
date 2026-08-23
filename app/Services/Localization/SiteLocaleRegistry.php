@@ -7,6 +7,7 @@ use App\Models\SiteLocale;
 use App\Models\SiteSettings;
 use App\Models\SiteTranslation;
 use App\Models\User;
+use App\Models\MessagingTriggerSetting;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -116,6 +117,14 @@ class SiteLocaleRegistry
             $this->cloneLocalizedSetting('company_short_description', $code, $default);
             foreach (['crm_chat_title', 'crm_chat_welcome_message', 'crm_chat_offline_message'] as $key) {
                 $this->cloneLocalizedSetting($key, $code, $default);
+            }
+
+            if (Schema::hasTable('messaging_trigger_settings')) {
+                MessagingTriggerSetting::query()->each(function (MessagingTriggerSetting $setting) use ($code, $default) {
+                    $templates = $setting->templates ?? [];
+                    $templates[$code] = $templates[$default] ?? collect($templates)->first() ?? '';
+                    $setting->update(['templates' => $templates]);
+                });
             }
 
             return $locale;

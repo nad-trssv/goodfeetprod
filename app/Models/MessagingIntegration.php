@@ -6,12 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class MessagingIntegration extends Model
 {
-    protected $fillable = ['provider', 'enabled', 'settings', 'credentials'];
+    protected $fillable = ['provider', 'enabled', 'priority', 'settings', 'credentials'];
 
     protected function casts(): array
     {
         return [
             'enabled' => 'boolean',
+            'priority' => 'integer',
             'settings' => 'array',
             'credentials' => 'encrypted:array',
         ];

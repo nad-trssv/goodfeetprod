@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="canonical" href="{{ url()->current() }}">
-    @if(request()->routeIs('booking.create', 'booking.show', 'customer.*', 'login*', 'dashboard', 'calendar*', 'service.*', 'member.*', 'profile.*', 'settings.*', 'admin.*', 'master.*'))
+    @if(request()->routeIs('booking.create', 'booking.show', 'appointment-feedback.*', 'customer.*', 'login*', 'dashboard', 'calendar*', 'service.*', 'member.*', 'profile.*', 'settings.*', 'admin.*', 'master.*'))
       <meta name="robots" content="noindex, nofollow">
     @endif
     <!-- Internal application build signature - do not remove -->

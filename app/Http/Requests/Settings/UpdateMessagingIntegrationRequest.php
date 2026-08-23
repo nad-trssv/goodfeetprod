@@ -27,6 +27,7 @@ class UpdateMessagingIntegrationRequest extends FormRequest
                 'numeric_id' => ['nullable', 'string', 'max:64', 'regex:/^\d+$/'],
                 'bot_username' => ['nullable', 'string', 'max:33', 'regex:/^@?[A-Za-z0-9_]{5,32}$/'],
                 'url' => ['nullable', 'url', 'max:2048'],
+                'json' => ['nullable', 'json', 'max:4000'],
                 default => ['nullable', 'string', 'max:255'],
             };
         }

@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use App\Services\Localization\SiteLocaleRegistry;
 use App\Services\Localization\FrontendTranslationCatalog;
+use App\Observers\AppointmentTriggerObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -36,6 +37,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('is-admin', [AdminPolicy::class, 'view']);
         Gate::define('is-superadmin', [SuperAdminPolicy::class, 'view']);
         Gate::policy(Appointments::class, AppointmentPolicy::class);
+        Appointments::observe(AppointmentTriggerObserver::class);
 
         foreach (array_keys(config('permissions')) as $permission) {
             Gate::define($permission, fn (User $user) => $user->hasPermission($permission));

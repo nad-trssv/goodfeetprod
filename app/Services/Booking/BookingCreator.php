@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use App\Services\Customer\CustomerIdentityService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use App\Services\Localization\SiteLocaleRegistry;
 
 class BookingCreator
 {
@@ -85,6 +86,7 @@ class BookingCreator
                 'appointment_start' => $start,
                 'appointment_end' => $end,
                 'client_email' => $request->client_email,
+                'client_locale' => $this->publicLocale(),
                 'client_phone' => $request->client_phone,
                 'client_name' => $request->client_name,
                 'client_lastname' => $request->client_lastname,
@@ -112,6 +114,16 @@ class BookingCreator
         ($this->notifications ?? app(AppointmentNotificationService::class))->send($appointment, 'booking_created');
 
         return $appointment;
+    }
+
+    private function publicLocale(): string
+    {
+        $locales = app(SiteLocaleRegistry::class);
+        $locale = app()->getLocale();
+
+        return array_key_exists($locale, $locales->activeLabels())
+            ? $locale
+            : $locales->defaultCode();
     }
 
 }

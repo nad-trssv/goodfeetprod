@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'whatsapp_graph_version' => env('WHATSAPP_GRAPH_VERSION', 'v23.0'),
+    'provider_order' => ['whatsapp', 'viber', 'telegram'],
     'providers' => [
         'whatsapp' => [
             'settings' => [
@@ -8,6 +10,10 @@ return [
                 'business_account_id' => 'numeric_id',
                 'phone_number_id' => 'numeric_id',
                 'app_id' => 'numeric_id',
+                'booking_created_template' => 'text',
+                'appointment_reminder_template' => 'text',
+                'review_request_template' => 'text',
+                'template_language_codes' => 'json',
             ],
             'credentials' => ['access_token', 'app_secret', 'webhook_verify_token'],
             'required_settings' => ['business_account_id', 'phone_number_id'],

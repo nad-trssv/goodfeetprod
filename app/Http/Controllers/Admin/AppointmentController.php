@@ -419,6 +419,7 @@ class AppointmentController extends Controller
                 'client_lastname' => $source->client_lastname,
                 'client_phone' => $source->client_phone,
                 'client_email' => $source->client_email,
+                'client_locale' => $source->client_locale,
                 'description' => $source->description,
                 'admin_notes' => $source->admin_notes,
                 'customer_name' => trim($source->client_name.' '.$source->client_lastname),
@@ -433,6 +434,7 @@ class AppointmentController extends Controller
             'currentUserId' => $request->user()->id,
             'canChooseMaster' => $request->user()->hasAllAppointmentsScope(),
             'repeatAppointment' => $repeatAppointment,
+            'siteLocales' => app(\App\Services\Localization\SiteLocaleRegistry::class)->activeLabels(),
         ]);
     }
 
@@ -486,6 +488,7 @@ class AppointmentController extends Controller
                 'name' => $customer->full_name,
                 'email' => $customer->email,
                 'phone' => $customer->phone,
+                'locale' => $customer->locale,
                 'has_account' => filled($customer->getRawOriginal('password')),
                 'appointments_count' => $customer->appointments_count,
             ]);

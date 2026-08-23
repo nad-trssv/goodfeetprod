@@ -23,6 +23,7 @@
             <file>tests/Feature/CrmFeatureTest.php</file>
             <file>tests/Feature/SystemHealthTest.php</file>
             <file>tests/Feature/MessagingIntegrationSettingsTest.php</file>
+            <file>tests/Feature/TriggerMessagingTest.php</file>
             <file>tests/Feature/SiteLocalizationTest.php</file>
             <file>tests/Feature/WorkTimeTrackingTest.php</file>
             <file>tests/Feature/TechnicalSupportTest.php</file>

@@ -7,6 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 use App\Models\Customer;
+use App\Services\Localization\SiteLocaleRegistry;
 
 class AppointmentRequest extends FormRequest
 {
@@ -47,6 +48,7 @@ class AppointmentRequest extends FormRequest
             'client_lastname' => ['nullable', 'string', 'max:190'],
             'client_phone' => ['required', 'string', 'min:8', 'max:32'],
             'client_email' => ['nullable', 'email', 'max:190'],
+            'client_locale' => ['nullable', 'string', Rule::in(array_keys(app(SiteLocaleRegistry::class)->activeLabels()))],
             'customer_id' => ['nullable', 'integer', Rule::exists('customers', 'id')],
             'description' => ['nullable', 'string', 'max:2000'],
             'admin_notes' => ['nullable', 'string', 'max:5000'],

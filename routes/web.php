@@ -36,10 +36,13 @@ use App\Http\Controllers\Admin\CrmSettingsController;
 use App\Http\Controllers\Admin\CrmRatingController;
 use App\Http\Controllers\Admin\SystemHealthController;
 use App\Http\Controllers\Admin\MessagingIntegrationController;
+use App\Http\Controllers\Admin\TriggerMessagingController;
 use App\Http\Controllers\Admin\SiteLocalizationController;
 use App\Http\Controllers\WorkTimeController;
 use App\Http\Controllers\Admin\WorkTimeReportController;
 use App\Http\Controllers\TechnicalSupportController;
+use App\Http\Controllers\AppointmentFeedbackController;
+use App\Http\Controllers\MessagingWebhookController;
 
 Route::get('/', [PageController::class, 'index'])->name('home');
 Route::get('/sitemap.xml', [PageController::class, 'sitemap'])->name('sitemap');
@@ -57,6 +60,11 @@ Route::post('/login', function () {
 
 Route::get('/booking/create', [BookingController::class, 'create'])->name('booking.create');
 Route::get('/booking/confirmation/{appointment:public_uuid}', [BookingController::class, 'show'])->name('booking.show');
+Route::get('/appointment-feedback/{feedback:token}', [AppointmentFeedbackController::class, 'show'])->middleware('throttle:30,1')->name('appointment-feedback.show');
+Route::post('/appointment-feedback/{feedback:token}', [AppointmentFeedbackController::class, 'store'])->middleware('throttle:10,1')->name('appointment-feedback.store');
+Route::get('/webhooks/messaging/whatsapp', [MessagingWebhookController::class, 'verifyWhatsApp'])->middleware('throttle:60,1')->name('webhooks.messaging.whatsapp.verify');
+Route::post('/webhooks/messaging/whatsapp', [MessagingWebhookController::class, 'whatsapp'])->middleware('throttle:120,1')->name('webhooks.messaging.whatsapp');
+Route::post('/webhooks/messaging/viber', [MessagingWebhookController::class, 'viber'])->middleware('throttle:120,1')->name('webhooks.messaging.viber');
 Route::get('/services', [ServiceController::class, 'index'])->name('clientservice');
 Route::get('/galerii', [PageController::class, 'gallery'])->name('gallery.index');
 Route::get('/booking', [BookingController::class, 'serviceBooking'])->name('serviceBooking');
@@ -261,6 +269,9 @@ Route::middleware([
             ->middleware(['permission:settings.update', 'super-admin-role', 'throttle:10,1'])
             ->whereIn('provider', array_keys(config('messaging_integrations.providers')))
             ->name('settings.messaging.update');
+        Route::put('settings/messaging-automation', [TriggerMessagingController::class, 'update'])
+            ->middleware(['permission:settings.update', 'super-admin-role', 'throttle:10,1'])
+            ->name('settings.messaging-automation.update');
         Route::post('settings/localization/languages', [SiteLocalizationController::class, 'storeLanguage'])
             ->middleware(['permission:settings.update', 'super-admin-role', 'throttle:10,1'])
             ->name('settings.localization.languages.store');

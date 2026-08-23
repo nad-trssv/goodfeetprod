@@ -57,6 +57,22 @@ class BookingCreatorTest extends TestCase
         ]);
     }
 
+    public function test_public_booking_snapshots_the_server_locale_and_ignores_a_forged_locale_field(): void
+    {
+        app()->setLocale('et');
+        [$user, $service] = $this->bookingEntities('75.50');
+        $request = $this->request($user, $service);
+        $request->merge(['client_locale' => 'ru']);
+
+        $appointment = (new BookingCreator(
+            $this->roomServiceWithoutAssignment(),
+            app(SlotAvailabilityService::class),
+            app(CustomerIdentityService::class),
+        ))->create($request, ['start' => '10:00', 'end' => '11:00'], $service);
+
+        $this->assertSame('et', $appointment->client_locale);
+    }
+
     public function test_it_rejects_an_overlapping_booking_for_the_same_master(): void
     {
         [$user, $service] = $this->bookingEntities('50.00');

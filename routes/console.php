@@ -11,3 +11,8 @@ Artisan::command('inspire', function () {
 Schedule::command('system:health-check --source=scheduled')
     ->everyFiveMinutes()
     ->withoutOverlapping(10);
+
+Schedule::command('messaging:dispatch-triggers')
+    ->everyMinute()
+    ->withoutOverlapping(10)
+    ->onOneServer();
