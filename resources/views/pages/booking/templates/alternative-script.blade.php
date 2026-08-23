@@ -12,6 +12,7 @@ $(function () {
   const noSlotsText = @json(__('msg.booking_no_slots'));
   const minuteText = @json(__('msg.min'));
   const fromText = @json(__('msg.price_from'));
+  const vacationText = @json(__('msg.on_vacation'));
   const csrf = document.querySelector('meta[name="csrf-token"]').content;
   const showServiceImages = @json((bool)($settings['show_service_images'] ?? true));
   const showMasterImages = @json((bool)($settings['show_master_images'] ?? true));
@@ -54,7 +55,7 @@ $(function () {
 
   function masterButton(master) {
     const image = showMasterImages ? `<img src="${escapeHtml(master.profile_photo_url)}" alt="${escapeHtml(master.name)}" width="84" height="84" loading="lazy" decoding="async" class="master-directory__photo">` : '';
-    const vacation = master.vacation ? `<small>🌴 В отпуске ${escapeHtml(master.vacation.from)}–${escapeHtml(master.vacation.to)}</small>` : '';
+    const vacation = master.vacation ? `<small>🌴 ${escapeHtml(vacationText)} ${escapeHtml(master.vacation.from)}–${escapeHtml(master.vacation.to)}</small>` : '';
     return `<button type="button" class="alt-master booking-option" data-master-id="${Number(master.id)}">${image}<span><strong>${escapeHtml(master.name)} ${master.vacation ? '🌴' : ''}</strong><small>${escapeHtml(master.professional_title || @json(__('msg.booking_view_services')))}</small>${vacation}</span><i class="fa-solid fa-chevron-right"></i></button>`;
   }
 

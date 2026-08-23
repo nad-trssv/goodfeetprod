@@ -81,7 +81,14 @@ class Services extends Model
 
     public function getTranslation($locale, $field)
     {
-        return $this->translations()->where('locale', $locale)->value($field) ?? $this->translations()->where('locale', 'en')->value($field);
+        $fallback = app(\App\Services\Localization\SiteLocaleRegistry::class)->defaultCode();
+        $translations = $this->relationLoaded('translations')
+            ? $this->translations
+            : $this->translations()->whereIn('locale', array_unique([$locale, $fallback, 'en']))->get();
+
+        return $translations->firstWhere('locale', $locale)?->{$field}
+            ?? $translations->firstWhere('locale', $fallback)?->{$field}
+            ?? $translations->firstWhere('locale', 'en')?->{$field};
     }
 
     public function rules(): HasMany

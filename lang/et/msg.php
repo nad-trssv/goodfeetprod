@@ -158,6 +158,13 @@ return [
     'booking_services_by_master' => 'Valitud spetsialisti teenused',
     'booking_choose_master_first' => 'Valige esmalt spetsialist',
     'booking_no_slots' => 'Sellel päeval pole vabu aegu',
+    'at_time' => 'kell :time',
+    'on_vacation' => 'Puhkusel',
+    'booking_not_found' => 'Broneeringut ei leitud.',
+    'home' => 'Avaleht',
+    'toggle_navigation' => 'Ava või sulge menüü',
+    'registration_number_short' => 'Reg. nr',
+    'all_rights_reserved' => 'Kõik õigused kaitstud.',
 
     //maintenance mode
     'maintenance_title' => 'Veebisait on ajutiselt maas',

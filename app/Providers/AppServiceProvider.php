@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
+use App\Services\Localization\SiteLocaleRegistry;
+use App\Services\Localization\FrontendTranslationCatalog;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,7 +22,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->scoped(SiteLocaleRegistry::class);
+        $this->app->scoped(FrontendTranslationCatalog::class);
     }
 
     /**

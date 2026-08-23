@@ -145,7 +145,7 @@ class MemberController extends Controller
         $member->update([
             'name' => $request->name,
             'professional_titles' => collect($request->input('professional_titles', []))
-                ->only(array_keys(config('supported_locales')))
+                ->only(array_keys(app(\App\Services\Localization\SiteLocaleRegistry::class)->installedLabels()))
                 ->map(fn ($title) => trim(strip_tags((string) $title)))
                 ->filter()
                 ->all(),

@@ -13,6 +13,8 @@ use App\Http\Resources\SettingWorkhoursResource;
 use App\Models\RedDay;
 use App\Models\MessagingIntegration;
 use App\Services\SettingService;
+use App\Services\Localization\FrontendTranslationCatalog;
+use App\Services\Localization\SiteLocaleRegistry;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 
@@ -25,7 +27,7 @@ class SettingsController extends Controller
         $this->settingService = $settingService;
     }
     
-    public function index(): View
+    public function index(SiteLocaleRegistry $siteLocales, FrontendTranslationCatalog $translationCatalog): View
     {
         $this->authorize('is-superadmin', Auth::user());
         $data = $this->settingService->list();
@@ -42,12 +44,18 @@ class SettingsController extends Controller
             }
         }
         
+        $installedSiteLocales = $siteLocales->installed();
+
         return view('admin.settings.index',[
             'workHours'     => $sortedWorkHours,
             'lunchHours'    => $data['lunchHours'] ?? ['start' => null, 'end' => null],
             'bookingLimit'  => $data['bookingLimit'] ?? ['days' => 180, 'active' => false],
-            'supportedLocales' => config('supported_locales'),
+            'supportedLocales' => $siteLocales->installedLabels(),
             'messagingIntegrations' => MessagingIntegration::query()->get()->keyBy('provider'),
+            'siteLocales' => $installedSiteLocales,
+            'availableSiteLocales' => $siteLocales->available(),
+            'defaultSiteLocale' => $siteLocales->defaultCode(),
+            'siteLocaleStatistics' => $siteLocales->statisticsFor($installedSiteLocales, $translationCatalog),
         ]);
     }
 

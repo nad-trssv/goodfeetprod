@@ -211,7 +211,7 @@ $redDaysTime = RedDay::where('full_day', 0)->whereNull('user_id')->get();
         $translation = $booking->service ? $booking->service->getTranslation(app()->getLocale(), 'name') : null;
 
         if (!$booking) {
-            return redirect()->back()->with('error', 'Бронирование не найдено.');
+            return redirect()->back()->with('error', __('msg.booking_not_found'));
         }
         $dateTimeStart = Carbon::parse($booking->appointment_start);
         $dateTimeEnd = Carbon::parse($booking->appointment_end);

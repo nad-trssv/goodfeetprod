@@ -62,6 +62,11 @@
           <span class="fas fa-paper-plane me-1"></span>{{ __('admin_messaging.title') }}
         </button>
       </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link {{ $activeSettingsTab === 'localization' ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#tab-localization" type="button">
+          <span class="fas fa-language me-1"></span>{{ __('admin_localization.title') }}
+        </button>
+      </li>
     </ul>
 
     @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
@@ -299,6 +304,10 @@
 
       <div class="tab-pane {{ $activeSettingsTab === 'integrations' ? 'active' : '' }}" id="tab-integrations">
         @include('admin.settings.partials.messaging-integrations')
+      </div>
+
+      <div class="tab-pane {{ $activeSettingsTab === 'localization' ? 'active' : '' }}" id="tab-localization">
+        @include('admin.settings.partials.localization')
       </div>
 
     </div>

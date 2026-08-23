@@ -160,6 +160,13 @@ return [
     'booking_services_by_master' => 'Услуги выбранного специалиста',
     'booking_choose_master_first' => 'Сначала выберите специалиста',
     'booking_no_slots' => 'На этот день свободного времени нет',
+    'at_time' => 'в :time',
+    'on_vacation' => 'В отпуске',
+    'booking_not_found' => 'Бронирование не найдено.',
+    'home' => 'Главная',
+    'toggle_navigation' => 'Открыть или закрыть меню',
+    'registration_number_short' => 'Рег. №',
+    'all_rights_reserved' => 'Все права защищены.',
 
     //maintenance mode
     'maintenance_title' => 'Сайт временно недоступен',

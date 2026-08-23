@@ -17,7 +17,7 @@ return [
         'dashboard'=>'Töölaud','appointments'=>'Broneeringud','customers'=>'Kliendid','services'=>'Teenused','staff'=>'Töötajad',
         'schedules'=>'Graafikud ja erandid','master_services'=>'Töötajate teenused','rooms'=>'Kabinetid','settings'=>'Saidi seaded',
         'promo_codes'=>'Sooduskoodid','notifications'=>'Teavitused','reschedule_requests'=>'Aja muutmise taotlused',
-        'activity_logs'=>'Tegevuslogi','roles'=>'Rollid ja õigused','profile'=>'Oma profiil',
+        'activity_logs'=>'Tegevuslogi','roles'=>'Rollid ja õigused','profile'=>'Oma profiil','work_time'=>'Tööaja arvestus',
     ],
     'actions' => ['view'=>'Vaatamine','create'=>'Loomine','update'=>'Muutmine','delete'=>'Kustutamine / tühistamine','status'=>'Staatuse muutmine','message'=>'Sõnum kliendile','manage'=>'Täielik haldus'],
     'system_roles' => ['super-admin'=>'Administraator','master'=>'Spetsialist','customer'=>'Klient','receptionist'=>'Administraator-reseptsionist'],

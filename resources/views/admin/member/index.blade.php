@@ -11,7 +11,7 @@
 
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
       <div><h2 class="mb-1">{{ __('admin_staff.team') }}</h2><p class="text-body-tertiary mb-0">{{ __('admin_staff.team_hint') }}</p></div>
-      <a href="{{ route('member.create') }}" class="btn btn-primary"><span class="fas fa-plus me-2"></span>{{ __('admin_staff.add_employee') }}</a>
+      <div class="d-flex flex-wrap gap-2">@can('work_time.view')<a href="{{ route('admin.work-time.index') }}" class="btn btn-outline-primary"><span class="fas fa-clock me-2"></span>{{ __('admin_work_time.title') }}</a>@endcan<a href="{{ route('member.create') }}" class="btn btn-primary"><span class="fas fa-plus me-2"></span>{{ __('admin_staff.add_employee') }}</a></div>
     </div>
 
     <div class="team-summary mb-4">
@@ -44,7 +44,7 @@
             <div class="min-w-0 flex-grow-1">
               <div class="d-flex align-items-start justify-content-between gap-2">
                 <div class="min-w-0"><a class="text-body-emphasis text-decoration-none" href="{{ route('member.edit',$user['id']) }}"><h5 class="member-card__name mb-1">{{ $user['name'] }} @if($user['vacation'])🌴@endif</h5></a><div class="text-body-tertiary fs-10">{{ $user['role_name'] ?: '—' }} · {{ $user['username'] }}</div></div>
-                <div class="dropdown"><button class="btn btn-sm btn-subtle-secondary dropdown-toggle dropdown-caret-none" data-bs-toggle="dropdown" aria-label="{{ __('admin_staff.actions') }}"><span class="fas fa-ellipsis-h"></span></button><div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="{{ route('member.edit',$user['id']) }}">{{ __('admin_staff.employee_card') }}</a><a class="dropdown-item" href="{{ route('master.calendar',$user['id']) }}">{{ __('admin_staff.calendar') }}</a><a class="dropdown-item" href="{{ route('master.calendar.list',$user['id']) }}">{{ __('admin_staff.appointments') }}</a><div class="dropdown-divider"></div><button class="dropdown-item text-danger member-destroy" type="button" data-id="{{ $user['id'] }}" data-item="{{ $user['name'] }}" data-bs-toggle="modal" data-bs-target="#deleteModal">{{ __('admin_staff.delete') }}</button></div></div>
+                <div class="dropdown"><button class="btn btn-sm btn-subtle-secondary dropdown-toggle dropdown-caret-none" data-bs-toggle="dropdown" aria-label="{{ __('admin_staff.actions') }}"><span class="fas fa-ellipsis-h"></span></button><div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="{{ route('member.edit',$user['id']) }}">{{ __('admin_staff.employee_card') }}</a><a class="dropdown-item" href="{{ route('master.calendar',$user['id']) }}">{{ __('admin_staff.calendar') }}</a><a class="dropdown-item" href="{{ route('master.calendar.list',$user['id']) }}">{{ __('admin_staff.appointments') }}</a>@can('work_time.view')<a class="dropdown-item" href="{{ route('admin.work-time.employee',$user['id']) }}">{{ __('admin_work_time.employee_report') }}</a>@endcan<div class="dropdown-divider"></div><button class="dropdown-item text-danger member-destroy" type="button" data-id="{{ $user['id'] }}" data-item="{{ $user['name'] }}" data-bs-toggle="modal" data-bs-target="#deleteModal">{{ __('admin_staff.delete') }}</button></div></div>
               </div>
               <div class="mt-2"><span class="member-state member-state--{{ $state['code'] }}">{{ $state['label'] }}</span></div>
             </div>
@@ -78,7 +78,7 @@
             <div class="appointment-panel mb-3"><small>{{ __('admin_staff.next_appointment') }}</small><strong>{{ __('admin_staff.no_upcoming') }}</strong></div>
           @endif
 
-          <div class="d-flex flex-wrap gap-2"><a class="btn btn-sm btn-primary flex-grow-1" href="{{ route('member.edit',$user['id']) }}">{{ __('admin_staff.open_card') }}</a><a class="btn btn-sm btn-outline-secondary" href="{{ route('master.calendar.list',$user['id']) }}" title="{{ __('admin_staff.employee_appointments') }}"><span class="fas fa-list"></span></a><a class="btn btn-sm btn-outline-secondary" href="{{ route('master.calendar',$user['id']) }}" title="{{ __('admin_staff.calendar') }}"><span class="fas fa-calendar-alt"></span></a><a class="btn btn-sm btn-outline-secondary" href="tel:{{ $user['phone'] }}" title="{{ __('admin_staff.call') }}"><span class="fas fa-phone"></span></a></div>
+          <div class="d-flex flex-wrap gap-2"><a class="btn btn-sm btn-primary flex-grow-1" href="{{ route('member.edit',$user['id']) }}">{{ __('admin_staff.open_card') }}</a>@can('work_time.view')<a class="btn btn-sm btn-outline-secondary" href="{{ route('admin.work-time.employee',$user['id']) }}" title="{{ __('admin_work_time.employee_report') }}"><span class="fas fa-clock"></span></a>@endcan<a class="btn btn-sm btn-outline-secondary" href="{{ route('master.calendar.list',$user['id']) }}" title="{{ __('admin_staff.employee_appointments') }}"><span class="fas fa-list"></span></a><a class="btn btn-sm btn-outline-secondary" href="{{ route('master.calendar',$user['id']) }}" title="{{ __('admin_staff.calendar') }}"><span class="fas fa-calendar-alt"></span></a><a class="btn btn-sm btn-outline-secondary" href="tel:{{ $user['phone'] }}" title="{{ __('admin_staff.call') }}"><span class="fas fa-phone"></span></a></div>
         </article>
       @endforeach
     </div>

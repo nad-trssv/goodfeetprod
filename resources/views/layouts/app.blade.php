@@ -11,7 +11,7 @@
     @endif
     <!-- Internal application build signature - do not remove -->
     <meta name="x-qc-fingerprint-f5HG-JH25-CDKb-5F54" content="{{ \App\Services\FingerprintService::make() }}">
-    <title>@yield('title', 'Esileht')</title>
+    <title>@yield('title', __('msg.home'))</title>
     <link rel="icon" href="{{ $settings['favicon_url'] ?? asset('assets/img/favicons/32x32.png') }}">
     <meta name="theme-color" content="#ffffff">
 
@@ -43,7 +43,7 @@
               </div>
               <div class="row col-3 align-items-center justify-content-end">
                 <ul class="col-12 d-flex list-unstyled mb-0 p-0 w-100 justify-content-end">
-                  @foreach(config('supported_locales') as $locale => $language)
+                  @foreach(app(\App\Services\Localization\SiteLocaleRegistry::class)->activeLabels() as $locale => $language)
                     <li class="{{ $loop->last ? '' : 'me-2' }}"><a class="lh-1 fc_primary fw-bold fs-9" href="{{ route('lang.change', $locale) }}">{{ strtoupper($locale) }}</a></li>
                   @endforeach
                 </ul>
@@ -65,7 +65,7 @@
             </div>
           </a>
   
-          <button class="navbar-toggler fs-8 ps-1 ps-sm-3 pe-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+          <button class="navbar-toggler fs-8 ps-1 ps-sm-3 pe-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('msg.toggle_navigation') }}"><span class="navbar-toggler-icon"></span></button>
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mt-3 mt-lg-0 d-flex justify-content-end w-100">
               @if(Auth::guard('web')->check() && Auth::guard('web')->user()->isStaff())
@@ -85,12 +85,12 @@
                   </ul>
                 </li>
               @else
-                <li class="nav-item border-bottom border-translucent border-bottom-lg-0 text-end"><a class="nav_link d-inline-flex align-items-center gap-1" href="{{ route('customer.login') }}"><i class="uil uil-user-circle fs-6"></i><span>Войти</span></a></li>
+                <li class="nav-item border-bottom border-translucent border-bottom-lg-0 text-end"><a class="nav_link d-inline-flex align-items-center gap-1" href="{{ route('customer.login') }}"><i class="uil uil-user-circle fs-6"></i><span>{{ __('customer.login') }}</span></a></li>
               @endif
               <li class="nav-item border-bottom border-translucent border-bottom-lg-0 text-center"><a class="btn_primary" href="{{ route('serviceBooking') }}" target="_blank">{{ __('msg.menu_booking') }}</a></li>
               
               <ul class="col-12 d-flex d-lg-none list-unstyled w-100 justify-content-center mt-4">
-                @foreach(config('supported_locales') as $locale => $language)
+                @foreach(app(\App\Services\Localization\SiteLocaleRegistry::class)->activeLabels() as $locale => $language)
                   <li class="{{ $loop->last ? '' : 'me-2' }}"><a class="lh-1 fc_primary fw-bold fs-9" href="{{ route('lang.change', $locale) }}">{{ strtoupper($locale) }}</a></li>
                 @endforeach
               </ul>
@@ -154,7 +154,7 @@
                 </div>
                 @if(!empty($settings['company_registration_number']) || !empty($settings['company_bank_account']))
                   <div class="contact_list mt-2 ff_secondary fs-10 fs-md-9 fc_primary">
-                    @if(!empty($settings['company_registration_number']))<div>Reg. nr: {{ $settings['company_registration_number'] }}</div>@endif
+                    @if(!empty($settings['company_registration_number']))<div>{{ __('msg.registration_number_short') }}: {{ $settings['company_registration_number'] }}</div>@endif
                     @if(!empty($settings['company_bank_account']))<div>IBAN: {{ $settings['company_bank_account'] }}</div>@endif
                   </div>
                 @endif
@@ -173,7 +173,7 @@
               </div>
             </div>
             <div class="col-12 col-md-6 ff_secondary fs-10 fs-md-9 fc_light text-center"> 
-              {{ $settings['company_name'] ?? config('app.name') }}, {{ date('Y') }} © Kõik õigused kaitstud.
+              {{ $settings['company_name'] ?? config('app.name') }}, {{ date('Y') }} © {{ __('msg.all_rights_reserved') }}
             </div>
             <div class="col-12 col-md-6 text-center">
               <p class="mb-0 fc_light ff_secondary fs-10 fs-md-9">Powered with <i class="fa-solid fa-heart"></i> by <a class="fc_light" href="https://quickCode.ee/" target="_blank">QuickCode OÜ</a></p>

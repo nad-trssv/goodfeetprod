@@ -172,6 +172,13 @@ return [
     'booking_services_by_master' => 'Services from the selected specialist',
     'booking_choose_master_first' => 'Choose a specialist first',
     'booking_no_slots' => 'No available times on this day',
+    'at_time' => 'at :time',
+    'on_vacation' => 'On vacation',
+    'booking_not_found' => 'Booking not found.',
+    'home' => 'Home',
+    'toggle_navigation' => 'Toggle navigation',
+    'registration_number_short' => 'Reg. no.',
+    'all_rights_reserved' => 'All rights reserved.',
 
     //maintenance mode
     'maintenance_title' => 'Website Temporarily Unavailable',

@@ -74,12 +74,12 @@
                             <div class="col-12">
                               <label class="form-label mb-2">{{ __('admin_staff.specialization') }}</label>
                               <ul class="nav nav-pills gap-1 mb-2" role="tablist">
-                                @foreach(config('supported_locales') as $locale => $label)
+                                @foreach(app(\App\Services\Localization\SiteLocaleRegistry::class)->installedLabels() as $locale => $label)
                                   <li class="nav-item"><button class="nav-link py-1 px-3 {{ $loop->first ? 'active' : '' }}" data-bs-toggle="pill" data-bs-target="#profile-title-{{ $locale }}" type="button">{{ $label }}</button></li>
                                 @endforeach
                               </ul>
                               <div class="tab-content">
-                                @foreach(config('supported_locales') as $locale => $label)
+                                @foreach(app(\App\Services\Localization\SiteLocaleRegistry::class)->installedLabels() as $locale => $label)
                                   <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="profile-title-{{ $locale }}">
                                     <input class="form-control profile-professional-title" data-locale="{{ $locale }}" maxlength="120" value="{{ $profile->professional_titles[$locale] ?? '' }}" placeholder="{{ __('admin_staff.specialization_example') }}">
                                   </div>

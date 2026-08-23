@@ -30,7 +30,9 @@
         @method('PUT') 
       <div class="row g-4">
         <div class="col-12 col-xl-10 order-1 order-xl-0">
-            @foreach(__('admin_service_extra.languages') as $locale => $language)
+            @foreach($siteLocales as $siteLocale)
+                    @php($locale = $siteLocale->code)
+                    @php($language = $siteLocale->native_name)
                     <div class="card shadow-none border mb-4 mt-6" data-component-card="data-component-card">
                       <div class="card-header p-4 border-bottom bg-body">
                         <div class="row g-3 justify-content-between align-items-center">
@@ -68,7 +70,7 @@
                         </div>
                       </div>
                     </div>
-            @endforeach
+                            @endforeach
             <div class="card shadow-none mb-4 mt-6">
                 <div class="col-auto">
                   <button type="submit" class="btn btn-primary w-100 mt-2">{{ __('admin_services.save') }}</button>
@@ -80,12 +82,9 @@
             <h5 class="lh-1">{{ __('admin_services.search_page') }}</h5>
             <hr>
             <ul class="nav nav-vertical flex-column doc-nav" data-doc-nav="data-doc-nav">
-              <li class="nav-item"> <a class="nav-link" href="#lang-ru">{{ __('admin_service_extra.languages.ru') }}</a>
-              </li>
-              <li class="nav-item"> <a class="nav-link" href="#lang-et">Eesti keel</a>
-              </li>
-              <li class="nav-item"> <a class="nav-link" href="#lang-en">English</a>
-              </li>
+              @foreach($siteLocales as $siteLocale)
+                <li class="nav-item"><a class="nav-link" href="#lang-{{ $siteLocale->code }}">{{ $siteLocale->native_name }} @if($siteLocale->is_default)<span class="badge badge-phoenix badge-phoenix-primary">{{ __('admin_localization.default') }}</span>@endif</a></li>
+              @endforeach
             </ul>
             <hr>
             <ul class="nav nav-vertical flex-column doc-nav" data-doc-nav="data-doc-nav">

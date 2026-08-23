@@ -175,7 +175,7 @@
                                 {{ $item['name'] }}
                               @endif
                               @if ($item['has_fixed_time'] == 1)
-                                (в {{ $item['time_from'] }})
+                                ({{ __('msg.at_time', ['time' => $item['time_from']]) }})
                               @endif
                             </h4>
                         </div>
@@ -552,7 +552,7 @@
                                   <div class="m-0">
                                       <h4 class="mb-0 fw-medium fs-8 m-0">${user.name} ${user.vacation ? '🌴' : ''}</h4>
                                       <small class="text-body-secondary">${user.professional_title || ''}</small>
-                                      ${user.vacation ? `<small class="d-block text-body-secondary">🌴 В отпуске ${user.vacation.from}–${user.vacation.to}</small>` : ''}
+                                      ${user.vacation ? `<small class="d-block text-body-secondary">🌴 ${@json(__('msg.on_vacation'))} ${user.vacation.from}–${user.vacation.to}</small>` : ''}
                                   </div>
                               </div>
                               <div class="col-1 d-flex align-items-center justify-content-end m-0">

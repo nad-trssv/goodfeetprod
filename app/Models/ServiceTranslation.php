@@ -10,7 +10,12 @@ class ServiceTranslation extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['service_id', 'locale', 'name', 'short_description', 'full_description'];
+    protected $fillable = ['service_id', 'locale', 'is_inherited', 'name', 'short_description', 'full_description'];
+
+    protected function casts(): array
+    {
+        return ['is_inherited' => 'boolean'];
+    }
 
     public $timestamps = false;
 

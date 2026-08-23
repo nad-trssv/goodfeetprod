@@ -84,7 +84,7 @@ class User extends Authenticatable
         $locale ??= app()->getLocale();
 
         return $titles[$locale]
-            ?? $titles[config('app.fallback_locale')]
+            ?? $titles[app(\App\Services\Localization\SiteLocaleRegistry::class)->defaultCode()]
             ?? collect($titles)->first(fn ($title) => filled($title));
     }
 
@@ -181,6 +181,16 @@ class User extends Authenticatable
     public function appointments()
     {
         return $this->hasMany(Appointments::class);
+    }
+
+    public function workShifts()
+    {
+        return $this->hasMany(WorkShift::class);
+    }
+
+    public function activeWorkShift()
+    {
+        return $this->hasOne(WorkShift::class)->whereNotNull('active_user_id')->latestOfMany();
     }
 
     public function chatSettings()

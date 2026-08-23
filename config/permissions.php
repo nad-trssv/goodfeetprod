@@ -45,6 +45,7 @@ return [
     'reschedule_requests.view' => ['group' => 'reschedule_requests', 'action' => 'view'],
     'reschedule_requests.update' => ['group' => 'reschedule_requests', 'action' => 'update'],
     'activity_logs.view' => ['group' => 'activity_logs', 'action' => 'view'],
+    'work_time.view' => ['group' => 'work_time', 'action' => 'view'],
     'roles.manage' => ['group' => 'roles', 'action' => 'manage'],
 
     'profile.view' => ['group' => 'profile', 'action' => 'view'],

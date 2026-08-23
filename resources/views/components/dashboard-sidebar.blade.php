@@ -6,11 +6,20 @@
   $showBookings = $staff->hasPermission('appointments.view') || $staff->hasPermission('appointments.create') || $staff->hasPermission('notifications.view') || $staff->hasPermission('reschedule_requests.view');
   $showManagement = $staff->hasPermission('services.view') || $staff->hasPermission('staff.view');
   $crmOpen = request()->routeIs('crm.*');
-  $showAdministration = $staff->hasPermission('settings.view') || $staff->hasPermission('promo_codes.view') || $staff->hasPermission('rooms.view') || $staff->hasPermission('activity_logs.view') || $staff->hasPermission('roles.manage') || ($staff->hasAllAppointmentsScope() && ($staff->hasPermission('appointments.view') || $staff->hasPermission('schedules.view')));
+  $showAdministration = $staff->hasPermission('settings.view') || $staff->hasPermission('promo_codes.view') || $staff->hasPermission('rooms.view') || $staff->hasPermission('activity_logs.view') || $staff->hasPermission('work_time.view') || $staff->hasPermission('roles.manage') || ($staff->hasAllAppointmentsScope() && ($staff->hasPermission('appointments.view') || $staff->hasPermission('schedules.view')));
   $managementOpen = request()->routeIs('service.*', 'languages.*', 'fixedtime.*', 'member.*', 'admin.masters.schedule', 'admin.master-services.*');
   $profileOpen = request()->routeIs('profile.*', 'master.schedule.*', 'master.services.*', 'master.time-off.*');
-  $administrationOpen = request()->routeIs('settings.*', 'promo-codes.*', 'admin.red-days.*', 'admin.appointments.*', 'admin.rooms.*', 'admin.activity-logs.*', 'admin.roles.*', 'admin.system-health.*');
+  $administrationOpen = request()->routeIs('settings.*', 'promo-codes.*', 'admin.red-days.*', 'admin.appointments.*', 'admin.rooms.*', 'admin.activity-logs.*', 'admin.work-time.*', 'admin.roles.*', 'admin.system-health.*');
 @endphp
+<style>
+  .navbar-vertical .admin-nav-group-toggle{padding-right:1.35rem!important}
+  .navbar-vertical .admin-nav-group-toggle .nav-link-text{line-height:1.25;white-space:normal}
+  .navbar-vertical .nav-group-chevron{flex:0 0 1.35rem;width:1.35rem;height:1.35rem;margin-left:.65rem!important;transition:transform .2s ease}
+  .navbar-vertical .nav-group-chevron svg{width:1rem;height:1rem}
+  .navbar-vertical [aria-expanded="true"] .nav-group-chevron{transform:rotate(180deg)}
+  .navbar-vertical .admin-nav-group-children{margin-right:.8rem;padding-top:.2rem;padding-bottom:.35rem}
+  .navbar-vertical .admin-nav-group-children .nav-link{padding-right:.85rem}
+</style>
 <nav class="navbar navbar-vertical navbar-expand-lg">
   <div class="collapse navbar-collapse" id="navbarVerticalCollapse">
     <div class="navbar-vertical-content">
@@ -75,10 +84,11 @@
         @if($showAdministration)
           <x-admin-nav-group id="adminNavAdministration" icon="settings" :label="__('admin_nav.administration')" :open="$administrationOpen">
             @can('settings.view')<x-admin-nav-link route="settings.index" icon="settings" :label="__('admin_nav.settings')" />@endcan
+            @if($staff->role?->resolvedSlug() === 'super-admin')<x-admin-nav-link route="settings.localization.translations.index" icon="globe" :label="__('admin_nav.localization')" />@endif
             @can('promo_codes.view')<x-admin-nav-link route="promo-codes.index" icon="tag" :label="__('admin_nav.promo_codes')" />@endcan
             @if($staff->hasAllAppointmentsScope())
               @can('schedules.view')
-                <x-admin-nav-link route="admin.red-days.index" icon="calendar-x" :label="__('admin_nav.closed_time')" />
+                <x-admin-nav-link route="admin.red-days.index" icon="x-circle" :label="__('admin_nav.closed_time')" />
                 <x-admin-nav-link route="admin.masters.today" icon="bar-chart-2" :label="__('admin_nav.staff_load')" />
               @endcan
               @can('appointments.view')<x-admin-nav-link route="admin.appointments.index" icon="table" :label="__('admin_nav.all_appointments')" />@endcan
@@ -88,6 +98,7 @@
               <x-admin-nav-link route="admin.rooms.today" icon="grid" :label="__('admin_nav.room_load')" />
             @endcan
             @can('activity_logs.view')<x-admin-nav-link route="admin.activity-logs.index" icon="activity" :label="__('admin_nav.activity_log')" />@endcan
+            @can('work_time.view')<x-admin-nav-link route="admin.work-time.index" icon="clock" :label="__('admin_nav.work_time_report')" />@endcan
             @if($staff->role?->resolvedSlug() === 'super-admin')<x-admin-nav-link route="admin.system-health.index" icon="heart" :label="__('admin_nav.system_health')" />@endif
             @can('roles.manage')<x-admin-nav-link route="admin.roles.index" icon="shield" :label="__('admin_nav.roles')" />@endcan
           </x-admin-nav-group>

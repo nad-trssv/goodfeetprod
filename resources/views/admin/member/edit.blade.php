@@ -35,8 +35,8 @@
               <div class="col-12 col-md-6"><label class="form-label" for="photoInput">{{ __('admin_staff.photo') }}</label><input class="form-control" id="photoInput" type="file" accept="image/jpeg,image/png,image/webp"><div class="form-text">{{ __('admin_staff.photo_hint') }}</div></div>
               <div class="col-12">
                 <label class="form-label">{{ __('admin_staff.localized_titles') }}</label>
-                <ul class="nav nav-pills gap-1 mb-2">@foreach(config('supported_locales') as $locale => $label)<li class="nav-item"><button class="nav-link py-1 px-3 {{ $loop->first ? 'active' : '' }}" data-bs-toggle="pill" data-bs-target="#title-{{ $locale }}" type="button">{{ $label }}</button></li>@endforeach</ul>
-                <div class="tab-content">@foreach(config('supported_locales') as $locale => $label)<div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="title-{{ $locale }}"><input class="form-control professional-title" data-locale="{{ $locale }}" maxlength="120" value="{{ $member->professional_titles[$locale] ?? '' }}"></div>@endforeach</div>
+                <ul class="nav nav-pills gap-1 mb-2">@foreach(app(\App\Services\Localization\SiteLocaleRegistry::class)->installedLabels() as $locale => $label)<li class="nav-item"><button class="nav-link py-1 px-3 {{ $loop->first ? 'active' : '' }}" data-bs-toggle="pill" data-bs-target="#title-{{ $locale }}" type="button">{{ $label }}</button></li>@endforeach</ul>
+                <div class="tab-content">@foreach(app(\App\Services\Localization\SiteLocaleRegistry::class)->installedLabels() as $locale => $label)<div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="title-{{ $locale }}"><input class="form-control professional-title" data-locale="{{ $locale }}" maxlength="120" value="{{ $member->professional_titles[$locale] ?? '' }}"></div>@endforeach</div>
               </div>
             </div>
           </div>

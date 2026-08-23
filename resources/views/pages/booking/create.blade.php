@@ -34,7 +34,7 @@
                     <div class="row g-3">
                         <div class="col-sm-6">
                             <label class="fw-bold text-body-highlight mb-1 ff_secondary"
-                                for="client_email">Email</label>
+                                for="client_email">{{ __('msg.email') }}</label>
                             <input class="form-control ff_secondary border_rounded" type="email" id="client_email"
                                 name="client_email" value="{{ old('client_email', Auth::guard('customer')->user()?->email) }}" placeholder="example@mail.ru" required="">
                             <div class="invalid-feedback ff_secondary">{{ __('msg.required_input') }}</div>
@@ -125,7 +125,7 @@
                                         <h5 class="text-body-highlight text-capitalize">{{ $choose_date }}:</h5>
                                         <p class="mb-0 text-body-tertiary">
                                             {{ $bookingData['start'] }} - {{ $bookingData['end'] }}
-                                            ({{ $service['effective_duration_minutes'] }} мин.)
+                                            ({{ $service['effective_duration_minutes'] }} {{ __('msg.min') }})
                                         </p>
                                     </div>
                                 </div>

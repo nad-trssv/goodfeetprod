@@ -36,6 +36,9 @@ use App\Http\Controllers\Admin\CrmSettingsController;
 use App\Http\Controllers\Admin\CrmRatingController;
 use App\Http\Controllers\Admin\SystemHealthController;
 use App\Http\Controllers\Admin\MessagingIntegrationController;
+use App\Http\Controllers\Admin\SiteLocalizationController;
+use App\Http\Controllers\WorkTimeController;
+use App\Http\Controllers\Admin\WorkTimeReportController;
 
 Route::get('/', [PageController::class, 'index'])->name('home');
 Route::get('/sitemap.xml', [PageController::class, 'sitemap'])->name('sitemap');
@@ -97,6 +100,13 @@ Route::middleware([
     'verified',
 ])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->middleware('permission:dashboard.view')->name('dashboard');
+    Route::get('work-time/status', [WorkTimeController::class, 'status'])->middleware('throttle:60,1')->name('work-time.status');
+    Route::post('work-time/start', [WorkTimeController::class, 'start'])->middleware('throttle:30,1')->name('work-time.start');
+    Route::post('work-time/pause', [WorkTimeController::class, 'pause'])->middleware('throttle:30,1')->name('work-time.pause');
+    Route::post('work-time/resume', [WorkTimeController::class, 'resume'])->middleware('throttle:30,1')->name('work-time.resume');
+    Route::post('work-time/stop', [WorkTimeController::class, 'stop'])->middleware('throttle:30,1')->name('work-time.stop');
+    Route::get('admin/work-time', [WorkTimeReportController::class, 'index'])->middleware(['permission:work_time.view', 'scope.all'])->name('admin.work-time.index');
+    Route::get('admin/work-time/employees/{member}', [WorkTimeReportController::class, 'employee'])->middleware(['permission:work_time.view', 'scope.all'])->name('admin.work-time.employee');
     Route::get('admin/search', AdminGlobalSearchController::class)->middleware('throttle:60,1')->name('admin.search');
 
     Route::get('calendar/create', [AppointmentController::class, 'createAppointment'])->middleware('permission:appointments.create')->name('calendar.create');
@@ -239,6 +249,21 @@ Route::middleware([
             ->middleware(['permission:settings.update', 'super-admin-role', 'throttle:10,1'])
             ->whereIn('provider', array_keys(config('messaging_integrations.providers')))
             ->name('settings.messaging.update');
+        Route::post('settings/localization/languages', [SiteLocalizationController::class, 'storeLanguage'])
+            ->middleware(['permission:settings.update', 'super-admin-role', 'throttle:10,1'])
+            ->name('settings.localization.languages.store');
+        Route::put('settings/localization/languages/{locale}', [SiteLocalizationController::class, 'updateLanguage'])
+            ->middleware(['permission:settings.update', 'super-admin-role'])
+            ->name('settings.localization.languages.update');
+        Route::put('settings/localization/languages/{locale}/default', [SiteLocalizationController::class, 'makeDefault'])
+            ->middleware(['permission:settings.update', 'super-admin-role'])
+            ->name('settings.localization.languages.default');
+        Route::get('settings/localization/translations', [SiteLocalizationController::class, 'translations'])
+            ->middleware(['permission:settings.view', 'super-admin-role'])
+            ->name('settings.localization.translations.index');
+        Route::put('settings/localization/translations/{locale}', [SiteLocalizationController::class, 'updateTranslation'])
+            ->middleware(['permission:settings.update', 'super-admin-role', 'throttle:60,1'])
+            ->name('settings.localization.translations.update');
         Route::get('settings/red-days', [AjaxRedDayController::class, 'getRedDays'])->middleware('permission:settings.view')->name('settings.red-days.index');
         Route::delete('settings/red-days/{id}', [AjaxRedDayController::class, 'destroy'])->middleware('permission:settings.update')->name('settings.red-days.destroy');
         Route::put('settings/red-days/{id}', [AjaxRedDayController::class, 'update'])->middleware('permission:settings.update')->name('settings.red-days.update');

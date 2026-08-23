@@ -17,7 +17,7 @@ return [
         'dashboard'=>'Dashboard','appointments'=>'Appointments','customers'=>'Customers','services'=>'Services','staff'=>'Staff',
         'schedules'=>'Schedules and exceptions','master_services'=>'Employee services','rooms'=>'Rooms','settings'=>'Site settings',
         'promo_codes'=>'Promo codes','notifications'=>'Notifications','reschedule_requests'=>'Reschedule requests',
-        'activity_logs'=>'Activity log','roles'=>'Roles and permissions','profile'=>'Own profile',
+        'activity_logs'=>'Activity log','roles'=>'Roles and permissions','profile'=>'Own profile','work_time'=>'Work time',
     ],
     'actions' => ['view'=>'View','create'=>'Create','update'=>'Edit','delete'=>'Delete / cancel','status'=>'Change status','message'=>'Message customer','manage'=>'Full management'],
     'system_roles' => ['super-admin'=>'Administrator','master'=>'Specialist','customer'=>'Customer','receptionist'=>'Receptionist'],

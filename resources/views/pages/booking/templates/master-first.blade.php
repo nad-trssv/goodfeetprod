@@ -4,7 +4,7 @@
     <div class="row g-4">
       <aside class="col-12 col-lg-4 col-xl-3"><div class="master-directory"><h2 class="fs-6 mb-3">{{ __('msg.choose_master') }}</h2><div id="altMasters">
         @foreach($bookingMasters as $master)
-          <button type="button" class="alt-master master-directory__item" data-master-id="{{ $master['id'] }}"><x-ui.avatar :name="$master['name']" :src="($settings['show_master_images'] ?? true) ? $master['profile_photo_url'] : null" :size="84" /><span><strong>{{ $master['name'] }} @if($master['vacation'] ?? null)<span title="В отпуске {{ $master['vacation']['from'] }}–{{ $master['vacation']['to'] }}">🌴</span>@endif</strong><small>{{ $master['professional_title'] ?: __('msg.booking_view_services') }}</small>@if($master['vacation'] ?? null)<small>В отпуске {{ $master['vacation']['from'] }}–{{ $master['vacation']['to'] }}</small>@endif</span><i class="fa-solid fa-chevron-right"></i></button>
+          <button type="button" class="alt-master master-directory__item" data-master-id="{{ $master['id'] }}"><x-ui.avatar :name="$master['name']" :src="($settings['show_master_images'] ?? true) ? $master['profile_photo_url'] : null" :size="84" /><span><strong>{{ $master['name'] }} @if($master['vacation'] ?? null)<span title="{{ __('msg.on_vacation') }} {{ $master['vacation']['from'] }}–{{ $master['vacation']['to'] }}">🌴</span>@endif</strong><small>{{ $master['professional_title'] ?: __('msg.booking_view_services') }}</small>@if($master['vacation'] ?? null)<small>{{ __('msg.on_vacation') }} {{ $master['vacation']['from'] }}–{{ $master['vacation']['to'] }}</small>@endif</span><i class="fa-solid fa-chevron-right"></i></button>
         @endforeach
       </div></div></aside>
       <main class="col-12 col-lg-8 col-xl-9">

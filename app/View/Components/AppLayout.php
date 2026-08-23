@@ -7,6 +7,7 @@ use App\Models\Services;
 use Illuminate\View\Component;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Storage;
+use App\Services\Localization\SiteLocaleRegistry;
 
 class AppLayout extends Component
 {
@@ -38,7 +39,7 @@ class AppLayout extends Component
             $descriptions = $formattedSettings['company_short_description'] ?? [];
             $locale = app()->getLocale();
             $formattedSettings['company_short_description'] = is_array($descriptions)
-                ? ($descriptions[$locale] ?? $descriptions[config('app.fallback_locale')] ?? '')
+                ? ($descriptions[$locale] ?? $descriptions[app(SiteLocaleRegistry::class)->defaultCode()] ?? '')
                 : '';
     
             return $formattedSettings;
@@ -57,7 +58,8 @@ class AppLayout extends Component
             ->orderBy('id')
             ->get()
             ->map(function ($service) use ($locale) {
-                $service->translation = $service->translations->firstWhere('locale', $locale);
+                $service->translation = $service->translations->firstWhere('locale', $locale)
+                    ?? $service->translations->firstWhere('locale', app(SiteLocaleRegistry::class)->defaultCode());
                 return $service;
             });
     }

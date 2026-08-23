@@ -92,8 +92,16 @@ class ActivityLogEntry extends Model
             'master_service.settings_updated' => $isOwnAction ? 'settings_updated_own' : 'settings_updated_employee',
             'master_service.toggle_failed' => 'toggle_failed',
             'master_service.settings_update_failed' => 'settings_update_failed',
+            'work_time.started' => 'work_time_started',
+            'work_time.paused' => 'work_time_paused',
+            'work_time.resumed' => 'work_time_resumed',
+            'work_time.stopped' => 'work_time_stopped',
             default => null,
         };
+
+        if (str_starts_with((string) $key, 'work_time_')) {
+            return __('admin_work_time.activity.'.str_replace('work_time_', '', $key));
+        }
 
         return $key ? __('admin_activity_events.'.$key) : $this->message;
     }

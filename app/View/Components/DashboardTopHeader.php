@@ -3,6 +3,7 @@
 namespace App\View\Components;
 
 use App\Services\Crm\CrmChatAccess;
+use App\Services\WorkTimeService;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
@@ -28,6 +29,7 @@ class DashboardTopHeader extends Component
             'unreadNotificationCount' => $user?->unreadNotifications()->count() ?? 0,
             'headerNotifications' => $user?->unreadNotifications()->latest()->limit(6)->get() ?? collect(),
             'unreadCrmChatCount' => $user?->hasPermission('crm.chat.view') ? app(CrmChatAccess::class)->unreadCount($user) : 0,
+            'workShiftState' => $user ? app(WorkTimeService::class)->state($user) : ['status' => 'inactive'],
         ]);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\RedDay;
 use App\Models\SiteSettings;
 use Illuminate\Support\Facades\Storage;
+use App\Services\Localization\SiteLocaleRegistry;
 
 class SettingService
 {
@@ -125,7 +126,7 @@ class SettingService
 
             if ($key === 'company_short_description') {
                 $value = collect($value ?? [])->mapWithKeys(function ($html, $locale) {
-                    if (!array_key_exists($locale, config('supported_locales'))) {
+                    if (!array_key_exists($locale, app(SiteLocaleRegistry::class)->installedLabels())) {
                         return [];
                     }
 

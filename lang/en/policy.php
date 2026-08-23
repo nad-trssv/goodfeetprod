@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'title' => 'Privacy policy',
+    'last_updated' => 'Last updated: :date',
+    'company_identity' => ':company, registration number :registration_number',
+    'intro' => ':company is committed to protecting the privacy of visitors to :url. Please read this privacy policy to understand how we use your personal data.',
+    'changes' => ':company may amend this privacy policy without prior notice. We recommend checking it whenever you visit the website.',
+    'collected_title' => 'What personal data do we collect?',
+    'collected_intro' => 'When you complete forms on the website, you may be asked to provide the following data:',
+    'collected_name' => 'first and last name',
+    'collected_phone' => 'phone number',
+    'collected_email' => 'email address',
+    'collected_other' => 'other data you choose to provide',
+    'security_title' => 'Security',
+    'security_text' => 'Data transmission over the internet or another network cannot be considered 100% secure, but we take appropriate measures to protect your personal data.',
+    'contacts_title' => 'Contact',
+    'contacts_intro' => 'You may contact us to:',
+    'contacts_information' => 'request information about your personal data',
+    'contacts_inaccuracy' => 'report inaccurate personal data',
+    'contacts_usage' => 'ask how personal data is used',
+    'contacts_noncompliance' => 'report non-compliance with this privacy policy',
+    'contacts_outro' => 'Please contact a representative of :company using the details below.',
+    'email' => 'Email address: :email',
+    'deletion_title' => 'Customer account and data deletion',
+    'deletion_text' => 'A signed-in customer can delete their account from the “My bookings” page. Deletion must be confirmed with the current password. Account contact details, customer notes and uploaded files are deleted. A service record may be retained in anonymised form when necessary for accounting, legal claims or another statutory obligation. If a customer cannot sign in or wishes to make an additional data protection request, they can contact the email address stated in this policy.',
+];

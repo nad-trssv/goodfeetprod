@@ -35,8 +35,8 @@
         <div class="col-12 col-lg-4"><label class="form-label" for="history-search">{{ __('customer.search') }}</label><input id="history-search" class="form-control" type="search" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="{{ __('customer.service') }} / {{ __('customer.master') }}"></div>
         <div class="col-12 col-sm-6 col-lg-2"><label class="form-label" for="history-service">{{ __('customer.service') }}</label><select id="history-service" class="form-select" name="service_id"><option value="">{{ __('customer.all_services') }}</option>@foreach($services as $service)<option value="{{ $service->id }}" @selected(($filters['service_id'] ?? null) == $service->id)>{{ $service->getTranslation(app()->getLocale(), 'name') ?? $service->name }}</option>@endforeach</select></div>
         <div class="col-12 col-sm-6 col-lg-2"><label class="form-label" for="history-master">{{ __('customer.master') }}</label><select id="history-master" class="form-select" name="master_id"><option value="">{{ __('customer.all_masters') }}</option>@foreach($masters as $master)<option value="{{ $master->id }}" @selected(($filters['master_id'] ?? null) == $master->id)>{{ $master->name }}</option>@endforeach</select></div>
-        <div class="col-6 col-lg-2"><label class="form-label" for="history-from">Дата от</label><input id="history-from" class="form-control" type="date" name="date_from" value="{{ $filters['date_from'] ?? '' }}"></div>
-        <div class="col-6 col-lg-2"><label class="form-label" for="history-to">Дата до</label><input id="history-to" class="form-control" type="date" name="date_to" value="{{ $filters['date_to'] ?? '' }}"></div>
+        <div class="col-6 col-lg-2"><label class="form-label" for="history-from">{{ __('customer.date_from') }}</label><input id="history-from" class="form-control" type="date" name="date_from" value="{{ $filters['date_from'] ?? '' }}"></div>
+        <div class="col-6 col-lg-2"><label class="form-label" for="history-to">{{ __('customer.date_to') }}</label><input id="history-to" class="form-control" type="date" name="date_to" value="{{ $filters['date_to'] ?? '' }}"></div>
         <div class="col-12 d-flex flex-wrap gap-2"><button class="btn btn-primary" type="submit">{{ __('customer.find') }}</button><a class="btn btn-outline-secondary" href="{{ route('customer.dashboard') }}">{{ __('customer.reset') }}</a></div>
       </div>
     </form>
@@ -65,7 +65,7 @@
       </table>
     </div>
     @if($history->hasPages())
-      <nav class="mt-3" aria-label="Страницы истории записей">{{ $history->onEachSide(1)->links() }}</nav>
+      <nav class="mt-3" aria-label="{{ __('customer.history_pages') }}">{{ $history->onEachSide(1)->links() }}</nav>
     @endif
 
   </div></section>

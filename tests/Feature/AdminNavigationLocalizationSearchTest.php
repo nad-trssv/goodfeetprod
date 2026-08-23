@@ -31,6 +31,18 @@ class AdminNavigationLocalizationSearchTest extends TestCase
             ->assertSee('aria-expanded="false"', false);
     }
 
+    public function test_topbar_uses_one_quick_actions_dropdown_and_sidebar_groups_have_safe_spacing(): void
+    {
+        $master = $this->staff('Master', '@navigation_master', 'ru');
+
+        $this->actingAs($master)->get(route('admin.search'))
+            ->assertOk()
+            ->assertSee('admin-quick-link d-flex', false)
+            ->assertSee('admin-nav-group-toggle', false)
+            ->assertSee('padding-right:1.35rem', false)
+            ->assertDontSee('d-none d-xxl-flex align-items-center gap-1', false);
+    }
+
     public function test_employee_can_save_own_locale_and_admin_can_change_an_employee_locale(): void
     {
         $admin = $this->staff('Admin', '@locale_admin', 'et');

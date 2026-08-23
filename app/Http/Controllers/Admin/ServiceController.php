@@ -7,6 +7,7 @@ use App\Http\Requests\Service\ServiceRequest;
 use App\Models\Services;
 use App\Services\ServiceService;
 use Illuminate\Http\Request;
+use App\Services\Localization\SiteLocaleRegistry;
 
 class ServiceController extends Controller
 {
@@ -92,13 +93,15 @@ class ServiceController extends Controller
         return redirect()->back()->with('success', __('admin_messages.status_updated'));
     }
 
-    public function editLanguages(Services $service)
+    public function editLanguages(Services $service, SiteLocaleRegistry $locales)
     {
         $translations = $service->translations()->get()->keyBy('locale');
     
         return view('admin.service.update.languages', [
             'service' => $service,
             'translations' => $translations,
+            'siteLocales' => $locales->installed(),
+            'defaultSiteLocale' => $locales->defaultCode(),
         ]);
     }
 

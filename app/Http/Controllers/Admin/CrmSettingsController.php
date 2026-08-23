@@ -9,6 +9,7 @@ use App\Models\CrmTag;
 use App\Models\SiteSettings;
 use App\Models\User;
 use App\Services\Crm\CrmChatSettings;
+use App\Services\Localization\SiteLocaleRegistry;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,12 +19,18 @@ use Illuminate\View\View;
 
 class CrmSettingsController extends Controller
 {
-    public function index(Request $request, CrmChatSettings $settings): View
+    public function index(Request $request, CrmChatSettings $settings, SiteLocaleRegistry $locales): View
     {
         $this->authorizeAdmin($request);
         $staff=User::with(['role.permissions','chatSettings'])->get()->filter->isStaff()->sortBy('name')->values();
         $tags=CrmTag::withCount('customers')->orderBy('name')->get();
-        return view('admin.crm.settings', ['settings'=>$settings->all(),'staff'=>$staff,'tags'=>$tags]);
+        return view('admin.crm.settings', [
+            'settings'=>$settings->all(),
+            'staff'=>$staff,
+            'tags'=>$tags,
+            'siteLocales'=>$locales->installed(),
+            'defaultSiteLocale'=>$locales->defaultCode(),
+        ]);
     }
 
     public function update(CrmSettingsRequest $request): RedirectResponse

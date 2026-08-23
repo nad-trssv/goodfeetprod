@@ -103,7 +103,7 @@ class ProfileService
     private function validatedTitles(array $titles): array
     {
         return collect($titles)
-            ->only(array_keys(config('supported_locales')))
+            ->only(array_keys(app(\App\Services\Localization\SiteLocaleRegistry::class)->installedLabels()))
             ->map(fn ($title) => trim(strip_tags((string) $title)))
             ->filter()
             ->all();

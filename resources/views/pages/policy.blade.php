@@ -1,53 +1,45 @@
-@section('title', 'GoodFeet - Privaatsuspoliitika')
-@push('styles')
-@endpush
+@section('title', __('policy.title'))
 <x-app-layout>
-
+    @php
+        $companyName = $settings['company_name'] ?? config('app.name');
+        $registrationNumber = $settings['company_registration_number'] ?? '—';
+        $companyEmail = $settings['company_email'] ?? '';
+    @endphp
     <section class="py-10 overflow-hidden">
         <div class="container">
-            <div class="contacts mb-4">
-                <h2 class="fw-semibold fc_main mt-4 mb-1  ff_secondary">Privaatsuspoliitika</h2>
-                <h4 h6 class="fw-light fc_secondary   ff_secondary">Viimane uuendus: 28.03.2025</h4>
-                <h4 class="fw-light fc_secondary   ff_secondary">GoodFeet OÜ, Reg.nr. 17186049</h4>
-                <h4 class="fw-light fc_secondary   ff_secondary">GoodFeet OÜ soovib kaitsta veebilehekülje
-                    https://goodfeet.ee külastajate privaatsust. Palun tutvuge meie privaatsuspoliitikaga, see aitab
-                    teil mõista, kuidas me teie isikuandmeid kasutame.</h4>
-                <h4 class="fw-light fc_secondary   ff_secondary">GoodFeet OÜ-l on õigus privaatsuspoliitikat igal ajal
-                    ette teatamata muuta, seega palun kontrollige seda iga kord, kui meie kodulehte külastate.</h4>
+            <article class="contacts mb-4">
+                <h1 class="fw-semibold fc_main mt-4 mb-1 ff_secondary">{{ __('policy.title') }}</h1>
+                <p class="fw-light fc_secondary ff_secondary">{{ __('policy.last_updated', ['date' => '28.03.2025']) }}</p>
+                <p class="fw-light fc_secondary ff_secondary">{{ __('policy.company_identity', ['company' => $companyName, 'registration_number' => $registrationNumber]) }}</p>
+                <p class="fw-light fc_secondary ff_secondary">{{ __('policy.intro', ['company' => $companyName, 'url' => config('app.url')]) }}</p>
+                <p class="fw-light fc_secondary ff_secondary">{{ __('policy.changes', ['company' => $companyName]) }}</p>
 
-                <h2 class="fw-semibold fc_main mt-4 mb-1  ff_secondary">Milliseid isikuandmeid me kogume?</h2>
-                <h4 class="fw-light fc_secondary   ff_secondary">Kodulehe kontakt vormi täitmisel võidakse teil paluda
-                    esitada mõningaid isiklikke andmeid, näiteks</h4>
+                <h2 class="fw-semibold fc_main mt-4 mb-1 ff_secondary">{{ __('policy.collected_title') }}</h2>
+                <p class="fw-light fc_secondary ff_secondary">{{ __('policy.collected_intro') }}</p>
                 <ul>
-                    <li class="ff_secondary">perekonnanimi, eesnimi</li>
-                    <li class="ff_secondary">telefoninumber</li>
-                    <li class="ff_secondary">e-posti aadress</li>
-                    <li class="ff_secondary">muud andmed, mida soovite esitada</li>
+                    @foreach(['collected_name', 'collected_phone', 'collected_email', 'collected_other'] as $key)
+                        <li class="ff_secondary">{{ __('policy.'.$key) }}</li>
+                    @endforeach
                 </ul>
 
-                <h2 class="fw-semibold fc_main mt-4 mb-1  ff_secondary">Ohutus</h2>
-                <h4 class="fw-light fc_secondary   ff_secondary">Kahjuks ei saa andmeedastust Interneti või mõne muu
-                    võrgu kaudu 100% turvaliseks pidada, kuid teeme asjakohaseid samme teie isikuandmete turvalisuse
-                    tagamiseks.</h4>
+                <h2 class="fw-semibold fc_main mt-4 mb-1 ff_secondary">{{ __('policy.security_title') }}</h2>
+                <p class="fw-light fc_secondary ff_secondary">{{ __('policy.security_text') }}</p>
 
-                <h2 class="fw-semibold fc_main mt-4 mb-1  ff_secondary">Kontaktid</h2>
-                <h4 class="fw-light fc_secondary   ff_secondary">Kui soovite</h4>
+                <h2 class="fw-semibold fc_main mt-4 mb-1 ff_secondary">{{ __('policy.contacts_title') }}</h2>
+                <p class="fw-light fc_secondary ff_secondary">{{ __('policy.contacts_intro') }}</p>
                 <ul>
-                    <li class="ff_secondary">küsida isikuandmete teavet,</li>
-                    <li class="ff_secondary">teavitada isikuandmete ebatäpsustest,</li>
-                    <li class="ff_secondary">küsida, kuidas isikuandmeid kasutatakse,</li>
-                    <li class="ff_secondary">teavitada käesoleva privaatsuspoliitika sätete mittejärgimisest,</li>
+                    @foreach(['contacts_information', 'contacts_inaccuracy', 'contacts_usage', 'contacts_noncompliance'] as $key)
+                        <li class="ff_secondary">{{ __('policy.'.$key) }}</li>
+                    @endforeach
                 </ul>
-                <h4 class="fw-light fc_secondary   ff_secondary">siis palun kontakteeruge allpool toodud kontaktandmetel
-                    GoodFeet OÜ esindajaga.</h4>
-                <h4 class="fw-light fc_secondary   ff_secondary">E-posti aadress: nadjatarassova@gmail.com</h4>
+                <p class="fw-light fc_secondary ff_secondary">{{ __('policy.contacts_outro', ['company' => $companyName]) }}</p>
+                @if($companyEmail)
+                    <p class="fw-light fc_secondary ff_secondary">{{ __('policy.email', ['email' => $companyEmail]) }}</p>
+                @endif
 
-                <h2 class="fw-semibold fc_main mt-4 mb-1 ff_secondary">Kliendikonto ja andmete kustutamine</h2>
-                <h4 class="fw-light fc_secondary ff_secondary">Sisselogitud klient saab oma konto kustutada lehel „Minu broneeringud“. Kustutamine tuleb kinnitada kehtiva parooliga. Konto kontaktandmed, kliendi märkused ja üleslaaditud failid kustutatakse. Osutatud teenuse kirje võidakse säilitada anonüümitud kujul, kui see on vajalik raamatupidamise, õigusnõuete või muu seadusest tuleneva kohustuse täitmiseks. Kui klient ei saa kontole sisse logida või soovib esitada täiendava andmekaitsetaotluse, saab ta võtta ühendust käesolevas poliitikas toodud e-posti aadressil.</h4>
-            </div>
+                <h2 class="fw-semibold fc_main mt-4 mb-1 ff_secondary">{{ __('policy.deletion_title') }}</h2>
+                <p class="fw-light fc_secondary ff_secondary">{{ __('policy.deletion_text') }}</p>
+            </article>
         </div>
     </section>
-
-    @push('scripts')
-    @endpush
 </x-app-layout>

@@ -55,6 +55,17 @@ class AdminNotificationTest extends TestCase
         $this->assertSame('cancelled_by_client', $master->notifications()->first()->data['event']);
     }
 
+    public function test_admin_layout_contains_a_local_notification_sound_for_new_counts(): void
+    {
+        [, $master] = $this->records();
+
+        $this->actingAs($master)->get(route('notifications.index'))
+            ->assertOk()
+            ->assertSee('window.adminNotificationSound', false)
+            ->assertSee('window.AudioContext', false)
+            ->assertSee('Number(data.count) > previousCount', false);
+    }
+
     public function test_opening_appointment_directly_marks_its_notifications_as_read(): void
     {
         [, $master, , $appointment] = $this->records();

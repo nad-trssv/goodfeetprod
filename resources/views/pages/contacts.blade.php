@@ -47,7 +47,7 @@ https://cdn.jsdelivr.net/npm/before-after-slider@1.0.1/dist/slider.bundle.min.js
                     </p>
                   </div>
                   <div class="contact">
-                    <p class="title fc_primary fs-7 fs-md-6 fw-bold mb-1"><i class="fa-solid fa-envelope me-2"></i>Email</p>
+                    <p class="title fc_primary fs-7 fs-md-6 fw-bold mb-1"><i class="fa-solid fa-envelope me-2"></i>{{ __('msg.email') }}</p>
                     <a href="mailto:{{ $settings['company_email'] }}" class="desc fc_light fs-9 fs-md-8 fs-xl-7 ff_secondary">{{ $settings['company_email'] }}</a>
                   </div>
                 </div>

@@ -8,6 +8,7 @@ use Illuminate\Contracts\View\View;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Response;
+use App\Services\Localization\SiteLocaleRegistry;
 
 class PageController extends Controller
 {
@@ -31,7 +32,7 @@ class PageController extends Controller
             ->map(function ($service) use ($locale, $today) {
                 $service->translation = $service->translations
                     ->where('locale', $locale)
-                    ->first();
+                    ->first() ?? $service->translations->firstWhere('locale', app(SiteLocaleRegistry::class)->defaultCode());
 
                 $ruleToday = $service->ruleForDate($today);
 
@@ -52,8 +53,9 @@ class PageController extends Controller
     public function gallery(): View
     {
         $locale = app()->getLocale();
-        $services = Services::where('status', 1)->where('is_deleted', 0)->orderBy('id', 'asc')->get()->map(function ($service) use ($locale) {
-            $service->translation = $service->translations()->where('locale', $locale)->first();
+        $services = Services::with('translations')->where('status', 1)->where('is_deleted', 0)->orderBy('id', 'asc')->get()->map(function ($service) use ($locale) {
+            $service->translation = $service->translations->firstWhere('locale', $locale)
+                ?? $service->translations->firstWhere('locale', app(SiteLocaleRegistry::class)->defaultCode());
             return $service;
         });
         return view('pages.gallery.index', [
@@ -64,8 +66,9 @@ class PageController extends Controller
     public function contacts(): View
     {
         $locale = app()->getLocale();
-        $services = Services::where('status', 1)->where('is_deleted', 0)->orderBy('id', 'asc')->get()->map(function ($service) use ($locale) {
-            $service->translation = $service->translations()->where('locale', $locale)->first();
+        $services = Services::with('translations')->where('status', 1)->where('is_deleted', 0)->orderBy('id', 'asc')->get()->map(function ($service) use ($locale) {
+            $service->translation = $service->translations->firstWhere('locale', $locale)
+                ?? $service->translations->firstWhere('locale', app(SiteLocaleRegistry::class)->defaultCode());
             return $service;
         });
         return view('pages.contacts', [
@@ -90,7 +93,7 @@ class PageController extends Controller
             $locale = app()->getLocale();
             $descriptions = $formattedSettings['company_short_description'] ?? [];
             $formattedSettings['company_short_description'] = is_array($descriptions)
-                ? ($descriptions[$locale] ?? $descriptions[config('app.fallback_locale')] ?? '')
+                ? ($descriptions[$locale] ?? $descriptions[app(SiteLocaleRegistry::class)->defaultCode()] ?? '')
                 : '';
     
             return $formattedSettings;
@@ -114,8 +117,9 @@ class PageController extends Controller
     public function policy(): View
     {
         $locale = app()->getLocale();
-        $services = Services::where('status', 1)->where('is_deleted', 0)->orderBy('id', 'asc')->get()->map(function ($service) use ($locale) {
-            $service->translation = $service->translations()->where('locale', $locale)->first();
+        $services = Services::with('translations')->where('status', 1)->where('is_deleted', 0)->orderBy('id', 'asc')->get()->map(function ($service) use ($locale) {
+            $service->translation = $service->translations->firstWhere('locale', $locale)
+                ?? $service->translations->firstWhere('locale', app(SiteLocaleRegistry::class)->defaultCode());
             return $service;
         });
         

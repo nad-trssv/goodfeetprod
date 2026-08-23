@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Services\Media\OptimizedImageStorage;
 use Carbon\Carbon;
+use App\Services\Localization\SiteLocaleRegistry;
 
 class ServiceService
 {
@@ -103,14 +104,18 @@ class ServiceService
                         'service_id' => $this->service->id,
                     ]);
                 }
-                $this->service->translations()->updateOrCreate(
-                    ['locale' => 'ru'],
-                    [
-                        'name' => $request['name'],
-                        'short_description' => $request['short_description'],
-                        'full_description' => $request['full_description'],
-                    ]
-                );
+                $defaultLocale = app(SiteLocaleRegistry::class)->defaultCode();
+                foreach (array_keys(app(SiteLocaleRegistry::class)->installedLabels()) as $locale) {
+                    $this->service->translations()->updateOrCreate(
+                        ['locale' => $locale],
+                        [
+                            'is_inherited' => $locale !== $defaultLocale,
+                            'name' => $request['name'],
+                            'short_description' => $request['short_description'],
+                            'full_description' => $request['full_description'],
+                        ]
+                    );
+                }
             });
             return $this->service;
 
@@ -149,23 +154,30 @@ class ServiceService
                 $price_can_change = $request->has('price_can_change') ? 1 : 0; 
                 $hasTranslations = $request->has('translations') && !empty($request->translations);
 
-                $name = $hasTranslations && isset($request->translations['ru']['name']) 
-                    ? $request->translations['ru']['name'] 
+                $defaultLocale = app(SiteLocaleRegistry::class)->defaultCode();
+                $name = $hasTranslations && isset($request->translations[$defaultLocale]['name'])
+                    ? $request->translations[$defaultLocale]['name']
                     : $request['name'];
     
-                $shortDescription = $hasTranslations && isset($request->translations['ru']['short_description']) 
-                    ? $request->translations['ru']['short_description'] 
+                $shortDescription = $hasTranslations && isset($request->translations[$defaultLocale]['short_description'])
+                    ? $request->translations[$defaultLocale]['short_description']
                     : $request['short_description'] ?? null;
     
-                $fullDescription = $hasTranslations && isset($request->translations['ru']['full_description']) 
-                    ? $request->translations['ru']['full_description'] 
+                $fullDescription = $hasTranslations && isset($request->translations[$defaultLocale]['full_description'])
+                    ? $request->translations[$defaultLocale]['full_description']
                     : $request['full_description'] ?? null;
 
                 if ($hasTranslations) {
                     foreach ($request->translations as $locale => $translation) {
+                        $existing = $service->translations()->where('locale', $locale)->first();
+                        $unchangedInherited = $existing?->is_inherited
+                            && $existing->name === $translation['name']
+                            && $existing->short_description === ($translation['short_description'] ?? null)
+                            && $existing->full_description === ($translation['full_description'] ?? null);
                         $service->translations()->updateOrCreate(
                             ['locale' => $locale],
                             [
+                                'is_inherited' => $locale !== $defaultLocale && $unchangedInherited,
                                 'name' => $translation['name'],
                                 'short_description' => $translation['short_description'] ?? null,
                                 'full_description' => $translation['full_description'] ?? null,
@@ -178,6 +190,7 @@ class ServiceService
                         'full_description' => $fullDescription,
                         'image_path' => $newImagePath ?? $service->image_path,
                     ]);
+                    $this->refreshInheritedTranslations($service, $defaultLocale);
                 } else {
                     $service->update([
                         'name' => $name,
@@ -194,13 +207,15 @@ class ServiceService
                         $service->users()->sync($request->masters);
                     }
                     $service->translations()->updateOrCreate(
-                        ['locale' => 'ru'],
+                        ['locale' => $defaultLocale],
                         [
+                            'is_inherited' => false,
                             'name' => $name,
                             'short_description' => $shortDescription,
                             'full_description' => $fullDescription,
                         ]
                     );
+                    $this->refreshInheritedTranslations($service, $defaultLocale);
                 }
     
                 $this->service = $service;
@@ -281,5 +296,19 @@ class ServiceService
             1600,
             1200,
         );
+    }
+
+    private function refreshInheritedTranslations(Services $service, string $defaultLocale): void
+    {
+        $source = $service->translations()->where('locale', $defaultLocale)->first();
+        if (! $source) {
+            return;
+        }
+
+        $service->translations()->where('is_inherited', true)->update([
+            'name' => $source->name,
+            'short_description' => $source->short_description,
+            'full_description' => $source->full_description,
+        ]);
     }
 }

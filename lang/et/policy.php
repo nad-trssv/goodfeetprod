@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'title' => 'Privaatsuspoliitika',
+    'last_updated' => 'Viimane uuendus: :date',
+    'company_identity' => ':company, registrikood :registration_number',
+    'intro' => ':company soovib kaitsta veebilehe :url külastajate privaatsust. Palun tutvuge privaatsuspoliitikaga, et mõista, kuidas me teie isikuandmeid kasutame.',
+    'changes' => ':company võib privaatsuspoliitikat ette teatamata muuta. Soovitame seda kontrollida iga kord, kui meie veebilehte külastate.',
+    'collected_title' => 'Milliseid isikuandmeid me kogume?',
+    'collected_intro' => 'Veebilehe vormide täitmisel võidakse teil paluda esitada järgmised andmed:',
+    'collected_name' => 'ees- ja perekonnanimi',
+    'collected_phone' => 'telefoninumber',
+    'collected_email' => 'e-posti aadress',
+    'collected_other' => 'muud andmed, mida soovite esitada',
+    'security_title' => 'Ohutus',
+    'security_text' => 'Andmeedastust interneti või muu võrgu kaudu ei saa pidada 100% turvaliseks, kuid rakendame teie isikuandmete kaitsmiseks asjakohaseid meetmeid.',
+    'contacts_title' => 'Kontaktid',
+    'contacts_intro' => 'Võite meiega ühendust võtta, et:',
+    'contacts_information' => 'küsida teavet oma isikuandmete kohta',
+    'contacts_inaccuracy' => 'teavitada isikuandmete ebatäpsustest',
+    'contacts_usage' => 'küsida, kuidas isikuandmeid kasutatakse',
+    'contacts_noncompliance' => 'teavitada privaatsuspoliitika sätete mittejärgimisest',
+    'contacts_outro' => 'Palun võtke ühendust ettevõtte :company esindajaga allpool toodud kontaktandmetel.',
+    'email' => 'E-posti aadress: :email',
+    'deletion_title' => 'Kliendikonto ja andmete kustutamine',
+    'deletion_text' => 'Sisselogitud klient saab oma konto kustutada lehel „Minu broneeringud“. Kustutamine tuleb kinnitada kehtiva parooliga. Konto kontaktandmed, kliendi märkused ja üleslaaditud failid kustutatakse. Osutatud teenuse kirje võidakse säilitada anonüümitud kujul, kui see on vajalik raamatupidamise, õigusnõuete või muu seadusest tuleneva kohustuse täitmiseks. Kui klient ei saa kontole sisse logida või soovib esitada täiendava andmekaitsetaotluse, saab ta võtta ühendust selles poliitikas toodud e-posti aadressil.',
+];
