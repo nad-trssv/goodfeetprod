@@ -19,6 +19,6 @@ return [
         'promo_codes'=>'Promo codes','notifications'=>'Notifications','reschedule_requests'=>'Reschedule requests',
         'activity_logs'=>'Activity log','roles'=>'Roles and permissions','profile'=>'Own profile','work_time'=>'Work time',
     ],
-    'actions' => ['view'=>'View','create'=>'Create','update'=>'Edit','delete'=>'Delete / cancel','status'=>'Change status','message'=>'Message customer','manage'=>'Full management'],
+    'actions' => ['view'=>'View','create'=>'Create','update'=>'Edit','delete'=>'Delete / cancel','status'=>'Change status','message'=>'Message customer','manage'=>'Full management','full'=>'Full analytics'],
     'system_roles' => ['super-admin'=>'Administrator','master'=>'Specialist','customer'=>'Customer','receptionist'=>'Receptionist'],
 ];

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Settings;
 
+use App\Rules\SiteDomainEmail;
 use Illuminate\Foundation\Http\FormRequest;
 
 class MainSettingsRequest extends FormRequest
@@ -24,6 +25,7 @@ class MainSettingsRequest extends FormRequest
         return [
             'company_name' => 'required|string|max:255',
             'company_email' => 'required|email|max:255',
+            'technical_support_sender_email' => ['sometimes', 'required', 'email:rfc', 'max:255', new SiteDomainEmail],
             'company_phone' => 'nullable|string|max:20',
             'company_address' => 'nullable|string|max:255',
             'company_registration_number' => 'nullable|string|max:100',

@@ -96,11 +96,16 @@ class ActivityLogEntry extends Model
             'work_time.paused' => 'work_time_paused',
             'work_time.resumed' => 'work_time_resumed',
             'work_time.stopped' => 'work_time_stopped',
+            'technical_support.sent' => 'technical_support_sent',
             default => null,
         };
 
         if (str_starts_with((string) $key, 'work_time_')) {
             return __('admin_work_time.activity.'.str_replace('work_time_', '', $key));
+        }
+
+        if ($key === 'technical_support_sent') {
+            return __('admin_support.activity');
         }
 
         return $key ? __('admin_activity_events.'.$key) : $this->message;

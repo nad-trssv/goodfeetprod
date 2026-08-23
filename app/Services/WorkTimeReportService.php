@@ -142,7 +142,7 @@ class WorkTimeReportService
                 ]);
             }
 
-            $cursor->addDay();
+            $cursor = $cursor->addDay();
         }
 
         return $days->reverse()->values();

@@ -142,6 +142,12 @@
                   <div class="invalid-feedback" id="company_email-error"></div>
                 </div>
                 <div class="col-md-6">
+                  <label class="form-label" for="technical_support_sender_email">{{ __('admin_settings.technical_support_sender_email') }}</label>
+                  <input class="form-control" id="technical_support_sender_email" name="technical_support_sender_email" type="email" placeholder="info@example.com" required>
+                  <div class="form-text">{{ __('admin_settings.technical_support_sender_hint') }}</div>
+                  <div class="invalid-feedback" id="technical_support_sender_email-error"></div>
+                </div>
+                <div class="col-md-6">
                   <label class="form-label">{{ __('admin_staff.phone') }}</label>
                   <input class="form-control" id="company_phone" type="text" pattern="^\+.*">
                   <div class="invalid-feedback" id="company_phone-error"></div>
@@ -669,7 +675,7 @@
         e.preventDefault();
         tinymce.triggerSave();
         const formData = new FormData(this);
-        ['company_name', 'company_email', 'company_phone', 'company_address',
+        ['company_name', 'company_email', 'technical_support_sender_email', 'company_phone', 'company_address',
          'company_registration_number', 'company_bank_account',
          'google', 'waze', 'social_media_facebook', 'social_media_youtube',
          'social_media_instagram', 'social_media_twitter'].forEach(function(key) {

@@ -2,6 +2,7 @@
 
 return [
     'dashboard.view' => ['group' => 'dashboard', 'action' => 'view'],
+    'dashboard.full' => ['group' => 'dashboard', 'action' => 'full'],
 
     'appointments.view' => ['group' => 'appointments', 'action' => 'view'],
     'appointments.create' => ['group' => 'appointments', 'action' => 'create'],

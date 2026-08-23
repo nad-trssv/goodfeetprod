@@ -1,626 +1,128 @@
 @section('title', __('admin_dashboard.title'))
-@push('styles')
-@endpush
 <x-dashboard-layout>
-    <div class="content">
-        {{-- Мои показатели --}}
-        <div class="d-flex mb-4 pt-8" id="scrollspyStats">
-            <span class="fa-stack me-2 ms-n1">
-                <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                <i class="fa-inverse fa-stack-1x fas fa-user text-primary-subtle"></i>
-            </span>
-            <div class="col">
-                <h3 class="mb-0 text-primary position-relative fw-bold">
-                    <span class="bg-body pe-2">{{ __('admin_dashboard.my_month') }}</span>
-                    <span
-                        class="border border-primary position-absolute top-50 translate-middle-y w-100 start-0 z-n1"></span>
-                </h3>
-                <p class="mb-0">{{ __('admin_dashboard.my_stats_hint') }}</p>
-            </div>
-        </div>
-        <div class="px-3 mb-5">
-            <div class="row justify-content-start">
-                <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
-                    <i class="fa-solid fa-users text-primary fs-5 lh-1"></i>
-                    <h1 class="fs-5 pt-3">{{ $stats['clients'] }}</h1>
-                    <p class="fs-9 mb-0">{{ __('admin_dashboard.clients') }}</p>
-                </div>
-                <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
-                    <i class="fa-solid fa-calendar-xmark text-warning fs-5 lh-1"></i>
-                    <h1 class="fs-5 pt-3">{{ $stats['redDays'] }}</h1>
-                    <p class="fs-9 mb-0">{{ __('admin_dashboard.closed_days') }}</p>
-                </div>
-                <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
-                    <span class="uil uil-wallet text-success fs-5 lh-1"></span>
-                    <h1 class="fs-5 pt-3">{{ $stats['salary'] }} &euro;</h1>
-                    <p class="fs-9 mb-0">{{ __('admin_dashboard.revenue') }}</p>
-                </div>
-                <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
-                    <i class="uil fs-5 lh-1 uil-chart-growth text-primary"></i>
-                    <h1 class="fs-5 pt-3 {{ $stats['clientsDifference'] > 0 ? 'text-success' : '' }}">
-                        {{ $stats['clientsDifference'] }}</h1>
-                    <p class="fs-9 mb-0">{{ __('admin_dashboard.clients_vs_last') }}</p>
-                </div>
-                <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
-                    <i class="uil fs-5 lh-1 uil-chart-line text-primary"></i>
-                    <h1 class="fs-5 pt-3 {{ $stats['salaryDifference'] > 0 ? 'text-success' : '' }}">
-                        {{ $stats['salaryDifference'] }} &euro;</h1>
-                    <p class="fs-9 mb-0">{{ __('admin_dashboard.revenue_vs_last') }}</p>
-                </div>
-            </div>
-        </div>
-
-        {{-- Общие показатели — только для администратора --}}
-        @can('is-superadmin')
-            <div class="d-flex mb-4">
-                <span class="fa-stack me-2 ms-n1">
-                    <i class="fas fa-circle fa-stack-2x text-success"></i>
-                    <i class="fa-inverse fa-stack-1x fas fa-users text-success-subtle"></i>
-                </span>
-                <div class="col">
-                    <h3 class="mb-0 text-success position-relative fw-bold">
-                        <span class="bg-body pe-2">{{ __('admin_dashboard.all_month') }}</span>
-                        <span
-                            class="border border-success position-absolute top-50 translate-middle-y w-100 start-0 z-n1"></span>
-                    </h3>
-                    <p class="mb-0">{{ __('admin_dashboard.all_stats_hint') }}</p>
-                </div>
-            </div>
-            <div class="px-3 mb-5">
-                <div class="row justify-content-start">
-                    <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
-                        <i class="fa-solid fa-users text-success fs-5 lh-1"></i>
-                        <h1 class="fs-5 pt-3">{{ $stats['all_clients'] }}</h1>
-                        <p class="fs-9 mb-0">{{ __('admin_dashboard.all_clients') }}</p>
-                    </div>
-                    <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
-                        <span class="uil uil-wallet text-success fs-5 lh-1"></span>
-                        <h1 class="fs-5 pt-3">{{ $stats['all_salary'] }} &euro;</h1>
-                        <p class="fs-9 mb-0">{{ __('admin_dashboard.all_revenue') }}</p>
-                    </div>
-                    <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
-                        <i class="uil fs-5 lh-1 uil-chart-growth text-success"></i>
-                        <h1 class="fs-5 pt-3 {{ $stats['all_clientsDifference'] > 0 ? 'text-success' : '' }}">
-                            {{ $stats['all_clientsDifference'] }}</h1>
-                        <p class="fs-9 mb-0">{{ __('admin_dashboard.clients_vs_last') }}</p>
-                    </div>
-                    <div class="col-6 col-md-4 col-xxl-2 text-center border-translucent border-end border-bottom pb-4">
-                        <i class="uil fs-5 lh-1 uil-chart-line text-success"></i>
-                        <h1 class="fs-5 pt-3 {{ $stats['all_salaryDifference'] > 0 ? 'text-success' : '' }}">
-                            {{ $stats['all_salaryDifference'] }} &euro;</h1>
-                        <p class="fs-9 mb-0">{{ __('admin_dashboard.revenue_vs_last') }}</p>
-                    </div>
-                </div>
-            </div>
+  <div class="content pt-8">
+    <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-4">
+      <div>
+        <h2 class="mb-1">{{ __('admin_dashboard.operational_title') }}</h2>
+        <p class="text-body-tertiary mb-0">{{ __('admin_dashboard.today_clients', ['count' => $today['total']]) }}</p>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        @can('dashboard.full')
+          <a class="btn btn-phoenix-primary" href="{{ route('admin.dashboard.full') }}"><span data-feather="bar-chart-2" class="me-2"></span>{{ __('admin_dashboard.open_full') }}</a>
         @endcan
-        <div class="mx-lg-n4 mt-3">
-            <div class="row g-3">
-                <div class="col-12 col-xl-6 col-xxl-8">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <div class="card-title mb-1">
-                                <h3 class="text-body-emphasis">{{ __('admin_dashboard.activity') }}</h3>
-                            </div>
-                            @if ($appointments)
-                                <p class="text-body-tertiary mb-4">{{ __('admin_dashboard.today_clients',['count'=>count($appointments)]) }}</p>
-                            @endif
-                            <div class="timeline-vertical timeline-with-details">
-                                @if ($appointments)
-                                    @foreach ($appointments as $event)
-                                        <div class="timeline-item position-relative event-item"
-                                            data-start="{{ $event['start'] }}" data-end="{{ $event['end'] }}">
-                                            <div class="row mt-2 pt-2">
-                                                <div class="col-12 col-md-auto d-flex">
-                                                    <div class="timeline-item-date order-1 order-md-0 me-md-4">
-                                                        <p
-                                                            class="fs-10 fw-semibold text-body-tertiary text-opacity-85 text-end text-uppercase event-item">
-                                                            {{ \Carbon\Carbon::parse($event['start'])->locale(App::getLocale())->translatedFormat('d M, Y') }}
-                                                            <br class="d-none d-md-block" />
-                                                            {{ \Carbon\Carbon::parse($event['start'])->format('H:i') }}
-                                                        </p>
-                                                    </div>
-                                                    <div class="timeline-item-bar position-md-relative me-3 me-md-0">
-                                                        <div class="icon-item icon-item-sm rounded-7 shadow-none dashboard_whatToday_icon"
-                                                            style="@if ($event['textColor']) background-color: {{ $event['textColor'] }} !important; @endif">
-                                                            <span
-                                                                class="dashboard_whatToday_icon_svg fa-solid fa-chess text-primary-dark fs-10"></span>
-                                                        </div>
-                                                        @if (!$loop->last)
-                                                            <span class="timeline-bar border-end border-dashed"></span>
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                                <div class="col">
-                                                    <div class="timeline-item-content ps-6 ps-md-3">
-                                                        <h5 class="fs-9 lh-sm">{{ $event['title'] }} (
-                                                            <span>{{ $event['price'] }} </span>&euro; )
-                                                        </h5>
-                                                        <p class="fs-9 mb-0 event-item">{{ __('admin_dashboard.client') }}: <a class="fw-semibold"
-                                                            href="{{ route('calendar.show', $event['id']) }}">{{ $event['client_lastname'] }},
-                                                            {{ $event['client_name'] }}</a></p>
-                                                        <p class="fs-9 mb-0 event-item">{{ __('admin_dashboard.employee') }}: <a class="fw-semibold"
-                                                            href="{{ route('profile.index') }}">{{ $event['master'] }}</a></p>
-                                                        <p class="fs-9 mb-0 event-item">{{ __('admin_dashboard.client_phone') }}: <a class="fw-semibold"
-                                                            href="tel:{{ $event['client_phone'] }}">{{ $event['client_phone'] }}</a></p>
-                                                        @if($event['room'])
-                                                            <p class="fs-9 mb-0 event-item">{{ __('admin_dashboard.room') }}: <a class="fw-semibold"
-                                                                href="{{ route('admin.rooms.today') }}">{{ $event['room'] }}</a></p>
-                                                        @endif
-                                                        @if ($event['description'])
-                                                            <p class="fs-9 text-body-secondary mb-5 event-item">
-                                                                {{ $event['description'] }}</p>
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                @else
-                                    <p class="text-body-tertiary mb-4">{{ __('admin_dashboard.today_clients',['count'=>0]) }}</p>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-xl-6 col-xxl-4">
-                    {{-- <div class="card h-100">
-                <div class="card-body">
-                  <div class="row g-0">
-                    <div class="col-6 border-1 border-bottom border-translucent border-end py-2"> <a class="btn btn-link ps-2 fs-8 text-body-secondary text-primary-hover fw-semibold d-flex flex-column d-xxl-inline-block" href="#!"><svg class="svg-inline--fa fa-user-group me-2 mb-2 mb-xxl-0" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="user-group" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" data-fa-i2svg=""><path fill="currentColor" d="M96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM0 482.3C0 383.8 79.8 304 178.3 304h91.4C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7H29.7C13.3 512 0 498.7 0 482.3zM609.3 512H471.4c5.4-9.4 8.6-20.3 8.6-32v-8c0-60.7-27.1-115.2-69.8-151.8c2.4-.1 4.7-.2 7.1-.2h61.4C567.8 320 640 392.2 640 481.3c0 17-13.8 30.7-30.7 30.7zM432 256c-31 0-59-12.6-79.3-32.9C372.4 196.5 384 163.6 384 128c0-26.8-6.6-52.1-18.3-74.3C384.3 40.1 407.2 32 432 32c61.9 0 112 50.1 112 112s-50.1 112-112 112z"></path></svg><!-- <span class="fa-solid fa-user-group me-2 mb-2 mb-xxl-0"></span> Font Awesome fontawesome.com -->Followers</a></div>
-                    <div class="col-6 border-1 border-bottom border-translucent py-2"><a class="btn btn-link fs-8 text-body-secondary text-primary-hover fw-semibold d-flex flex-column d-xxl-inline-block" href="#!"><svg class="svg-inline--fa fa-users me-2 mb-2 mb-xxl-0" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="users" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" data-fa-i2svg=""><path fill="currentColor" d="M144 0a80 80 0 1 1 0 160A80 80 0 1 1 144 0zM512 0a80 80 0 1 1 0 160A80 80 0 1 1 512 0zM0 298.7C0 239.8 47.8 192 106.7 192h42.7c15.9 0 31 3.5 44.6 9.7c-1.3 7.2-1.9 14.7-1.9 22.3c0 38.2 16.8 72.5 43.3 96c-.2 0-.4 0-.7 0H21.3C9.6 320 0 310.4 0 298.7zM405.3 320c-.2 0-.4 0-.7 0c26.6-23.5 43.3-57.8 43.3-96c0-7.6-.7-15-1.9-22.3c13.6-6.3 28.7-9.7 44.6-9.7h42.7C592.2 192 640 239.8 640 298.7c0 11.8-9.6 21.3-21.3 21.3H405.3zM224 224a96 96 0 1 1 192 0 96 96 0 1 1 -192 0zM128 485.3C128 411.7 187.7 352 261.3 352H378.7C452.3 352 512 411.7 512 485.3c0 14.7-11.9 26.7-26.7 26.7H154.7c-14.7 0-26.7-11.9-26.7-26.7z"></path></svg><!-- <span class="fa-solid fa-users me-2 mb-2 mb-xxl-0"></span> Font Awesome fontawesome.com -->Communities</a></div>
-                    <div class="col-6 border-1 border-bottom border-translucent border-end py-2"><a class="btn btn-link ps-2 fs-8 text-body-secondary text-primary-hover fw-semibold d-flex flex-column d-xxl-inline-block" href="#!"><svg class="svg-inline--fa fa-photo-film me-2 mb-2 mb-xxl-0" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="photo-film" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" data-fa-i2svg=""><path fill="currentColor" d="M256 0H576c35.3 0 64 28.7 64 64V288c0 35.3-28.7 64-64 64H256c-35.3 0-64-28.7-64-64V64c0-35.3 28.7-64 64-64zM476 106.7C471.5 100 464 96 456 96s-15.5 4-20 10.7l-56 84L362.7 169c-4.6-5.7-11.5-9-18.7-9s-14.2 3.3-18.7 9l-64 80c-5.8 7.2-6.9 17.1-2.9 25.4s12.4 13.6 21.6 13.6h80 48H552c8.9 0 17-4.9 21.2-12.7s3.7-17.3-1.2-24.6l-96-144zM336 96a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zM64 128h96V384v32c0 17.7 14.3 32 32 32H320c17.7 0 32-14.3 32-32V384H512v64c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V192c0-35.3 28.7-64 64-64zm8 64c-8.8 0-16 7.2-16 16v16c0 8.8 7.2 16 16 16H88c8.8 0 16-7.2 16-16V208c0-8.8-7.2-16-16-16H72zm0 104c-8.8 0-16 7.2-16 16v16c0 8.8 7.2 16 16 16H88c8.8 0 16-7.2 16-16V312c0-8.8-7.2-16-16-16H72zm0 104c-8.8 0-16 7.2-16 16v16c0 8.8 7.2 16 16 16H88c8.8 0 16-7.2 16-16V416c0-8.8-7.2-16-16-16H72zm336 16v16c0 8.8 7.2 16 16 16h16c8.8 0 16-7.2 16-16V416c0-8.8-7.2-16-16-16H424c-8.8 0-16 7.2-16 16z"></path></svg><!-- <span class="fa-solid fa-photo-film me-2 mb-2 mb-xxl-0"></span> Font Awesome fontawesome.com -->Media Files</a></div>
-                    <div class="col-6 border-1 border-bottom border-translucent py-2"><a class="btn btn-link fs-8 text-body-secondary text-primary-hover fw-semibold d-flex flex-column d-xxl-inline-block" href="#!"><svg class="svg-inline--fa fa-calendar-days me-2 mb-2 mb-xxl-0" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="calendar-days" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M128 0c17.7 0 32 14.3 32 32V64H288V32c0-17.7 14.3-32 32-32s32 14.3 32 32V64h48c26.5 0 48 21.5 48 48v48H0V112C0 85.5 21.5 64 48 64H96V32c0-17.7 14.3-32 32-32zM0 192H448V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V192zm64 80v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H80c-8.8 0-16 7.2-16 16zm128 0v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H208c-8.8 0-16 7.2-16 16zm144-16c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H336zM64 400v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V400c0-8.8-7.2-16-16-16H80c-8.8 0-16 7.2-16 16zm144-16c-8.8 0-16 7.2-16 16v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V400c0-8.8-7.2-16-16-16H208zm112 16v32c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V400c0-8.8-7.2-16-16-16H336c-8.8 0-16 7.2-16 16z"></path></svg><!-- <span class="fa-solid fa-calendar-days me-2 mb-2 mb-xxl-0"></span> Font Awesome fontawesome.com -->Events</a></div>
-                    <div class="col-6 border-1 border-end border-translucent py-2"><a class="btn btn-link ps-2 fs-8 text-body-secondary text-primary-hover fw-semibold d-flex flex-column d-xxl-inline-block" href="#!"><svg class="svg-inline--fa fa-dice me-2 mb-2 mb-xxl-0" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="dice" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" data-fa-i2svg=""><path fill="currentColor" d="M274.9 34.3c-28.1-28.1-73.7-28.1-101.8 0L34.3 173.1c-28.1 28.1-28.1 73.7 0 101.8L173.1 413.7c28.1 28.1 73.7 28.1 101.8 0L413.7 274.9c28.1-28.1 28.1-73.7 0-101.8L274.9 34.3zM200 224a24 24 0 1 1 48 0 24 24 0 1 1 -48 0zM96 200a24 24 0 1 1 0 48 24 24 0 1 1 0-48zM224 376a24 24 0 1 1 0-48 24 24 0 1 1 0 48zM352 200a24 24 0 1 1 0 48 24 24 0 1 1 0-48zM224 120a24 24 0 1 1 0-48 24 24 0 1 1 0 48zm96 328c0 35.3 28.7 64 64 64H576c35.3 0 64-28.7 64-64V256c0-35.3-28.7-64-64-64H461.7c11.6 36 3.1 77-25.4 105.5L320 413.8V448zM480 328a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"></path></svg><!-- <span class="fa-solid fa-dice me-2 mb-2 mb-xxl-0"></span> Font Awesome fontawesome.com -->Games</a></div>
-                    <div class="col-6 border-1 py-2"><a class="btn btn-link fs-8 text-body-secondary text-primary-hover fw-semibold d-flex flex-column d-xxl-inline-block" href="#!"><svg class="svg-inline--fa fa-user-gear me-2 mb-2 mb-xxl-0" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="user-gear" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" data-fa-i2svg=""><path fill="currentColor" d="M224 0a128 128 0 1 1 0 256A128 128 0 1 1 224 0zM178.3 304h91.4c11.8 0 23.4 1.2 34.5 3.3c-2.1 18.5 7.4 35.6 21.8 44.8c-16.6 10.6-26.7 31.6-20 53.3c4 12.9 9.4 25.5 16.4 37.6s15.2 23.1 24.4 33c15.7 16.9 39.6 18.4 57.2 8.7v.9c0 9.2 2.7 18.5 7.9 26.3H29.7C13.3 512 0 498.7 0 482.3C0 383.8 79.8 304 178.3 304zM436 218.2c0-7 4.5-13.3 11.3-14.8c10.5-2.4 21.5-3.7 32.7-3.7s22.2 1.3 32.7 3.7c6.8 1.5 11.3 7.8 11.3 14.8v17.7c0 7.8 4.8 14.8 11.6 18.7c6.8 3.9 15.1 4.5 21.8 .6l13.8-7.9c6.1-3.5 13.7-2.7 18.5 2.4c7.6 8.1 14.3 17.2 20.1 27.2s10.3 20.4 13.5 31c2.1 6.7-1.1 13.7-7.2 17.2l-14.4 8.3c-6.5 3.7-10 10.9-10 18.4s3.5 14.7 10 18.4l14.4 8.3c6.1 3.5 9.2 10.5 7.2 17.2c-3.3 10.6-7.8 21-13.5 31s-12.5 19.1-20.1 27.2c-4.8 5.1-12.5 5.9-18.5 2.4l-13.8-7.9c-6.7-3.9-15.1-3.3-21.8 .6c-6.8 3.9-11.6 10.9-11.6 18.7v17.7c0 7-4.5 13.3-11.3 14.8c-10.5 2.4-21.5 3.7-32.7 3.7s-22.2-1.3-32.7-3.7c-6.8-1.5-11.3-7.8-11.3-14.8V467.8c0-7.9-4.9-14.9-11.7-18.9c-6.8-3.9-15.2-4.5-22-.6l-13.5 7.8c-6.1 3.5-13.7 2.7-18.5-2.4c-7.6-8.1-14.3-17.2-20.1-27.2s-10.3-20.4-13.5-31c-2.1-6.7 1.1-13.7 7.2-17.2l14-8.1c6.5-3.8 10.1-11.1 10.1-18.6s-3.5-14.8-10.1-18.6l-14-8.1c-6.1-3.5-9.2-10.5-7.2-17.2c3.3-10.6 7.7-21 13.5-31s12.5-19.1 20.1-27.2c4.8-5.1 12.4-5.9 18.5-2.4l13.6 7.8c6.8 3.9 15.2 3.3 22-.6c6.9-3.9 11.7-11 11.7-18.9V218.2zm92.1 133.5a48.1 48.1 0 1 0 -96.1 0 48.1 48.1 0 1 0 96.1 0z"></path></svg><!-- <span class="fa-solid fa-user-gear me-2 mb-2 mb-xxl-0"></span> Font Awesome fontawesome.com -->Settings </a></div>
-                  </div>
-                </div>
-              </div> --}}
-                </div>
-            </div>
-        </div>
-
-        <div class="mx-lg-n4 mt-3 mb-3">
-            <div class="row g-3">
-                <div class="col-12 col-xl-4 col-xxl-4">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <div class="card-title mb-1 d-flex pb-4 border-bottom border-dashed align-items-end">
-                                <h3 class="flex-1 mb-0">{{ __('admin_dashboard.my_events') }}</h3>
-                                <a class="fw-bold fs-9" href="{{ route('master.time-off.index') }}">{{ __('admin_dashboard.all') }}</a>
-                            </div>
-                            @if ($events->isNotEmpty())
-                                @foreach ($events as $event)
-                                    <div class="py-3 border-bottom border-dashed">
-                                        <p class="text-warning fs-10 mb-0 fw-bold mb-1 text-uppercase">
-                                            @if ($event['start_time'] !== null && $event['end_time'] !== null)
-                                                {{ \Carbon\Carbon::parse($event['date'] . ' ' . $event['start_time'])->translatedFormat('D, M d H:i') }}
-                                                -
-                                                {{ \Carbon\Carbon::parse($event['date'] . ' ' . $event['end_time'])->translatedFormat('H:i') }}
-                                            @else
-                                                {{ \Carbon\Carbon::parse($event['date'])->translatedFormat('D, M d') }}
-                                            @endif
-                                        </p>
-                                        @if ($event['type'] === 'redday')
-                                            <p class="fw-bold mb-1"><i
-                                                    class="far fa-calendar-times text-danger me-1"></i>{{ $event['name'] }}
-                                            </p>
-                                        @elseif ($event['type'] === 'birthday')
-                                            <p class="fw-bold mb-1">
-                                                <i
-                                                    class="fas fa-birthday-cake text-warning me-1"></i>{{ $event['name'] }}
-                                                @if ($event->celebrant)
-                                                    — @can('is-superadmin')
-                                                        <a class="text-primary"
-                                                            href="{{ route('member.edit', $event->celebrant->id) }}">{{ $event->celebrant->name }}</a>
-                                                    @else
-                                                        <span
-                                                            class="fw-bold text-primary">{{ $event->celebrant->name }}</span>
-                                                    @endcan
-                                                @endif
-                                            </p>
-                                        @elseif ($event['type'] === 'event')
-                                            <p class="fw-bold mb-1"><i
-                                                    class="far fa-bell text-success me-1"></i>{{ $event['name'] }}</p>
-                                        @endif
-                                        @if ($event['description'])
-                                            <p class="fs-10 text-body-tertiary mb-0">{{ $event['description'] }}</p>
-                                        @endif
-                                    </div>
-                                @endforeach
-                            @else
-                                <p class="text-body-tertiary my-4">{{ __('admin_dashboard.no_events') }}</p>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-
-                @can('is-superadmin')
-                    <div class="col-12 col-xl-4 col-xxl-4">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <div class="card-title mb-1 d-flex pb-4 border-bottom border-dashed align-items-end">
-                                    <h3 class="flex-1 mb-0">{{ __('admin_dashboard.all_events') }}</h3>
-                                    <a class="fw-bold fs-9" href="{{ route('calendarListAllMasters') }}">{{ __('admin_dashboard.all_appointments') }}</a>
-                                </div>
-                                @if ($allEvents->isNotEmpty())
-                                    @foreach ($allEvents as $event)
-                                        <div class="py-3 border-bottom border-dashed">
-                                            <p class="text-warning fs-10 mb-0 fw-bold mb-1 text-uppercase">
-                                                @if ($event['start_time'] !== null && $event['end_time'] !== null)
-                                                    {{ \Carbon\Carbon::parse($event['date'] . ' ' . $event['start_time'])->translatedFormat('D, M d H:i') }}
-                                                    -
-                                                    {{ \Carbon\Carbon::parse($event['date'] . ' ' . $event['end_time'])->translatedFormat('H:i') }}
-                                                @else
-                                                    {{ \Carbon\Carbon::parse($event['date'])->translatedFormat('D, M d') }}
-                                                @endif
-                                            </p>
-                                            @if ($event['type'] === 'redday')
-                                                <p class="fw-bold mb-1"><i
-                                                        class="far fa-calendar-times text-danger me-1"></i>{{ $event['name'] }}
-                                                </p>
-                                            @elseif ($event['type'] === 'birthday')
-                                                <p class="fw-bold mb-1">
-                                                    <i
-                                                        class="fas fa-birthday-cake text-warning me-1"></i>{{ $event['name'] }}
-                                                    @if ($event->celebrant)
-                                                        — <a class="text-primary"
-                                                            href="{{ route('member.edit', $event->celebrant->id) }}">{{ $event->celebrant->name }}</a>
-                                                    @endif
-                                                </p>
-                                            @elseif ($event['type'] === 'event')
-                                                <p class="fw-bold mb-1"><i
-                                                        class="far fa-bell text-success me-1"></i>{{ $event['name'] }}</p>
-                                                @if ($event['organized_by'] && $event->organizer)
-                                                    <p class="text-body-secondary fs-9 mb-1">{{ __('admin_dashboard.organizer') }}: <span
-                                                            class="fw-bold">{{ $event->organizer->name }}</span></p>
-                                                @endif
-                                            @endif
-                                            @if ($event['description'])
-                                                <p class="fs-10 text-body-tertiary mb-0">{{ $event['description'] }}</p>
-                                            @endif
-                                        </div>
-                                    @endforeach
-                                @else
-                                    <p class="text-body-tertiary my-4">{{ __('admin_dashboard.no_events') }}</p>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                @endcan
-            </div>
-        </div>
-        <div class="row col-12 my-6">
-            <div class="col-6">
-                <div class="quickcode-chart-by-month-sales" style="min-height:300px"></div>
-            </div>
-            <div class="col-6">
-                <div class="quickcode-chart-by-month-clients" style="min-height:300px"></div>
-            </div>
-        </div>
-        <div class="row col-12 my-2">
-            <div class="col-12">
-                <div class="quickcode-gauge-by-day" style="min-height:300px"></div>
-            </div>
-        </div>
-
-        @can('is-superadmin')
-            <div class="row col-12 my-6">
-                <div class="col-6">
-                    <div class="quickcode-chart-all-by-month-sales" style="min-height:300px"></div>
-                </div>
-                <div class="col-6">
-                    <div class="quickcode-chart-all-by-month-clients" style="min-height:300px"></div>
-                </div>
-            </div>
+        @can('appointments.create')
+          <a class="btn btn-primary" href="{{ route('calendar.create', ['date' => today()->toDateString()]) }}"><span data-feather="plus" class="me-2"></span>{{ __('admin_nav.new_appointment') }}</a>
         @endcan
-        <x-dashboard-footer />
+      </div>
     </div>
-    @push('scripts')
-        <script>
-            //Activity today
-            const items = document.querySelectorAll('.event-item');
-            const now = new Date();
-            items.forEach((item) => {
-                const start = new Date(item.dataset.start);
-                const end = new Date(item.dataset.end);
-                if (now >= start && now <= end) {
-                    item.classList.add('active');
-                } else {
-                    item.classList.remove('active');
-                }
-            });
 
-            const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--phoenix-primary-rgb').trim();
-            var chartDataByMonth = @json($chartDataByMonth);
+    @if($action_required > 0)
+      <div class="alert alert-subtle-warning d-flex align-items-center justify-content-between gap-3 flex-wrap">
+        <span><span data-feather="alert-triangle" class="me-2"></span>{{ __('admin_dashboard.action_required', ['count' => $action_required]) }}</span>
+        <a class="btn btn-sm btn-warning" href="{{ route('dashboard.appointments.unresolved', ['scope'=>'own']) }}">{{ __('admin_dashboard.resolve_statuses') }}</a>
+      </div>
+    @endif
 
-            // Мои продажи по месяцам
-            var chartContainerByMonthSales = document.querySelector('.quickcode-chart-by-month-sales');
-            var myChartByMonthSales = echarts.init(chartContainerByMonthSales);
-            myChartByMonthSales.setOption({
-                title: {
-                    text: @json(__('admin_dashboard.my_sales_chart')),
-                    left: 'center',
-                    textStyle: {
-                        color: `rgba(${primaryColor}, 1)`
-                    }
-                },
-                tooltip: {
-                    trigger: 'axis'
-                },
-                legend: {
-                    data: [@json(__('admin_dashboard.sales'))],
-                    top: '10%'
-                },
-                xAxis: {
-                    type: 'category',
-                    data: chartDataByMonth.labels
-                },
-                yAxis: [{
-                    type: 'value',
-                    name: @json(__('admin_dashboard.sales')),
-                    axisLabel: {
-                        formatter: '{value} €'
-                    }
-                }],
-                series: [{
-                    name: @json(__('admin_dashboard.sales')),
-                    type: 'line',
-                    smooth: true,
-                    data: chartDataByMonth.data,
-                    lineStyle: {
-                        color: 'rgba(255, 158, 68, 1)'
-                    },
-                    areaStyle: {
-                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                                offset: 0,
-                                color: 'rgba(255, 148, 0, 0.8)'
-                            },
-                            {
-                                offset: 1,
-                                color: 'rgba(255, 70, 131, 0.2)'
-                            }
-                        ])
-                    },
-                    itemStyle: {
-                        color: '#ef8b00'
-                    }
-                }]
-            });
+    <h4 class="mb-3">{{ __('admin_dashboard.today_section') }}</h4>
+    <div class="row g-3 mb-5">
+      <div class="col-6 col-xl-3"><x-dashboard-metric-card :label="__('admin_dashboard.appointments')" :value="$today['total']" icon="calendar" /></div>
+      <div class="col-6 col-xl-3"><x-dashboard-metric-card :label="__('admin_dashboard.completed')" :value="$today['completed']" icon="check-circle" tone="success" /></div>
+      <div class="col-6 col-xl-3"><x-dashboard-metric-card :label="__('admin_dashboard.today_revenue')" :value="number_format($today['revenue'], 2, ',', ' ').' €'" icon="credit-card" tone="success" /></div>
+      <div class="col-6 col-xl-3"><x-dashboard-metric-card :label="__('admin_dashboard.no_show_loss')" :value="number_format($today['lost_revenue'], 2, ',', ' ').' €'" icon="user-x" tone="danger" /></div>
+    </div>
 
-            // Мои клиенты по месяцам
-            var chartContainerByMonthClients = document.querySelector('.quickcode-chart-by-month-clients');
-            var myChartByMonthClients = echarts.init(chartContainerByMonthClients);
-            myChartByMonthClients.setOption({
-                title: {
-                    text: @json(__('admin_dashboard.my_clients_chart')),
-                    left: 'center',
-                    textStyle: {
-                        color: `rgba(${primaryColor}, 1)`
-                    }
-                },
-                tooltip: {
-                    trigger: 'axis'
-                },
-                legend: {
-                    data: [@json(__('admin_dashboard.clients'))],
-                    top: '10%'
-                },
-                xAxis: {
-                    type: 'category',
-                    data: chartDataByMonth.labels
-                },
-                yAxis: [{
-                    type: 'value',
-                    name: @json(__('admin_dashboard.clients'))
-                }],
-                series: [{
-                    name: @json(__('admin_dashboard.clients')),
-                    type: 'bar',
-                    data: chartDataByMonth.counts,
-                    itemStyle: {
-                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                                offset: 0,
-                                color: 'rgba(137, 110, 181, 0.8)'
-                            },
-                            {
-                                offset: 1,
-                                color: 'rgba(190, 178, 211, 0.2)'
-                            }
-                        ])
-                    }
-                }]
-            });
+    <div class="row g-3 mb-5">
+      <div class="col-12 col-xl-8">
+        <div class="card h-100">
+          <div class="card-header d-flex align-items-center justify-content-between gap-2">
+            <h4 class="mb-0">{{ __('admin_dashboard.today_schedule') }}</h4>
+            <a class="btn btn-sm btn-phoenix-secondary" href="{{ route('appointments.today') }}">{{ __('admin_dashboard.open_today') }}</a>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead><tr><th class="ps-3">{{ __('admin_dashboard.time') }}</th><th>{{ __('admin_dashboard.client') }}</th><th>{{ __('admin_dashboard.service') }}</th><th>{{ __('admin_dashboard.employee') }}</th><th>{{ __('appointment_statuses.status') }}</th><th></th></tr></thead>
+              <tbody>
+                @forelse($appointments as $appointment)
+                  <tr>
+                    <td class="ps-3 fw-semibold text-nowrap">{{ $appointment['start']->format('H:i') }}–{{ $appointment['end']->format('H:i') }}</td>
+                    <td>{{ trim($appointment['client_name'].' '.$appointment['client_lastname']) ?: '—' }}</td>
+                    <td>{{ $appointment['title'] ?: '—' }}</td>
+                    <td>{{ $appointment['master'] ?: '—' }}</td>
+                    <td><x-appointments.status :status="$appointment['status']" /></td>
+                    <td class="text-end pe-3"><a class="btn btn-sm btn-phoenix-primary" href="{{ route('calendar.show', $appointment['id']) }}" aria-label="{{ __('admin_dashboard.open_appointment') }}"><span data-feather="arrow-right"></span></a></td>
+                  </tr>
+                @empty
+                  <tr><td colspan="6" class="text-center text-body-tertiary py-5">{{ __('admin_dashboard.no_appointments_today') }}</td></tr>
+                @endforelse
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-xl-4">
+        <div class="d-grid gap-3 h-100">
+          @foreach([['label' => __('admin_dashboard.current_appointment'), 'item' => $current_appointment, 'tone' => 'success'], ['label' => __('admin_dashboard.next_appointment'), 'item' => $next_appointment, 'tone' => 'primary']] as $spotlight)
+            <div class="card border-start border-4 border-{{ $spotlight['tone'] }}">
+              <div class="card-body p-3">
+                <div class="text-body-tertiary fs-9 text-uppercase fw-semibold mb-2">{{ $spotlight['label'] }}</div>
+                @if($spotlight['item'])
+                  <div class="fw-bold">{{ $spotlight['item']->appointment_start->format('H:i') }} · {{ $spotlight['item']->service?->getTranslation(app()->getLocale(), 'name') ?? $spotlight['item']->service?->name }}</div>
+                  <div class="text-body-secondary fs-9 mt-1">{{ trim($spotlight['item']->client_name.' '.$spotlight['item']->client_lastname) }}</div>
+                  <a class="stretched-link" href="{{ route('calendar.show', $spotlight['item']) }}"><span class="visually-hidden">{{ __('admin_dashboard.open_appointment') }}</span></a>
+                @else
+                  <div class="text-body-tertiary">{{ __('admin_dashboard.none') }}</div>
+                @endif
+              </div>
+            </div>
+          @endforeach
+        </div>
+      </div>
+    </div>
 
-            // Gauge активности
-            var chartGauge = document.querySelector('.quickcode-gauge-by-day');
-            var myChartGauge = echarts.init(chartGauge);
-            myChartGauge.setOption({
-                title: {
-                    text: @json(__('admin_dashboard.activity_today')),
-                    left: 'center',
-                    textStyle: {
-                        color: `rgba(${primaryColor}, 1)`
-                    }
-                },
-                tooltip: {
-                    trigger: 'axis',
-                    padding: [7, 10],
-                    backgroundColor: `rgba(${primaryColor}, 1)`,
-                    borderColor: `rgba(${primaryColor}, 1)`,
-                    textStyle: {
-                        color: `rgba(${primaryColor}, 1)`
-                    },
-                    borderWidth: 1,
-                    transitionDuration: 0,
-                    axisPointer: {
-                        type: 'none'
-                    }
-                },
-                series: [{
-                    type: 'gauge',
-                    center: ['50%', '60%'],
-                    radius: '100%',
-                    startAngle: 180,
-                    endAngle: 0,
-                    progress: {
-                        show: true,
-                        width: 18,
-                        itemStyle: {
-                            color: '#a088c2',
-                            shadowColor: '#c6bcd5'
-                        }
-                    },
-                    itemStyle: {
-                        color: `rgba(${primaryColor}, 1)`,
-                        shadowColor: `rgba(${primaryColor}, 1)`,
-                        shadowBlur: 10,
-                        shadowOffsetX: 2,
-                        shadowOffsetY: 2
-                    },
-                    axisLine: {
-                        lineStyle: {
-                            width: 18,
-                            color: [
-                                [1, '#cfd1d9']
-                            ]
-                        }
-                    },
-                    axisTick: {
-                        show: false
-                    },
-                    splitLine: {
-                        lineStyle: {
-                            width: 2,
-                            color: '#cfd1d9'
-                        }
-                    },
-                    axisLabel: {
-                        distance: 25,
-                        color: '#acaeb9'
-                    },
-                    anchor: {
-                        show: true,
-                        showAbove: true,
-                        size: 25,
-                        itemStyle: {
-                            color: `rgba(${primaryColor}, 1)`
-                        }
-                    },
-                    title: {
-                        show: false
-                    },
-                    detail: {
-                        valueAnimation: true,
-                        fontSize: 80,
-                        offsetCenter: [0, '70%']
-                    },
-                    data: [{
-                        value: @json($activity),
-                        detail: {
-                            fontSize: 30,
-                            color: `rgba(${primaryColor}, 1)`,
-                            offsetCenter: [0, '40%'],
-                            formatter: '{value}%'
-                        }
-                    }]
-                }]
-            });
+    <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+      <div><h4 class="mb-1">{{ __('admin_dashboard.my_month') }}</h4><p class="text-body-tertiary mb-0">{{ __('admin_dashboard.my_stats_hint') }}</p></div>
+      <span class="badge badge-phoenix badge-phoenix-secondary">{{ now()->translatedFormat('F Y') }}</span>
+    </div>
+    <div class="row g-3">
+      <div class="col-6 col-xl-3"><x-dashboard-metric-card :label="__('admin_dashboard.revenue')" :value="number_format($personal_month['revenue'], 2, ',', ' ').' €'" icon="trending-up" tone="success" /></div>
+      <div class="col-6 col-xl-3"><x-dashboard-metric-card :label="__('admin_dashboard.unique_clients')" :value="$personal_month['unique_clients']" icon="users" /></div>
+      <div class="col-6 col-xl-3"><x-dashboard-metric-card :label="__('admin_dashboard.worked_time')" :value="\App\Services\WorkTimeReportService::formatDuration($work_time['worked_seconds'])" icon="clock" tone="info" :hint="__('admin_dashboard.hours_minutes')" /></div>
+      <div class="col-6 col-xl-3"><x-dashboard-metric-card :label="__('admin_dashboard.my_no_shows')" :value="$personal_month['no_show']" icon="user-minus" tone="danger" :hint="number_format($personal_month['lost_revenue'], 2, ',', ' ').' €'" /></div>
+    </div>
 
-            @can('is-superadmin')
-                // Все продажи по месяцам (все мастера)
-                var chartContainerAllByMonthSales = document.querySelector('.quickcode-chart-all-by-month-sales');
-                if (chartContainerAllByMonthSales) {
-                    var myChartAllByMonthSales = echarts.init(chartContainerAllByMonthSales);
-                    myChartAllByMonthSales.setOption({
-                        title: {
-                            text: @json(__('admin_dashboard.all_sales_chart')),
-                            left: 'center',
-                            textStyle: {
-                                color: `rgba(${primaryColor}, 1)`
-                            }
-                        },
-                        tooltip: {
-                            trigger: 'axis'
-                        },
-                        legend: {
-                            data: [@json(__('admin_dashboard.sales'))],
-                            top: '10%'
-                        },
-                        xAxis: {
-                            type: 'category',
-                            data: chartDataByMonth.all_labels
-                        },
-                        yAxis: [{
-                            type: 'value',
-                            name: @json(__('admin_dashboard.sales')),
-                            axisLabel: {
-                                formatter: '{value} €'
-                            }
-                        }],
-                        series: [{
-                            name: @json(__('admin_dashboard.sales')),
-                            type: 'line',
-                            smooth: true,
-                            data: chartDataByMonth.all_data,
-                            lineStyle: {
-                                color: '#28a745'
-                            },
-                            areaStyle: {
-                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                                        offset: 0,
-                                        color: 'rgba(40, 167, 69, 0.8)'
-                                    },
-                                    {
-                                        offset: 1,
-                                        color: 'rgba(40, 167, 69, 0.1)'
-                                    }
-                                ])
-                            },
-                            itemStyle: {
-                                color: '#28a745'
-                            }
-                        }]
-                    });
-                }
+    <div class="d-flex flex-column flex-md-row align-items-md-end justify-content-between gap-2 mt-5 mb-3">
+      <div><h4 class="mb-1">{{ __('admin_dashboard.my_customer_segments') }}</h4><p class="text-body-tertiary mb-0">{{ __('admin_dashboard.customer_segments_hint') }}</p></div>
+      <a class="btn btn-sm btn-phoenix-primary align-self-start" href="{{ route('dashboard.customers.lost', ['scope'=>'own']) }}">{{ __('admin_dashboard.open_lost_clients') }}</a>
+    </div>
+    <div class="row g-3 mb-5">
+      <div class="col-6 col-xl-3"><x-dashboard-metric-card :label="__('admin_dashboard.new_clients')" :value="$personal_customers['new']" icon="user-plus" tone="success" /></div>
+      <div class="col-6 col-xl-3"><x-dashboard-metric-card :label="__('admin_dashboard.returning_clients')" :value="$personal_customers['returning']" icon="repeat" /></div>
+      <div class="col-6 col-xl-3"><x-dashboard-metric-card :label="__('admin_dashboard.regular_clients')" :value="$personal_customers['regular']" icon="heart" tone="info" /></div>
+      <div class="col-6 col-xl-3"><x-dashboard-metric-card :label="__('admin_dashboard.lost_clients')" :value="$personal_customers['lost']" icon="user-x" tone="danger"><a class="stretched-link" href="{{ route('dashboard.customers.lost', ['scope'=>'own']) }}"><span class="visually-hidden">{{ __('admin_dashboard.open_lost_clients') }}</span></a></x-dashboard-metric-card></div>
+    </div>
 
-                // Все клиенты по месяцам (все мастера)
-                var chartContainerAllByMonthClients = document.querySelector('.quickcode-chart-all-by-month-clients');
-                if (chartContainerAllByMonthClients) {
-                    var myChartAllByMonthClients = echarts.init(chartContainerAllByMonthClients);
-                    myChartAllByMonthClients.setOption({
-                        title: {
-                            text: @json(__('admin_dashboard.all_clients_chart')),
-                            left: 'center',
-                            textStyle: {
-                                color: `rgba(${primaryColor}, 1)`
-                            }
-                        },
-                        tooltip: {
-                            trigger: 'axis'
-                        },
-                        legend: {
-                            data: [@json(__('admin_dashboard.clients'))],
-                            top: '10%'
-                        },
-                        xAxis: {
-                            type: 'category',
-                            data: chartDataByMonth.all_labels
-                        },
-                        yAxis: [{
-                            type: 'value',
-                            name: @json(__('admin_dashboard.clients'))
-                        }],
-                        series: [{
-                            name: @json(__('admin_dashboard.clients')),
-                            type: 'bar',
-                            data: chartDataByMonth.all_counts,
-                            itemStyle: {
-                                color: 'rgba(40, 167, 69, 0.6)'
-                            }
-                        }]
-                    });
-                }
-            @endcan
-        </script>
-    @endpush
+    <div class="card border-warning-subtle mb-5"><div class="card-body d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3"><div class="d-flex align-items-center gap-3"><span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-warning-subtle text-warning" style="width:2.75rem;height:2.75rem"><span data-feather="alert-circle"></span></span><div><div class="fs-5 fw-bold">{{ $action_required }}</div><div>{{ __('admin_dashboard.unresolved_my_count') }}</div></div></div><a class="btn btn-warning" href="{{ route('dashboard.appointments.unresolved', ['scope'=>'own']) }}">{{ __('admin_dashboard.open_unresolved') }}</a></div></div>
+
+    <div class="row g-3 mb-5">
+      <div class="col-12 col-xl-6"><div class="card"><div class="card-body"><div id="dashboard-personal-week-chart" style="height:320px" role="img" aria-label="{{ __('admin_dashboard.last_week_chart') }}"></div></div></div></div>
+      <div class="col-12 col-xl-6"><div class="card"><div class="card-body"><div id="dashboard-personal-month-chart" style="height:320px" role="img" aria-label="{{ __('admin_dashboard.current_month_chart') }}"></div></div></div></div>
+    </div>
+    <x-dashboard-footer />
+  </div>
+  @push('scripts')
+    <script>
+      (() => {
+        if (typeof echarts === 'undefined') return;
+        const render = (id, rows, title) => {
+          const container = document.getElementById(id);
+          if (!container) return;
+          const chart = echarts.init(container);
+          chart.setOption({title:{text:title},tooltip:{trigger:'axis'},legend:{top:30,data:[@json(__('admin_dashboard.revenue')),@json(__('admin_dashboard.completed'))]},grid:{left:45,right:45,top:75,bottom:35},xAxis:{type:'category',data:rows.map(row=>row.date),axisLabel:{hideOverlap:true}},yAxis:[{type:'value',name:'€'},{type:'value',minInterval:1}],series:[{name:@json(__('admin_dashboard.revenue')),type:'line',smooth:true,data:rows.map(row=>row.revenue),itemStyle:{color:'var(--phoenix-success)'}},{name:@json(__('admin_dashboard.completed')),type:'bar',yAxisIndex:1,data:rows.map(row=>row.completed)}]});
+          window.addEventListener('resize',()=>chart.resize(),{passive:true});
+        };
+        render('dashboard-personal-week-chart', @json($personal_charts['week']), @json(__('admin_dashboard.last_week_chart')));
+        render('dashboard-personal-month-chart', @json($personal_charts['month']), @json(__('admin_dashboard.current_month_chart')));
+      })();
+    </script>
+  @endpush
 </x-dashboard-layout>

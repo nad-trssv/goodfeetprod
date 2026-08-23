@@ -1,0 +1,22 @@
+@section('title', __('admin_dashboard.unresolved_title'))
+<x-dashboard-layout>
+  <div class="content pt-8">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+      <div><h2 class="mb-1">{{ __('admin_dashboard.unresolved_title') }}</h2><p class="text-body-tertiary mb-0">{{ __('admin_dashboard.unresolved_subtitle') }}</p></div>
+      <a class="btn btn-phoenix-secondary align-self-start" href="{{ $allScope ? route('admin.dashboard.full') : route('dashboard') }}"><span data-feather="arrow-left" class="me-2"></span>{{ __('admin_dashboard.back_to_dashboard') }}</a>
+    </div>
+
+    @can('dashboard.full')<div class="nav nav-pills mb-3 gap-2"><a class="nav-link {{ !$allScope ? 'active' : '' }}" href="{{ route('dashboard.appointments.unresolved', ['scope'=>'own']) }}">{{ __('admin_dashboard.my_appointments_scope') }}</a><a class="nav-link {{ $allScope ? 'active' : '' }}" href="{{ route('dashboard.appointments.unresolved', ['scope'=>'all']) }}">{{ __('admin_dashboard.all_appointments_scope') }}</a></div>@endcan
+
+    @if($allScope && $employeeCounts->isNotEmpty())
+      <div class="row g-3 mb-4">@foreach($employeeCounts as $row)<div class="col-6 col-lg-4 col-xxl-3"><a class="card card-body h-100 text-decoration-none" href="{{ route('dashboard.appointments.unresolved', ['scope'=>'all','master_id'=>$row->user_id]) }}"><div class="d-flex align-items-center gap-3"><x-ui.avatar :user="$row->user" :size="38" /><div class="min-w-0"><div class="fw-semibold text-truncate">{{ $row->user?->name ?? '—' }}</div><div class="text-danger fw-bold">{{ $row->unresolved_count }}</div></div></div></a></div>@endforeach</div>
+    @endif
+
+    <form method="GET" action="{{ route('dashboard.appointments.unresolved') }}" class="card card-body mb-4"><input type="hidden" name="scope" value="{{ $allScope ? 'all' : 'own' }}"><div class="row g-3 align-items-end"><div class="col-12 col-lg"><label class="form-label" for="unresolved-search">{{ __('admin_dashboard.search_appointments') }}</label><input class="form-control" id="unresolved-search" name="search" value="{{ $search }}" placeholder="{{ __('admin_dashboard.search_clients_placeholder') }}"></div>@if($allScope)<div class="col-12 col-md-5 col-lg-3"><label class="form-label" for="unresolved-master">{{ __('admin_dashboard.employee') }}</label><select class="form-select" id="unresolved-master" name="master_id"><option value="">{{ __('admin_dashboard.all_employees') }}</option>@foreach($masters as $master)<option value="{{ $master->id }}" @selected($masterId===$master->id)>{{ $master->name }}</option>@endforeach</select></div>@endif<div class="col-12 col-md-auto"><button class="btn btn-primary w-100" type="submit">{{ __('admin_dashboard.find') }}</button></div></div></form>
+
+    <div class="card"><div class="card-header d-flex align-items-center justify-content-between gap-2"><h4 class="mb-0">{{ __('admin_dashboard.unresolved_list') }}</h4><span class="badge badge-phoenix badge-phoenix-warning">{{ $appointments->total() }}</span></div><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th class="ps-3">{{ __('admin_dashboard.date_time') }}</th><th>{{ __('admin_dashboard.client') }}</th><th>{{ __('admin_dashboard.service') }}</th><th>{{ __('admin_dashboard.employee') }}</th><th>{{ __('admin_dashboard.overdue_by') }}</th><th></th></tr></thead><tbody>
+      @forelse($appointments as $appointment)<tr><td class="ps-3 text-nowrap fw-semibold">{{ $appointment->appointment_start->translatedFormat('d.m.Y H:i') }}</td><td><div>{{ trim($appointment->client_name.' '.$appointment->client_lastname) ?: '—' }}</div><small class="text-body-tertiary">{{ $appointment->client_phone ?: $appointment->client_email }}</small></td><td>{{ $appointment->service?->getTranslation(app()->getLocale(),'name') ?? $appointment->service?->name ?? '—' }}</td><td>{{ $appointment->user?->name ?? '—' }}</td><td><span class="badge badge-phoenix badge-phoenix-warning">{{ $appointment->appointment_end->diffForHumans(now(), true) }}</span></td><td class="text-end pe-3"><a class="btn btn-sm btn-primary" href="{{ route('calendar.show', $appointment) }}">{{ __('admin_dashboard.set_status') }}</a></td></tr>@empty<tr><td colspan="6" class="text-center text-body-tertiary py-5">{{ __('admin_dashboard.no_unresolved') }}</td></tr>@endforelse
+    </tbody></table></div>@if($appointments->hasPages())<div class="card-footer">{{ $appointments->links() }}</div>@endif</div>
+    <x-dashboard-footer />
+  </div>
+</x-dashboard-layout>

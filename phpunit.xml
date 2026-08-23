@@ -25,6 +25,8 @@
             <file>tests/Feature/MessagingIntegrationSettingsTest.php</file>
             <file>tests/Feature/SiteLocalizationTest.php</file>
             <file>tests/Feature/WorkTimeTrackingTest.php</file>
+            <file>tests/Feature/TechnicalSupportTest.php</file>
+            <file>tests/Feature/DashboardReportingTest.php</file>
         </testsuite>
     </testsuites>
     <source>

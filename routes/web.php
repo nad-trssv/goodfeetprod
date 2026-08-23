@@ -39,6 +39,7 @@ use App\Http\Controllers\Admin\MessagingIntegrationController;
 use App\Http\Controllers\Admin\SiteLocalizationController;
 use App\Http\Controllers\WorkTimeController;
 use App\Http\Controllers\Admin\WorkTimeReportController;
+use App\Http\Controllers\TechnicalSupportController;
 
 Route::get('/', [PageController::class, 'index'])->name('home');
 Route::get('/sitemap.xml', [PageController::class, 'sitemap'])->name('sitemap');
@@ -100,6 +101,15 @@ Route::middleware([
     'verified',
 ])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->middleware('permission:dashboard.view')->name('dashboard');
+    Route::get('admin/dashboard/full', [DashboardController::class, 'full'])
+        ->middleware(['permission:dashboard.full', 'scope.all'])
+        ->name('admin.dashboard.full');
+    Route::get('dashboard/customers/lost', [DashboardController::class, 'lostCustomers'])
+        ->middleware('permission:dashboard.view')
+        ->name('dashboard.customers.lost');
+    Route::get('dashboard/appointments/unresolved', [DashboardController::class, 'unresolvedAppointments'])
+        ->middleware('permission:dashboard.view')
+        ->name('dashboard.appointments.unresolved');
     Route::get('work-time/status', [WorkTimeController::class, 'status'])->middleware('throttle:60,1')->name('work-time.status');
     Route::post('work-time/start', [WorkTimeController::class, 'start'])->middleware('throttle:30,1')->name('work-time.start');
     Route::post('work-time/pause', [WorkTimeController::class, 'pause'])->middleware('throttle:30,1')->name('work-time.pause');
@@ -107,6 +117,8 @@ Route::middleware([
     Route::post('work-time/stop', [WorkTimeController::class, 'stop'])->middleware('throttle:30,1')->name('work-time.stop');
     Route::get('admin/work-time', [WorkTimeReportController::class, 'index'])->middleware(['permission:work_time.view', 'scope.all'])->name('admin.work-time.index');
     Route::get('admin/work-time/employees/{member}', [WorkTimeReportController::class, 'employee'])->middleware(['permission:work_time.view', 'scope.all'])->name('admin.work-time.employee');
+    Route::get('technical-support', [TechnicalSupportController::class, 'create'])->name('technical-support.create');
+    Route::post('technical-support', [TechnicalSupportController::class, 'store'])->middleware('throttle:5,10')->name('technical-support.store');
     Route::get('admin/search', AdminGlobalSearchController::class)->middleware('throttle:60,1')->name('admin.search');
 
     Route::get('calendar/create', [AppointmentController::class, 'createAppointment'])->middleware('permission:appointments.create')->name('calendar.create');
